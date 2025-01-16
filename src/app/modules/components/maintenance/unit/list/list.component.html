@@ -1,0 +1,18 @@
+<app-title-page
+  [title]="title"
+  [page]="page"
+  [numTrashed]="(trashedItems$ | async)?.length ?? 0">
+</app-title-page>
+<app-filter [config]="config" (filters)="filtersData($event)"></app-filter>
+<app-data-list
+  [data]="units$ | async"
+  [columns]="columns"
+  [page]="page"
+  [areAllSelected]="(areAllSelected$ | async) ?? false"
+  [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
+  (searchList)="onSearch($event)"
+  (deleteItem)="onDelete($event)"
+  (deleteAll)="onDeleteAll()"
+  (toggleItem)="onToggleItem($event)"
+  (toggleAll)="onToggleAll($event)">
+</app-data-list>

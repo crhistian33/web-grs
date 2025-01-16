@@ -1,0 +1,18 @@
+<app-title-page
+  [title]="title"
+  [page]="page">
+</app-title-page>
+<app-data-list
+  [data]="companies$ | async"
+  [columns]="columns"
+  [page]="page"
+  [areAllSelected]="(areAllSelected$ | async) ?? false"
+  [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
+  (searchList)="onSearch($event)"
+  (deleteItem)="onDelete($event)"
+  (restoreItem)="onRestore($event)"
+  (toggleItem)="onToggleItem($event)"
+  (toggleAll)="onToggleAll($event)"
+  (restoreAll)="onRestoreAll()"
+  (deleteAll)="onDeleteAll()">
+</app-data-list>

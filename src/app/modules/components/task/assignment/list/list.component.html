@@ -1,0 +1,4 @@
+<app-title-page [title]="title" [page]="page" />
+<app-filter [config]="config" (filters)="filtersData($event)" />
+<app-data-list [data]="assignments$ | async" [columns]="columns" [page]="page" [nestedColumns]="nestedColumns"
+  [getNestedDataFn]="getWorkers" />

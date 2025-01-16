@@ -1,0 +1,168 @@
+<div class="bg-white my-4 rounded shadow">
+  <div class="flex justify-between items-center cursor-pointer border-b px-4 py-2" (click)="toggle()">
+    <div class="flex items-center">
+      <ng-icon name="heroMagnifyingGlassSolid" class="scale-75 me-1"></ng-icon>
+      <h2 class="text-gray_dark_600 text-sm font-semibold">Filtros de búsqueda</h2>
+    </div>
+    <ng-icon name="heroChevronDownSolid" class="scale-75 transition-transform duration-300" [class.rotate-180]="isShown"></ng-icon>
+  </div>
+  <div [@fadeInOut]="isShown ? 'active' : 'void'">
+    <form [formGroup]="filterForm">
+      <div class="flex flex-wrap px-4 py-2">
+        <div class="flex flex-1 items-center">
+          <div class="flex flex-col flex-grow">
+            <div class="flex flex-wrap">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.company">
+                <ng-select
+                  [items]="companies$ | async"
+                  [clearable]="true"
+                  [searchable]="true"
+                  bindLabel="name"
+                  bindValue="id"
+                  placeholder="Seleccionar Empresa"
+                  formControlName="companyId"
+                  class=" pb-2"
+                  (change)="onChangeSelect($event, 'company')"
+                >
+                  <ng-template ng-option-tmp let-item="item">
+                    <span class="flex items-center">
+                      <span class="text-gray-600 text-sm mr-2">[{{item.code}}]</span>
+                      <span>{{item.name}}</span>
+                    </span>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.customer">
+                <ng-select
+                  [items]="filteredCustomers$ | async"
+                  [clearable]="true"
+                  [searchable]="true"
+                  bindLabel="name"
+                  bindValue="id"
+                  placeholder="Seleccionar Cliente"
+                  formControlName="customerId"
+                  class="ng-select-tailwind pr-2"
+                  (change)="onChangeSelect($event, 'customer')"
+                >
+                  <ng-template ng-option-tmp let-item="item">
+                    <span class="flex items-center">
+                      <span class="text-gray-600 text-sm mr-2">[{{item.code}}]</span>
+                      <span>{{item.name}}</span>
+                    </span>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.unit">
+                <ng-select
+                  [items]="filteredUnits$ | async"
+                  [clearable]="true"
+                  [searchable]="true"
+                  bindLabel="name"
+                  bindValue="id"
+                  placeholder="Seleccionar Unidad"
+                  formControlName="unitId"
+                  class="ng-select-tailwind pr-2"
+                  (change)="onChangeSelect($event, 'unit')"
+                >
+                  <ng-template ng-option-tmp let-item="item">
+                    <span class="flex items-center">
+                      <span class="text-gray-600 text-sm mr-2">[{{item.code}}]</span>
+                      <span>{{item.name}}</span>
+                    </span>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.shift">
+                <ng-select
+                  [items]="filteredShifts$ | async"
+                  [clearable]="true"
+                  [searchable]="true"
+                  bindLabel="name"
+                  bindValue="id"
+                  placeholder="Seleccionar Turno"
+                  formControlName="shiftId"
+                  class="ng-select-tailwind pr-2"
+                  (change)="onChangeSelect($event, 'shift')"
+                >
+                  <ng-template ng-option-tmp let-item="item">
+                    <span class="flex items-center">
+                      <span>{{item.name}}</span>
+                    </span>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.typeworker">
+                <ng-select
+                  [items]="typeworkers$ | async"
+                  [clearable]="true"
+                  [searchable]="true"
+                  bindLabel="name"
+                  bindValue="id"
+                  placeholder="Seleccionar tipo de trabajador"
+                  formControlName="typeworkerId"
+                  class="ng-select-tailwind pr-2"
+                  (change)="onChangeSelect($event, 'typeworker')"
+                >
+                  <ng-template ng-option-tmp let-item="item">
+                    <span class="flex items-center">
+                      <span>{{item.name}}</span>
+                    </span>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.fromDate">
+                <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa">
+                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha hasta</label>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.toDate">
+                <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa">
+                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha desde</label>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col items-center justify-center">
+            <!-- <button
+              class="bg-main hover:bg-main_dark transition-colors text-white text-sm py-2 rounded mb-1 w-28"
+              (click)="onSearch()">
+              Buscar
+            </button> -->
+            <button
+              class="bg-gray_dark_500 hover:bg-gray_dark_600 transition-colors text-white text-sm py-2 rounded w-28"
+              (click)="onClear()">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- <button (click)="toggle()">Mostrar/Ocultar</button>
+<div [@fadeInOut]="isShown ? 'active' : 'void'">
+  <div class="p-4">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold">Opciones de búsqueda</h3>
+      <button
+        (click)="toggle()"
+        class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="space-x-2">
+      <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded">
+        Búsqueda por fecha
+      </button>
+      <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded">
+        Búsqueda por nombre
+      </button>
+      <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded">
+        Búsqueda avanzada
+      </button>
+    </div>
+  </div>
+</div> -->

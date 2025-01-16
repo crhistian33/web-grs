@@ -1,0 +1,20 @@
+<div class="flex justify-between items-center">
+  <h3 class="text-xl text-gray-800 font-semibold">{{ title }}</h3>
+  @if (page === 'papelera') {
+    <button class="border-gray-400 border rounded hover:bg-gray-200 transition-colors ps-1 pe-2 py-1" (click)="goBack()">
+      <div class="flex items-center">
+        <ng-icon name="heroArrowUturnLeftSolid" class="text-gray_dark_600 scale-75"></ng-icon>
+        <span class="ms-1 text-sm font-semibold">Volver</span>
+      </div>
+    </button>
+  }
+  @if(page === 'lista') {
+    <a [routerLink]="['removidos']" class="relative border-gray-400 border rounded hover:bg-gray-200 transition-colors ps-1 pe-2 py-1">
+      <div class="flex items-center">
+        <ng-icon name="heroTrashSolid" class="text-gray_dark_600 scale-75"></ng-icon>
+        <span class="ms-1 text-sm font-semibold">Papelera</span>
+      </div>
+      <div class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full -top-2 -end-2">{{ numTrashed }}</div>
+    </a>
+  }
+</div>

@@ -1,0 +1,14 @@
+<app-loading></app-loading>
+<app-notification></app-notification>
+<div class="flex flex-row min-h-screen">
+  <div class="bg-main_dark flex-none w-14 justify-center">
+    <app-nav-left></app-nav-left>
+  </div>
+  <div class="bg-gray-100 flex-1">
+    <app-header></app-header>
+    <app-breadcrumb></app-breadcrumb>
+    <main class="container mx-auto">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

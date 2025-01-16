@@ -1,0 +1,72 @@
+<h3 class="text-xl text-gray-800 font-semibold">{{ id? 'EDITAR' : 'CREAR' }} {{ title | uppercase }}</h3>
+<div class="bg-gray-50 flex items-center p-5 my-4 shadow-lg">
+  <form [formGroup]="myForm" class="w-full max-w-md">
+
+    @for (item of formModule?.fields; track item.name) {
+      @switch (item.type) {
+        @case ('text') {
+          <div class="mb-4">
+            <label for="name" class="block text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
+            <input
+              [type]="item.type"
+              [formControlName]="item.name"
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-gray-500 text-[#2E384D]"
+            />
+            <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
+              {{ getErrorMessage(item) }}
+            </div>
+          </div>
+        }
+        @case ('date') {
+          <div class="relative mb-4">
+            <label class="block text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
+            <input
+              [type]="item.type"
+              [formControlName]="item.name"
+              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
+              <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
+                {{ getErrorMessage(item) }}
+              </div>
+          </div>
+        }
+        @case ('select') {
+          <div class="mb-4">
+          <label [for]="item.name" class="block text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
+          <select
+            [id]="item.name"
+            [formControlName]="item.name"
+            class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
+          >
+            <option value="">Seleccionar {{ item.label }}</option>
+            <option *ngFor="let subItem of getSubEntity(item.name)" [value]="subItem.id">{{ subItem.name }}</option>
+          </select>
+          <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
+            {{ getErrorMessage(item) }}
+          </div>
+        </div>
+        }
+      }
+    }
+
+    <!-- Botón de Enviar -->
+    <div class="mt-6 border-t pt-5">
+      <button
+        type="button"
+        class="bg-main text-white py-2 px-4 rounded-md hover:bg-main_dark"
+        (click)="onSubmit(true)">{{ id ? 'Actualizar' : 'Guardar' }}
+      </button>
+      @if(!id) {
+        <button
+          type="button"
+          class="bg-secondary text-white py-2 px-4 rounded-md ms-2"
+          (click)="onSubmit(false)">Guardar y crear nuevo
+        </button>
+      }
+      <button
+        type="button"
+        class="bg-gray_dark_600 text-white py-2 px-4 rounded-md ms-2"
+        (click)="onCancel()">Cancelar
+      </button>
+    </div>
+  </form>
+</div>

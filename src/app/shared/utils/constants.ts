@@ -19,6 +19,7 @@ export const IDENTIFIES = {
   WORKER: 'worker_id',
   ASSIGNMENT: 'assignment_id',
   UNIT_SHIFT: 'unit_shift_id',
+  WORKERS: 'workers',
 }
 
 export const TITLES = {
@@ -36,6 +37,8 @@ export const TITLES = {
   UNITS_REMOVE: 'Unidades removidas',
   WORKERS: 'Trabajadores',
   WORKERS_REMOVE: 'Trabajadores removidos',
+  ASSIGNMENTS: 'Asignaciones',
+  ASSIGNMENTS_REMOVE: 'Asignaciones removidas',
   CENTER: 'Centro de costo',
   COMPANY: 'Empresa',
   CUSTOMER: 'Cliente',
@@ -43,7 +46,6 @@ export const TITLES = {
   TYPEWORKER: 'Tipo de trabajador',
   UNIT: 'Unidad',
   WORKER: 'Trabajador',
-  ASSIGNMENTS: 'Asignaciones',
   ASSIGNMENT: 'Asignación',
 }
 

@@ -15,7 +15,8 @@ import { CenterState } from '@state/center/center.state';
 import { CustomerActions } from '@state/customer/customer.action';
 import { CustomerState } from '@state/customer/customer.state';
 import { UnitActions } from '@state/unit/unit.actions';
-import { Observable } from 'rxjs';
+import { UnitState } from '@state/unit/unit.state';
+import { Observable, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -24,81 +25,80 @@ import { Observable } from 'rxjs';
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
-  private store = inject(Store);
-  private sweetAlertService = inject(SweetalertService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+  private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly sweetAlertService = inject(SweetalertService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
-  entity!: Unit;
-  title: string = TITLES.UNIT;
-  route_list: string = ROUTES.UNIT_LIST;
+  readonly title: string = TITLES.UNIT;
+  readonly route_list: string = ROUTES.UNIT_LIST;
+  readonly module = PARAMETERS.UNIT;
+
   resetForm: boolean = false;
-  module = PARAMETERS.UNIT;
   centers$: Observable<Center[]> = this.store.select(CenterState.getItems);
   customers$: Observable<Customer[]> = this.store.select(CustomerState.getItems);
-  subentities: SubEntity[] = []
+  entity$: Observable<Unit | null> = this.store.select(UnitState.getEntity);
+
+  readonly subentities = [
+    { id: IDENTIFIES.CENTER, data: this.centers$ },
+    { id: IDENTIFIES.CUSTOMER, data: this.customers$ }
+  ];
 
   ngOnInit() {
-    this.store.dispatch(new CenterActions.GetAll);
-    this.store.dispatch(new CustomerActions.GetAll);
-
-    this.subentities = [
-      { id: IDENTIFIES.CENTER, data: this.centers$ },
-      { id: IDENTIFIES.CUSTOMER, data: this.customers$ }
-    ];
-
+    this.store.dispatch([
+      new CenterActions.GetAll,
+      new CustomerActions.GetAll,
+    ]);
     if(this.id) {
-      this.store.dispatch(new UnitActions.GetById(this.id)).subscribe({
-        next: (response: any) => {
-          this.entity = response.unit.selectedEntity;
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, "error", 5000);
-        }
-      })
+      this.store.dispatch(new UnitActions.GetById(this.id));
     }
   }
 
-  onSubmit(submitted: any) {
-    const { data, redirect } = submitted;
-    if(!this.id) {
-      this.store.dispatch(new UnitActions.Create(data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.unit.result.title,
-            response.unit.result.message,
-            () => {
-              if(redirect) {
-                this.router.navigate([this.route_list]);
-              } else {
-                this.resetForm = true;
-              }
-            }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        },
-        complete: () => {
-          this.resetForm = false;
+  onSubmit(event: { data: any; redirect: boolean }) {
+    const action = this.id
+      ? new UnitActions.Update(this.id, event.data)
+      : new UnitActions.Create(event.data);
+
+    this.store.dispatch(action)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: any) => {
+        this.handleSuccess(response, event.redirect);
+      },
+      error: (error) => {
+        this.notificationService.show(
+          error.error?.message || 'Error occurred',
+          'error',
+          5000
+        );
+      }
+    });
+  }
+
+  private handleSuccess(response: any, redirect: boolean): void {
+    const result = response.unit.result;
+    this.sweetAlertService.confirmSuccess(
+      result.title,
+      result.message,
+      () => {
+        if (redirect) {
+          this.router.navigate([this.route_list]);
+        } else {
+          this.resetForm = true;
         }
-      })
-    } else {
-      this.store.dispatch(new UnitActions.Update(this.id, data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.unit.result.title,
-            response.unit.result.message,
-            () => { this.router.navigate([this.route_list]); }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        }
-      })
-    }
+      }
+    );
+  }
+
+  onClearReset(reset: boolean) {
+    this.resetForm = reset;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new UnitActions.clearEntity);
   }
 }

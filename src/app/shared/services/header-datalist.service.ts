@@ -15,11 +15,11 @@ import { PARAMETERS } from '@shared/utils/constants';
 })
 export class HeaderDatalistService {
   private headWorker: DataListColumn<Worker>[] = [
-    { key: 'id', label: 'N°', type: 'number', filtered: false, },
-    { key: 'name', label: 'Nombres y apellidos', type: 'text', filtered: true, },
-    { key: 'dni', label: 'DNI', type: 'text', filtered: true, },
-    { key: 'birth_date', label: 'Fecha Nac.', type: 'date', filtered: false, },
-    { key: 'typeworker', label: 'Tipo', type: 'relation-name', filtered: false, },
+    { key: 'id', label: 'N°', type: 'number', filtered: false, internal: false },
+    { key: 'name', label: 'Nombres y apellidos', type: 'text', filtered: true, internal: true },
+    { key: 'dni', label: 'DNI', type: 'text', filtered: true, internal: true },
+    { key: 'birth_date', label: 'Fecha Nac.', type: 'date', filtered: false, internal: false },
+    { key: 'typeworker', label: 'Tipo', type: 'relation-name', filtered: false, internal: false },
   ];
   private headTypeWorker: DataListColumn<TypeWorker>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false, },
@@ -58,13 +58,13 @@ export class HeaderDatalistService {
     { key: 'shifts', label: 'Turnos', type: 'relation-name-multi', filtered: true, },
   ];
   private headAssignment: DataListColumn<Assignment>[] = [
-    { key: 'id', label: 'N°', type: 'number', filtered: false, display: true },
-    { key: 'unit', label: 'Unidad', type: 'relation-name', filtered: false, display: true },
-    { key: 'shift', label: 'Turno', type: 'relation-name', filtered: false, display: true },
-    { key: 'start_date', label: 'Fecha de asignación', type: 'date', filtered: true, display: true },
-    { key: 'end_date', label: 'Fin de asignación', type: 'date', filtered: true, display: true },
-    { key: 'state', label: 'Estado', type: 'state', filtered: false, display: true },
-    { key: 'workers_count', label: '# Asignados', type: 'text', filtered: false, display: true },
+    { key: 'id', label: 'N°', type: 'number', filtered: false },
+    { key: 'unit', label: 'Unidad', type: 'relation-name', filtered: false },
+    { key: 'shift', label: 'Turno', type: 'relation-name', filtered: false },
+    { key: 'start_date', label: 'Fecha de asignación', type: 'date', filtered: true },
+    { key: 'end_date', label: 'Fin de asignación', type: 'date', filtered: true },
+    { key: 'state', label: 'Estado', type: 'state', filtered: false },
+    { key: 'workers_count', label: '# Asignados', type: 'text', filtered: false },
   ];
 
   getHeaderDataList(param: string): DataListColumn<any>[] {
@@ -121,6 +121,17 @@ export class HeaderDatalistService {
         break;
       case PARAMETERS.UNIT:
         return this.headUnit.filter(column => column.filtered).map(column => column.key);
+        break;
+      default:
+        return [];
+        break;
+    }
+  }
+
+  getInternal(param: string): DataListColumn<any>[] {
+    switch (param) {
+      case PARAMETERS.WORKER:
+        return this.headWorker.filter(column => column.internal);
         break;
       default:
         return [];

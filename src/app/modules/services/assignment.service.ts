@@ -11,4 +11,8 @@ export class AssignmentService extends BaseCrudService<Assignment> {
   constructor(private http: HttpClient) {
     super(http, `${environment.API_URL}/assignments`);
   }
+
+  verfiiedAssign(id: number) {
+    return this.http.get(`${environment.API_URL}/assignments/verified/${id}`);
+  }
 }

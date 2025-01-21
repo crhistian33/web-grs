@@ -10,9 +10,12 @@ export namespace WorkerActions {
     static readonly type = '[Worker] Get All Deletes';
   }
 
-  export class GetAllFilter<T> {
-    static readonly type = '[Worker] Get All Filter';
-    constructor(public searchTerm: string, public columns: (keyof T)[]) {}
+  export class GetUnassignment<T> {
+    static readonly type = '[Worker] Get All Unassignment';
+  }
+
+  export class GetTitulars<T> {
+    static readonly type = '[Worker] Get All Titulars';
   }
 
   export class GetById {
@@ -20,13 +23,18 @@ export namespace WorkerActions {
     constructor(public id: number) {}
   }
 
+  export class GetAssignsId {
+    static readonly type = '[Worker] Get Assigns Id';
+    constructor(public id: number) {}
+  }
+
   export class countDeletes {
     static readonly type = '[Worker] Count Deletes';
   }
 
-  export class DropFilter {
-    static readonly type = '[Worker] Drop Filter';
-    constructor(public payload: Partial<FilterStateModel>) {}
+  export class Filters<T> {
+    static readonly type = '[Worker] Filters Entities';
+    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -51,7 +59,7 @@ export namespace WorkerActions {
 
   export class DeleteAll {
     static readonly type = '[Worker] Delete All';
-    constructor(public payload: Worker[], public del: boolean) {}
+    constructor(public payload: Worker[], public del: boolean, public active: boolean) {}
   }
 
   export class RestoreAll {
@@ -67,5 +75,17 @@ export namespace WorkerActions {
   export class ToggleAllItems {
     static readonly type = '[Worker] Toggle All';
     constructor(public selected: boolean) {}
+  }
+
+  export class ClearItemSelection {
+    static readonly type = '[Worker] Clear Selection';
+  }
+
+  export class clearEntity {
+    static readonly type = '[Worker] Clear entity';
+  }
+
+  export class clearAll {
+    static readonly type = '[Worker] Clear All';
   }
 }

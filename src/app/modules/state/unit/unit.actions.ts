@@ -10,11 +10,6 @@ export namespace UnitActions {
     static readonly type = '[Unit] Get All Deletes';
   }
 
-  export class GetAllFilter<T> {
-    static readonly type = '[Unit] Get All Filter';
-    constructor(public searchTerm: string, public columns: (keyof T)[]) {}
-  }
-
   export class GetAllToShift {
     static readonly type = '[Unit] Get All to Shift';
   }
@@ -28,9 +23,9 @@ export namespace UnitActions {
     static readonly type = '[Unit] Count Deletes';
   }
 
-  export class DropFilter {
-    static readonly type = '[Unit] Drop Filter';
-    constructor(public payload: Partial<FilterStateModel>) {}
+  export class Filters<T> {
+    static readonly type = '[Unit] Filters Entities';
+    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -55,7 +50,7 @@ export namespace UnitActions {
 
   export class DeleteAll {
     static readonly type = '[Unit] Delete All';
-    constructor(public payload: Unit[], public del: boolean) {}
+    constructor(public payload: Unit[], public del: boolean,public active: boolean) {}
   }
 
   export class RestoreAll {
@@ -71,5 +66,17 @@ export namespace UnitActions {
   export class ToggleAllItems {
     static readonly type = '[Unit] Toggle All';
     constructor(public selected: boolean) {}
+  }
+
+  export class ClearItemSelection {
+    static readonly type = '[Unit] Clear Selection';
+  }
+
+  export class clearEntity {
+    static readonly type = '[Unit] Clear entity';
+  }
+
+  export class clearAll {
+    static readonly type = '[Unit] Clear All';
   }
 }

@@ -1,21 +1,29 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IModule } from '@shared/models/form.model';
 import { SubEntity } from '@shared/models/subentity.model';
 import { FORM_MODULE } from '@shared/utils/form-fields';
-import { map, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, Subject, Subscription, take, takeUntil } from 'rxjs';
+import { DataListComponent } from '../data-list/data-list.component';
+import { Worker } from '@models/worker.model';
+import { DataListColumn } from '@shared/models/dataListColumn.model';
+import { Store } from '@ngxs/store';
+import { WorkerState } from '@state/worker/worker.state';
+import { WorkerActions } from '@state/worker/worker.action';
 
 @Component({
   selector: 'app-formbuilder',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DataListComponent],
   templateUrl: './formbuilder.component.html',
   styleUrl: './formbuilder.component.scss',
 })
 export class FormBuilderComponent {
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly store = inject(Store);
+  private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
   @Input() title!: string;
@@ -25,90 +33,159 @@ export class FormBuilderComponent {
   @Input() route!: string;
   @Input() reset!: boolean;
   @Output() formSubmitted = new EventEmitter<{ data: any, redirect: boolean }>();
+  @Output() clearReset = new EventEmitter<boolean>();
+
   myForm!: FormGroup;
   formModule?: IModule;
-  private dataMap: Map<string, any[]> = new Map();
-  private subscriptions: Subscription = new Subscription();
+  nameControlTable?: string;
+
+  readonly dataMap = new Map<string, any[]>();
+  selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
+
+  columns: DataListColumn<Worker>[] = [
+    { key: 'id', label: 'N°', type: 'number'},
+    { key: 'name', label: 'Nombres y apellidos', type: 'text'},
+    { key: 'dni', label: 'DNI', type: 'text'},
+  ];
+
+  getSubEntityItems$(id: string): Observable<any[]> {
+    return this.subentities.find(e => e.id === id)?.data || of([]);
+  }
 
   ngOnInit() {
-    this.formModule = FORM_MODULE[this.module];
     this.initForm();
-
-    this.subentities.forEach(subentity => {
-      const subscription = subentity.data.subscribe(data => {
-        this.dataMap.set(subentity.id, data);
-      });
-      this.subscriptions.add(subscription);
-    });
   }
 
   private initForm() {
-    const group: { [key: string]: any } = {};
+    this.formModule = FORM_MODULE[this.module];
 
-    this.formModule?.fields.forEach(field => {
-      let controlValidators: any[] = [];
-      if(field.validators) {
-        field.validators.forEach((validation: any) => {
-          if (validation.validator === 'required') controlValidators.push(Validators.required);
-          if (validation.validator === 'maxLength(20)') controlValidators.push(Validators.maxLength(20));
-        });
+    if (!this.formModule?.fields) {
+      console.warn('No se ha encontrado los campos para el modulo: ', this.module);
+      return;
+    }
+
+    const formGroup = this.createFormGroup();
+    this.myForm = this.fb.group(formGroup, { updateOn: 'change' });
+
+    if (this.entity) {
+      this.updateFormValues(this.entity);
+    }
+  }
+
+  private createFormGroup(): { [key: string]: any } {
+    return this.formModule!.fields.reduce((group, field) => {
+      if (field.type === 'table') {
+        this.nameControlTable = field.name;
       }
-      group[field.name] = [field.value, controlValidators];
-    });
+      const validators = this.buildValidators(field);
+      const initialValue = this.entity?.[field.name] ?? field.value;
+      return { ...group, [field.name]: [initialValue, validators] };
+    }, {});
+  }
 
-    this.myForm = this.fb.group(group, {
-      updateOn: 'change',
+  private buildValidators(field: any): any[] {
+    if (!field.validators) return [];
+
+    return field.validators.map((validation: any) => {
+      switch (validation.validator) {
+        case 'required': return Validators.required;
+        case 'maxLength(20)': return Validators.maxLength(20);
+        default: return null;
+      }
+    }).filter(Boolean);
+  }
+
+  private updateFormValues(entity: any) {
+    if (!entity || !this.myForm) return;
+
+    Object.keys(this.myForm.controls)
+    .filter(controlName => entity.hasOwnProperty(controlName))
+    .forEach(controlName => {
+      if (controlName === this.nameControlTable) {
+        this.selectedItems$
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(selectedWorkers => {
+            this.myForm.get(controlName)?.patchValue(selectedWorkers);
+          });
+      } else {
+        if(controlName === 'state') {
+          this.myForm.get(controlName)?.setValue(!!entity[controlName]);
+        }
+        else
+          this.myForm.get(controlName)?.patchValue(entity[controlName], {
+            emitEvent: false
+          });
+      }
     });
   }
 
+  private resetForm() {
+    if (!this.myForm) return;
+
+    this.myForm.reset();
+    this.formModule?.fields
+      .filter(field => field.value !== undefined)
+      .forEach(field => {
+        this.myForm.get(field.name)?.setValue(field.value);
+      });
+  }
+
   onSubmit(redirect: boolean) {
-    const data = this.myForm.getRawValue();
-    if(this.myForm.valid) {
-      this.formSubmitted.emit({ data, redirect })
+    if (this.myForm.valid) {
+      this.formSubmitted.emit({
+        data: this.myForm.getRawValue(),
+        redirect
+      });
     } else {
       this.myForm.markAllAsTouched();
     }
   }
 
   onCancel() {
+    this.resetForm();
     this.router.navigate([this.route]);
   }
 
-  getEntity() {
-    if(this.entity) {
-      this.myForm.patchValue(this.entity);
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['entity']?.currentValue && this.myForm) {
+      this.updateFormValues(changes['entity'].currentValue);
     }
-  }
-
-  getSubEntity(id: string):any[] {
-    const entity = this.subentities.find(e => e.id === id);
-    return this.dataMap.get(entity?.id || '') || [];
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if(changes['reset'] && this.reset) {
-      const resetValues: Record<string, any> = {};
-      this.formModule?.fields.forEach(field => {
-        resetValues[field.name] = field.value || '';
+    if (changes['reset']?.currentValue && this.myForm) {
+      this.resetForm();
+      setTimeout(() => {
+        this.clearReset.emit(false);
       });
-      this.myForm.reset(resetValues);
     }
-    if(changes['entity']) {
-      this.getEntity();
-    }
+  }
+
+  onToggleItem(id: number) {
+    this.store.dispatch(new WorkerActions.ToggleItemSelection(id));
+    this.selectedItems$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(selectedWorkers => {
+        this.myForm.get('workers')?.patchValue(selectedWorkers);
+      });
+  }
+
+  onToggleAll(checked: boolean) {
+    this.store.dispatch(new WorkerActions.ToggleAllItems(checked));
+    this.selectedItems$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(selectedWorkers => {
+        this.myForm.get('workers')?.patchValue(selectedWorkers);
+      });
   }
 
   getErrorMessage(control: any) {
     const formControl = this.myForm.get(control.name);
-    for (let validation of control.validators) {
-      if (formControl?.hasError(validation.name)) {
-         return validation.message;
-      }
-    }
-    return '';
+    const error = control.validators?.find(
+      (validation: any) => formControl?.hasError(validation.name)
+    );
+    return error?.message || '';
   }
 
   ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

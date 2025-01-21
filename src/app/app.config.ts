@@ -22,6 +22,8 @@ import { LoadingState } from '@shared/state/loading/loading.state';
 import { BreadcrumbState } from '@shared/state/breadcrumb/breadcrumb.state';
 import { FilterState } from '@shared/state/filter/filter.state';
 import { AssignmentState } from '@state/assignment/assignment.state';
+import { CountState } from '@state/count/count.state';
+import { VerifiedState } from '@shared/state/verified/verified.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,6 +42,8 @@ export const appConfig: ApplicationConfig = {
       BreadcrumbState,
       LoadingState,
       FilterState,
+      CountState,
+      VerifiedState,
       WorkerState,
       CompanyState,
       TypeworkerState,
@@ -60,7 +64,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     ReactiveFormsModule,
     provideNgIconsConfig({ size: '1.5em' }),
-    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid })
+    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid })
 
   ]
 };

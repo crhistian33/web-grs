@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Unit } from '@models/unit.model';
 import { Store } from '@ngxs/store';
+import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { DataListComponent } from '@shared/components/data-list/data-list.component';
 import { TitlePageComponent } from '@shared/components/title-page/title-page.component';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
@@ -15,7 +16,7 @@ import { Observable, take } from 'rxjs';
 
 @Component({
   selector: 'app-removes',
-  imports: [CommonModule, DataListComponent, TitlePageComponent],
+  imports: [CommonModule, DataListComponent, TitlePageComponent, ActionsComponent],
   templateUrl: './removes.component.html',
   styleUrl: './removes.component.scss'
 })
@@ -37,10 +38,6 @@ export class RemovesComponent {
 
   ngOnInit() {
     this.store.dispatch(new UnitActions.GetDeletes)
-  }
-
-  onSearch(searchTerm: string) {
-    this.store.dispatch(new UnitActions.GetAllFilter(searchTerm, this.colFiltered));
   }
 
   onDelete(id: number) {
@@ -109,7 +106,7 @@ export class RemovesComponent {
       this.selectedItems$
       .pipe(take(1))
       .subscribe(data => {
-        this.store.dispatch(new UnitActions.DeleteAll(data, true))
+        this.store.dispatch(new UnitActions.DeleteAll(data, true, false))
         .pipe(take(1))
         .subscribe({
           next: (response: any)=> {

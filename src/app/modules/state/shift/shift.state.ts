@@ -28,6 +28,11 @@ export class ShiftState extends BaseState<Shift> {
   }
 
   @Selector()
+  static getEntity(state: ShiftStateModel): Shift | null {
+    return state.selectedEntity;
+  }
+
+  @Selector()
   static getTrasheds(state: ShiftStateModel): Shift[] {
     return state.trashedItems;
   }
@@ -68,17 +73,14 @@ export class ShiftState extends BaseState<Shift> {
     return this.getOne(ctx, id, ShiftActions.GetById.type);
   }
 
-  @Action(ShiftActions.GetAllFilter)
-  getAllFilter(
-    ctx: StateContext<ShiftStateModel>,
-    { searchTerm, columns }: ShiftActions.GetAllFilter<Shift>
-  ) {
-    return this.getItemsFilter(ctx, searchTerm, columns);
-  }
-
   @Action(ShiftActions.countDeletes)
   countTrasheds(ctx: StateContext<ShiftStateModel>) {
     return this.countItemsTrashed(ctx);
+  }
+
+  @Action(ShiftActions.Filters)
+  Filters(ctx: StateContext<ShiftStateModel>, { payload, columns }: ShiftActions.Filters<Shift>) {
+    return super.filtersItems(ctx, ShiftActions.Filters.type, payload, columns);
   }
 
   @Action(ShiftActions.Create)
@@ -116,12 +118,13 @@ export class ShiftState extends BaseState<Shift> {
   @Action(ShiftActions.DeleteAll)
   deleteAll(
     ctx: StateContext<ShiftStateModel>,
-    { payload, del }: ShiftActions.DeleteAll
+    { payload, del, active }: ShiftActions.DeleteAll
   ) {
     return this.deleteAllItem(
       ctx,
       payload,
       del,
+      active,
       ShiftActions.DeleteAll.type
     );
   }
@@ -148,5 +151,20 @@ export class ShiftState extends BaseState<Shift> {
     { selected }: ShiftActions.ToggleAllItems
   ) {
     return this.toggleAllItem(ctx, selected);
+  }
+
+  @Action(ShiftActions.clearEntity)
+  clearItem(ctx: StateContext<ShiftStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(ShiftActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<ShiftStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(ShiftActions.clearAll)
+  clearAll(ctx: StateContext<ShiftStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

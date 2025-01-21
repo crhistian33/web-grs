@@ -1,12 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { NgIconsModule } from '@ng-icons/core';
 
 import { BaseModel } from '../../models/base.model';
-import { DataListColumn, RelationType } from '@shared/models/dataListColumn.model';
-import { NgIconsModule } from '@ng-icons/core';
+import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { CellValuePipe } from '@shared/pipes/cell-value.pipe';
-import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-data-list',
@@ -36,20 +36,17 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
   ]
 })
 export class DataListComponent<T extends BaseModel, N = any> implements OnInit, OnChanges {
-  @Output() searchList = new EventEmitter<string>();
   @Output() deleteItem = new EventEmitter<number>();
   @Output() restoreItem = new EventEmitter<number>();
-  @Output() deleteAll = new EventEmitter<void>();
-  @Output() restoreAll = new EventEmitter<void>();
   @Output() toggleItem = new EventEmitter<number>();
   @Output() toggleAll = new EventEmitter<boolean>();
   @Input() data: T[] | null = [];
   @Input() columns: DataListColumn<T>[] = [];
   @Input() areAllSelected: boolean = false;
-  @Input() hasSelectedItem: boolean = false;
-  @Input() page!: string;
   @Input() nestedColumns?: DataListColumn<N>[];
   @Input() getNestedDataFn?: (item: T) => N[];
+  @Input() page!: string;
+  @Input() hiddenActions: boolean = false;
   expandedRows: { [key: number]: boolean } = {};
   isShown = false;
   panelStates = new Map<number, boolean>();
@@ -83,6 +80,14 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
     this.initializeData();
   }
 
+  private initializeData() {
+    if(this.data) {
+      this.filteredData = [...this.data];
+      this.totalItems = this.data.length;
+      this.updatePaginatedData();
+    }
+  }
+
   hasNestedData(item: T): boolean {
     if(this.getNestedDataFn) {
       this.isShown = true;
@@ -102,14 +107,6 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
       this.initializeData();
   }
 
-  private initializeData() {
-    if(this.data) {
-      this.filteredData = [...this.data];
-      this.totalItems = this.data.length;
-      this.updatePaginatedData();
-    }
-  }
-
   onToggleItem(id: number) {
     this.toggleItem.emit(id);
   }
@@ -127,26 +124,9 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
     this.restoreItem.emit(id);
   }
 
-  onDeleteAll() {
-    this.deleteAll.emit();
-  }
-
-  onRestoreAll() {
-    this.restoreAll.emit();
-  }
-
-  onSearch(event: any) {
-    const searchTerm = event.target.value.toLowerCase();
-    this.searchList.emit(searchTerm);
-  }
-
   changePage(page: number) {
     this.currentPage = page;
     this.updatePaginatedData();
-  }
-
-  parseDate(value: any): Date {
-    return new Date(value as string);
   }
 
   private updatePaginatedData() {
@@ -156,10 +136,6 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
     this.paginatedData.forEach(item => {
       this.panelStates.set(item.id, false);
     })
-  }
-
-  toggle() {
-    this.isShown = !this.isShown;
   }
 
   togglePanel(id: number) {

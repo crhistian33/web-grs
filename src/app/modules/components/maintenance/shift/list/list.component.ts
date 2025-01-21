@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Shift } from '@models/shift.model';
 import { Store } from '@ngxs/store';
+import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { DataListComponent } from '@shared/components/data-list/data-list.component';
 import { TitlePageComponent } from '@shared/components/title-page/title-page.component';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
@@ -15,7 +16,7 @@ import { Observable, take } from 'rxjs';
 
 @Component({
   selector: 'app-list',
-  imports: [CommonModule, DataListComponent, TitlePageComponent],
+  imports: [CommonModule, DataListComponent, TitlePageComponent, ActionsComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss'
 })
@@ -56,12 +57,6 @@ export class ListComponent {
 
   onCountTrasheds() {
     this.store.dispatch(new ShiftActions.countDeletes());
-  }
-
-  onSearch(searchTerm: string) {
-    this.store.dispatch(
-      new ShiftActions.GetAllFilter(searchTerm, this.colFiltered)
-    );
   }
 
   onDelete(id: number) {
@@ -113,7 +108,7 @@ export class ListComponent {
   onDeleteOrRecycleAll(del: boolean) {
     this.selectedItems$.pipe(take(1)).subscribe((data) => {
       this.store
-        .dispatch(new ShiftActions.DeleteAll(data, del))
+        .dispatch(new ShiftActions.DeleteAll(data, del, true))
         .pipe(take(1))
         .subscribe({
           next: (response: any) => {

@@ -61,14 +61,11 @@ export class DataTableComponent {
 
   onSearch(event: any) {
     const searchTerm = event.target.value.toLowerCase();
-    console.log(this.data)
     this.filteredData = this.data.filter(item => {
-      console.log(Object.values(item))
       Object.values(item).some(value =>
         value.toString().toLowerCase().includes(searchTerm)
       )}
     );
-    console.log(this.filteredData)
     this.totalItems = this.filteredData.length;
     this.currentPage = 1;
     this.updatePaginatedData();

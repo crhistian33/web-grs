@@ -12,7 +12,8 @@ import { IDENTIFIES, PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants'
 import { CompanyActions } from '@state/company/company.actions';
 import { CompanyState } from '@state/company/company.state';
 import { CustomerActions } from '@state/customer/customer.action';
-import { Observable } from 'rxjs';
+import { CustomerState } from '@state/customer/customer.state';
+import { Observable, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -21,77 +22,76 @@ import { Observable } from 'rxjs';
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
-  private store = inject(Store);
-  private sweetAlertService = inject(SweetalertService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+  private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly sweetAlertService = inject(SweetalertService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
-  entity!: Customer;
-  title: string = TITLES.CUSTOMER;
-  route_list: string = ROUTES.CUSTOMER_LIST;
+  readonly title: string = TITLES.CUSTOMER;
+  readonly route_list: string = ROUTES.CUSTOMER_LIST;
+  readonly module = PARAMETERS.CUSTOMER;
+
   resetForm: boolean = false;
-  module = PARAMETERS.CUSTOMER;
-  subentities: SubEntity[] = []
+
   companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
+  entity$: Observable<Customer | null> = this.store.select(CustomerState.getEntity);
+
+  readonly subentities = [
+    { id: IDENTIFIES.COMPANY, data: this.companies$ }
+  ]
 
   ngOnInit() {
     this.store.dispatch(new CompanyActions.GetAll);
-    this.subentities = [
-      { id: IDENTIFIES.COMPANY, data: this.companies$ }
-    ]
-
     if(this.id) {
-      this.store.dispatch(new CustomerActions.GetById(this.id)).subscribe({
-        next: (response: any) => {
-          this.entity = response.customer.selectedEntity;
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, "error", 5000);
-        }
-      })
+      this.store.dispatch(new CustomerActions.GetById(this.id));
     }
   }
 
-  onSubmit(submitted: any) {
-    const { data, redirect } = submitted;
-    if(!this.id) {
-      this.store.dispatch(new CustomerActions.Create(data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.customer.result.title,
-            response.customer.result.message,
-            () => {
-              if(redirect) {
-                this.router.navigate([this.route_list]);
-              } else {
-                this.resetForm = true;
-              }
-            }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        },
-        complete: () => {
-          this.resetForm = false;
+  onSubmit(event: { data: any; redirect: boolean }) {
+    const action = this.id
+      ? new CustomerActions.Update(this.id, event.data)
+      : new CustomerActions.Create(event.data);
+
+    this.store.dispatch(action)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: any) => {
+        this.handleSuccess(response, event.redirect);
+      },
+      error: (error) => {
+        this.notificationService.show(
+          error.error?.message || 'Error occurred',
+          'error',
+          5000
+        );
+      }
+    });
+  }
+
+  private handleSuccess(response: any, redirect: boolean): void {
+    const result = response.customer.result;
+    this.sweetAlertService.confirmSuccess(
+      result.title,
+      result.message,
+      () => {
+        if (redirect) {
+          this.router.navigate([this.route_list]);
+        } else {
+          this.resetForm = true;
         }
-      })
-    } else {
-      this.store.dispatch(new CustomerActions.Update(this.id, data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.customer.result.title,
-            response.customer.result.message,
-            () => { this.router.navigate([this.route_list]); }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        }
-      })
-    }
+      }
+    );
+  }
+
+  onClearReset(reset: boolean) {
+    this.resetForm = reset;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new CustomerActions.clearEntity);
   }
 }

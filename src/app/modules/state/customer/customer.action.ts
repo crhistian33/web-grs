@@ -10,11 +10,6 @@ export namespace CustomerActions {
     static readonly type = '[Customer] Get All Deletes';
   }
 
-  export class GetAllFilter<T> {
-    static readonly type = '[Customer] Get All Filter';
-    constructor(public searchTerm: string, public columns: (keyof T)[]) {}
-  }
-
   export class GetById {
     static readonly type = '[Customer] Get By Id';
     constructor(public id: number) {}
@@ -24,9 +19,9 @@ export namespace CustomerActions {
     static readonly type = '[Customer] Count Deletes';
   }
 
-  export class DropFilter {
-    static readonly type = '[Customer] Drop Filter';
-    constructor(public payload: Partial<FilterStateModel>) {}
+  export class Filters<T> {
+    static readonly type = '[Customer] Filters Entities';
+    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -51,7 +46,7 @@ export namespace CustomerActions {
 
   export class DeleteAll {
     static readonly type = '[Customer] Delete All';
-    constructor(public payload: Customer[], public del: boolean) {}
+    constructor(public payload: Customer[], public del: boolean, public active: boolean) {}
   }
 
   export class RestoreAll {
@@ -67,5 +62,17 @@ export namespace CustomerActions {
   export class ToggleAllItems {
     static readonly type = '[Customer] Toggle All';
     constructor(public selected: boolean) {}
+  }
+
+  export class ClearItemSelection {
+    static readonly type = '[Customer] Clear Selection';
+  }
+
+  export class clearEntity {
+    static readonly type = '[Customer] Clear entity';
+  }
+
+  export class clearAll {
+    static readonly type = '[Customer] Clear All';
   }
 }

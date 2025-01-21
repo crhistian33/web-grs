@@ -1,6 +1,6 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Company } from '@models/company.model';
 import { Customer } from '@models/customer.model';
@@ -53,24 +53,23 @@ import { combineLatest, distinctUntilChanged, map, Observable, shareReplay, Subj
   ]
 })
 export class FilterComponent {
-  private destroy$ = new Subject<void>();
+  private readonly fb = inject(FormBuilder);
+  private readonly store = inject(Store);
+  private readonly destroy$ = new Subject<void>();
+
   @Input() config!: filterConfig;
   @Output() filters = new EventEmitter<FilterStateModel>();
   filterForm: FormGroup;
   isExpanded: boolean = true;
+  isShown = false;
 
-  companies$: Observable<Company[]>;
-  typeworkers$: Observable<TypeWorker[]>;
+  companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
+  typeworkers$: Observable<TypeWorker[]> = this.store.select(TypeworkerState.getItems);
   filteredCustomers$: Observable<Customer[]>;
   filteredUnits$: Observable<Unit[]>;
   filteredShifts$: Observable<Shift[]>;
 
-  isShown = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private store: Store
-  ) {
+  constructor() {
     this.filterForm = this.fb.group({
       companyId: [null],
       customerId: [null, { disabled: true }],
@@ -79,10 +78,8 @@ export class FilterComponent {
       typeworkerId: [null, { disabled: true }],
       fromDate: [null],
       toDate: [null],
+      searchTerm: [null],
     });
-
-    this.companies$ = this.store.select(CompanyState.getItems);
-    this.typeworkers$ = this.store.select(TypeworkerState.getItems);
 
     this.filteredCustomers$ = combineLatest([
       this.store.select(CustomerState.getItems),
@@ -143,11 +140,6 @@ export class FilterComponent {
       this.store.dispatch(new ShiftActions.GetAll);
     if(this.config.typeworker)
       this.store.dispatch(new TypeWorkerActions.GetAll);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   onChangeSelect(event: any, field: string) {
@@ -241,7 +233,11 @@ export class FilterComponent {
     this.filters.emit(this.filterForm.value);
   }
 
-  onSearch() {
+  onSearch(event: any) {
+    const searchTerm = event.target.value.toLowerCase();
+    this.filterForm.patchValue({
+      searchTerm: searchTerm
+    });
     this.filters.emit(this.filterForm.value);
   }
 
@@ -253,5 +249,10 @@ export class FilterComponent {
 
   expandedSearch() {
     this.isExpanded = !this.isExpanded;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

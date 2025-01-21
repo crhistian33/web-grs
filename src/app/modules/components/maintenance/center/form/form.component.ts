@@ -8,6 +8,8 @@ import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
 import { CenterActions } from '@state/center/center.action';
+import { CenterState } from '@state/center/center.state';
+import { filter, Observable, Subject, take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -16,70 +18,69 @@ import { CenterActions } from '@state/center/center.action';
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
-  private store = inject(Store);
-  private sweetAlertService = inject(SweetalertService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+  private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly sweetAlertService = inject(SweetalertService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
-  entity!: Center;
-  title: string = TITLES.CENTER;
-  route_list: string = ROUTES.CENTER_LIST;
+  readonly title: string = TITLES.CENTER;
+  readonly route_list: string = ROUTES.CENTER_LIST;
+  readonly module = PARAMETERS.CENTER;
+
   resetForm: boolean = false;
-  module = PARAMETERS.CENTER;
+  entity$: Observable<Center | null> = this.store.select(CenterState.getEntity).pipe(filter(Boolean));
 
   ngOnInit() {
     if(this.id) {
-      this.store.dispatch(new CenterActions.GetById(this.id)).subscribe({
-        next: (response: any) => {
-          this.entity = response.center.selectedEntity;
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, "error", 5000);
-        }
-      })
+      this.store.dispatch(new CenterActions.GetById(this.id));
     }
   }
 
-  onSubmit(submitted: any) {
-    const { data, redirect } = submitted;
-    if(!this.id) {
-      this.store.dispatch(new CenterActions.Create(data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.center.result.title,
-            response.center.result.message,
-            () => {
-              if(redirect) {
-                this.router.navigate([this.route_list]);
-              } else {
-                this.resetForm = true;
-              }
-            }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        },
-        complete: () => {
-          this.resetForm = false;
+  onSubmit(event: { data: any; redirect: boolean }) {
+    const action = this.id
+      ? new CenterActions.Update(this.id, event.data)
+      : new CenterActions.Create(event.data);
+
+    this.store.dispatch(action)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: any) => {
+        this.handleSuccess(response, event.redirect);
+      },
+      error: (error) => {
+        this.notificationService.show(
+          error.error?.message || 'Error occurred',
+          'error',
+          5000
+        );
+      }
+    });
+  }
+
+  private handleSuccess(response: any, redirect: boolean): void {
+    const result = response.center.result;
+    this.sweetAlertService.confirmSuccess(
+      result.title,
+      result.message,
+      () => {
+        if (redirect) {
+          this.router.navigate([this.route_list]);
+        } else {
+          this.resetForm = true;
         }
-      })
-    } else {
-      this.store.dispatch(new CenterActions.Update(this.id, data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.center.result.title,
-            response.center.result.message,
-            () => { this.router.navigate([this.route_list]); }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        }
-      })
-    }
+      }
+    );
+  }
+
+  onClearReset(reset: boolean) {
+    this.resetForm = reset;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new CenterActions.clearEntity);
   }
 }

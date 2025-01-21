@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, take } from 'rxjs';
+import { Observable, Subject, take } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { NgIconsModule } from '@ng-icons/core';
 
@@ -17,28 +17,32 @@ import { NotificationService } from '@shared/services/notification.service';
 import { filterConfig } from '@shared/models/filter-config.model';
 import { FilterComponent } from '@shared/components/filter/filter.component';
 import { FilterStateModel } from '@shared/models/filter.model';
+import { ActionsComponent } from '@shared/components/actions/actions.component';
 
 @Component({
   selector: 'app-list',
-  imports: [CommonModule, DataListComponent, NgIconsModule, TitlePageComponent, FilterComponent],
+  imports: [CommonModule, DataListComponent, NgIconsModule, TitlePageComponent, FilterComponent, ActionsComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
 export class ListComponent {
-  private store = inject(Store);
-  private sweetalertService = inject(SweetalertService);
-  private headerDataListService = inject(HeaderDatalistService);
-  private notificationService = inject(NotificationService);
+  private readonly store = inject(Store);
+  private readonly headerDataListService = inject(HeaderDatalistService);
+  private readonly sweetalertService = inject(SweetalertService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
-  title: string = TITLES.WORKERS;
-  page: string = TYPES.LIST;
-  columns: DataListColumn<Worker>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.WORKER);
-  colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.WORKER);
+  readonly title: string = TITLES.WORKERS;
+  readonly page: string = TYPES.LIST;
+  readonly columns: DataListColumn<Worker>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.WORKER);
+  readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.WORKER);
+
   config: filterConfig = {
     typeworker: true,
+    search: true,
   }
 
-  workers$: Observable<Worker[] | null> = this.store.select(WorkerState.getItems);
+  workers$: Observable<Worker[]> = this.store.select(WorkerState.getItems);
   trashedWorkers$: Observable<Worker[] | null> = this.store.select(WorkerState.getTrasheds);
   areAllSelected$: Observable<boolean> = this.store.select(WorkerState.areAllSelected);
   hasSelectedItems$: Observable<boolean> = this.store.select(WorkerState.hasSelectedItems);
@@ -51,10 +55,6 @@ export class ListComponent {
 
   onCountTrasheds() {
     this.store.dispatch(new WorkerActions.countDeletes);
-  }
-
-  onSearch(searchTerm: string) {
-    this.store.dispatch(new WorkerActions.GetAllFilter(searchTerm, this.colFiltered));
   }
 
   onDelete(id: number) {
@@ -75,7 +75,7 @@ export class ListComponent {
       },
       error: (error) => {
         const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-        this.notificationService.show(errors, "error");
+        this.notificationService.show(errors || 'Error occurred', "error");
       },
       complete: () => {
         this.onCountTrasheds();
@@ -95,7 +95,7 @@ export class ListComponent {
     this.selectedItems$
     .pipe(take(1))
     .subscribe(data => {
-      this.store.dispatch(new WorkerActions.DeleteAll(data, del))
+      this.store.dispatch(new WorkerActions.DeleteAll(data, del, true))
       .pipe(take(1))
       .subscribe({
         next: (response: any)=> {
@@ -124,6 +124,12 @@ export class ListComponent {
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new WorkerActions.DropFilter(filter));
+    this.store.dispatch(new WorkerActions.Filters(filter, this.colFiltered));
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new WorkerActions.clearAll);
   }
 }

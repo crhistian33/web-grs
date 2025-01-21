@@ -30,6 +30,11 @@ export class UnitState extends BaseState<Unit> {
   }
 
   @Selector()
+  static getEntity(state: UnitStateModel): Unit | null {
+    return state.selectedEntity;
+  }
+
+  @Selector()
   static getTrasheds(state: UnitStateModel): Unit[] {
     return state.trashedItems;
   }
@@ -64,14 +69,14 @@ export class UnitState extends BaseState<Unit> {
     return this.getOne(ctx, id, UnitActions.GetById.type)
   }
 
-  @Action(UnitActions.GetAllFilter)
-  getAllFilter(ctx: StateContext<UnitStateModel>, { searchTerm, columns }: UnitActions.GetAllFilter<Unit>) {
-    return this.getItemsFilter(ctx, searchTerm, columns)
-  }
-
   @Action(UnitActions.countDeletes)
   countTrasheds(ctx: StateContext<UnitStateModel>) {
     return this.countItemsTrashed(ctx);
+  }
+
+  @Action(UnitActions.Filters)
+  Filters(ctx: StateContext<UnitStateModel>, { payload, columns }: UnitActions.Filters<Unit>) {
+    return super.filtersItems(ctx, UnitActions.Filters.type, payload, columns);
   }
 
   @Action(UnitActions.Create)
@@ -95,8 +100,8 @@ export class UnitState extends BaseState<Unit> {
   }
 
   @Action(UnitActions.DeleteAll)
-  deleteAll(ctx: StateContext<UnitStateModel>, { payload, del }: UnitActions.DeleteAll) {
-    return this.deleteAllItem(ctx, payload, del, UnitActions.DeleteAll.type)
+  deleteAll(ctx: StateContext<UnitStateModel>, { payload, del, active }: UnitActions.DeleteAll) {
+    return this.deleteAllItem(ctx, payload, del, active, UnitActions.DeleteAll.type)
   }
 
   @Action(UnitActions.RestoreAll)
@@ -114,28 +119,11 @@ export class UnitState extends BaseState<Unit> {
     return this.toggleAllItem(ctx, selected)
   }
 
-  @Action(UnitActions.DropFilter)
-  dropFilter(ctx: StateContext<UnitStateModel>, { payload }: UnitActions.DropFilter) {
-    ctx.dispatch(new SetLoading(UnitActions.DropFilter.type, true));
-    const state = ctx.getState();
-    const filtered = state.entities.filter(item => {
-      return (
-        (!payload.companyId || item.customer.company.id === payload.companyId) &&
-        (!payload.customerId || item.customer.id === payload.customerId) &&
-        (!payload.centerId || item.center.id === payload.centerId) &&
-        (!payload.shiftId || item.shifts.some(shift => shift.id === payload.shiftId))
-      )
-    })
-    ctx.patchState({ filteredItems: filtered });
-    ctx.dispatch(new SetLoading(UnitActions.DropFilter.type, false));
-  }
-
   @Action(UnitActions.GetAllToShift)
   getUnitToShift(ctx: StateContext<UnitStateModel>) {
     return this.unitService.GetAllToShift().pipe(
       tap({
         next: (response: any) => {
-          console.log('DATA', response.data)
           ctx.patchState({
             entities: response.data,
             filteredItems: response.data,
@@ -143,5 +131,20 @@ export class UnitState extends BaseState<Unit> {
         },
       })
     );
+  }
+
+  @Action(UnitActions.clearEntity)
+  clearItem(ctx: StateContext<UnitStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(UnitActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<UnitStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(UnitActions.clearAll)
+  clearAll(ctx: StateContext<UnitStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

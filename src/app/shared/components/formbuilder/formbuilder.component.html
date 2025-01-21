@@ -1,7 +1,6 @@
 <h3 class="text-xl text-gray-800 font-semibold">{{ id? 'EDITAR' : 'CREAR' }} {{ title | uppercase }}</h3>
 <div class="bg-gray-50 flex items-center p-5 my-4 shadow-lg">
-  <form [formGroup]="myForm" class="w-full max-w-md">
-
+  <form [formGroup]="myForm" class="w-full sm:w-1/2 md:max-w-lg">
     @for (item of formModule?.fields; track item.name) {
       @switch (item.type) {
         @case ('text') {
@@ -29,6 +28,14 @@
               </div>
           </div>
         }
+        @case ('checkbox') {
+          <div class="relative mb-4" *ngIf="id">
+            <div class="flex items-center mb-4">
+              <label for="default-checkbox" class="me-2 text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
+              <input type="checkbox" [formControlName]="item.name" class="w-4 h-4 text-main bg-gray-100 border-gray-700 rounded focus:ring-main dark:focus:ring-main_dark">
+            </div>
+          </div>
+        }
         @case ('select') {
           <div class="mb-4">
           <label [for]="item.name" class="block text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
@@ -38,12 +45,26 @@
             class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
           >
             <option value="">Seleccionar {{ item.label }}</option>
-            <option *ngFor="let subItem of getSubEntity(item.name)" [value]="subItem.id">{{ subItem.name }}</option>
+            <ng-container *ngIf="getSubEntityItems$(item.name) | async as subItems">
+              <option *ngFor="let subItem of subItems" [value]="subItem.id">{{ subItem.name }}</option>
+            </ng-container>
           </select>
           <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
             {{ getErrorMessage(item) }}
           </div>
         </div>
+        }
+        @case ('table') {
+          <div class="mb-4">
+            <span class="block text-sm font-medium text-[#5F7E8A] mb-1">{{ item.label }}</span>
+            <app-data-list
+              [data]="getSubEntityItems$(item.name) | async"
+              [columns]="columns"
+              [hiddenActions]="true"
+              (toggleAll)="onToggleAll($event)"
+              (toggleItem)="onToggleItem($event)">
+            </app-data-list>
+          </div>
         }
       }
     }

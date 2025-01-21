@@ -7,4 +7,5 @@ export interface filterConfig {
   typeworker?: boolean;
   fromDate?: boolean;
   toDate?: boolean;
+  search?: boolean;
 }

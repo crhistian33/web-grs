@@ -4,7 +4,7 @@ export interface DataListColumn<T> {
   type?: 'text' | 'date' | 'number' | 'relation-name' | 'relation-name-multi' | 'state' | 'models';
   format?: (value: any) => string;
   filtered?: boolean;
-  display?: boolean;
+  internal?: boolean;
 }
 
 export interface RelationType {

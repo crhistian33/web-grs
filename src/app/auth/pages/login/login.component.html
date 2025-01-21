@@ -3,7 +3,7 @@
     <img src="assets/images/isotipo.png" alt="Grupo de resguardo y seguridad">
   </div>
   <div class="bg-white p-5">
-    <form action="">
+    <form>
       <div class="space-y-12">
         <div class="border-b border-gray-900/10 pb-12">
           <img src="assets/images/logo_sys.png" alt="GRS 1.0">
@@ -50,7 +50,7 @@
 
       <div class="mt-6 flex items-center justify-end gap-x-6">
         <button type="button"
-          class="rounded-md bg-main px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-main_dark transition-colors" [routerLink]="['/task']" routerLinkActive="router-link-active" >Ingresar</button>
+          class="rounded-md bg-main px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-main_dark transition-colors" (click)="onSubmit()">Ingresar</button>
       </div>
     </form>
   </div>

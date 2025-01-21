@@ -8,6 +8,8 @@ import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
 import { CompanyActions } from '@state/company/company.actions';
+import { CompanyState } from '@state/company/company.state';
+import { filter, Observable, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -16,70 +18,69 @@ import { CompanyActions } from '@state/company/company.actions';
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
-  private store = inject(Store);
-  private sweetAlertService = inject(SweetalertService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+  private readonly store = inject(Store);
+  private readonly sweetAlertService = inject(SweetalertService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
-  entity!: Company;
-  title: string = TITLES.COMPANY;
-  route_list: string = ROUTES.COMPANY_LIST;
+  readonly title: string = TITLES.COMPANY;
+  readonly route_list: string = ROUTES.COMPANY_LIST;
+  readonly module = PARAMETERS.COMPANY;
+
   resetForm: boolean = false;
-  module = PARAMETERS.COMPANY;
+  entity$: Observable<Company | null> = this.store.select(CompanyState.getEntity).pipe(filter(Boolean));
 
   ngOnInit() {
     if(this.id) {
-      this.store.dispatch(new CompanyActions.GetById(this.id)).subscribe({
-        next: (response: any) => {
-          this.entity = response.company.selectedEntity;
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, "error", 5000);
-        }
-      })
+      this.store.dispatch(new CompanyActions.GetById(this.id));
     }
   }
 
-  onSubmit(submitted: any) {
-    const { data, redirect } = submitted;
-    if(!this.id) {
-      this.store.dispatch(new CompanyActions.Create(data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.company.result.title,
-            response.company.result.message,
-            () => {
-              if(redirect) {
-                this.router.navigate([this.route_list]);
-              } else {
-                this.resetForm = true;
-              }
-            }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        },
-        complete: () => {
-          this.resetForm = false;
+  onSubmit(event: { data: any; redirect: boolean }) {
+    const action = this.id
+      ? new CompanyActions.Update(this.id, event.data)
+      : new CompanyActions.Create(event.data);
+
+    this.store.dispatch(action)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: any) => {
+        this.handleSuccess(response, event.redirect);
+      },
+      error: (error) => {
+        this.notificationService.show(
+          error.error?.message || 'Error occurred',
+          'error',
+          5000
+        );
+      }
+    });
+  }
+
+  private handleSuccess(response: any, redirect: boolean): void {
+    const result = response.company.result;
+    this.sweetAlertService.confirmSuccess(
+      result.title,
+      result.message,
+      () => {
+        if (redirect) {
+          this.router.navigate([this.route_list]);
+        } else {
+          this.resetForm = true;
         }
-      })
-    } else {
-      this.store.dispatch(new CompanyActions.Update(this.id, data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.company.result.title,
-            response.company.result.message,
-            () => { this.router.navigate([this.route_list]); }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        }
-      })
-    }
+      }
+    );
+  }
+
+  onClearReset(reset: boolean) {
+    this.resetForm = reset;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new CompanyActions.clearEntity);
   }
 }

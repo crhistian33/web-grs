@@ -9,6 +9,8 @@ import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
 import { ShiftActions } from '@state/shift/shift.action';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { ShiftState } from '@state/shift/shift.state';
 
 @Component({
   selector: 'app-form',
@@ -17,70 +19,69 @@ import { ShiftActions } from '@state/shift/shift.action';
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
-  private store = inject(Store);
-  private sweetAlertService = inject(SweetalertService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
+  private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly sweetAlertService = inject(SweetalertService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
-  entity!: Shift;
-  title: string = TITLES.SHIFT;
-  route_list: string = ROUTES.SHIFT_LIST;
+  readonly title: string = TITLES.SHIFT;
+  readonly route_list: string = ROUTES.SHIFT_LIST;
+  readonly module = PARAMETERS.SHIFT;
+
   resetForm: boolean = false;
-  module = PARAMETERS.SHIFT;
+  entity$: Observable<Shift | null> = this.store.select(ShiftState.getEntity);
 
   ngOnInit() {
     if(this.id) {
-      this.store.dispatch(new ShiftActions.GetById(this.id)).subscribe({
-        next: (response: any) => {
-          this.entity = response.shift.selectedEntity;
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, "error", 5000);
-        }
-      })
+      this.store.dispatch(new ShiftActions.GetById(this.id));
     }
   }
 
-  onSubmit(submitted: any) {
-    const { data, redirect } = submitted;
-    if(!this.id) {
-      this.store.dispatch(new ShiftActions.Create(data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.shift.result.title,
-            response.shift.result.message,
-            () => {
-              if(redirect) {
-                this.router.navigate([this.route_list]);
-              } else {
-                this.resetForm = true;
-              }
-            }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        },
-        complete: () => {
-          this.resetForm = false;
+  onSubmit(event: { data: any; redirect: boolean }) {
+    const action = this.id
+      ? new ShiftActions.Update(this.id, event.data)
+      : new ShiftActions.Create(event.data);
+
+    this.store.dispatch(action)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: any) => {
+        this.handleSuccess(response, event.redirect);
+      },
+      error: (error) => {
+        this.notificationService.show(
+          error.error?.message || 'Error occurred',
+          'error',
+          5000
+        );
+      }
+    });
+  }
+
+  private handleSuccess(response: any, redirect: boolean): void {
+    const result = response.shift.result;
+    this.sweetAlertService.confirmSuccess(
+      result.title,
+      result.message,
+      () => {
+        if (redirect) {
+          this.router.navigate([this.route_list]);
+        } else {
+          this.resetForm = true;
         }
-      })
-    } else {
-      this.store.dispatch(new ShiftActions.Update(this.id, data))
-      .subscribe({
-        next: (response: any)=> {
-          this.sweetAlertService.confirmSuccess(
-            response.shift.result.title,
-            response.shift.result.message,
-            () => { this.router.navigate([this.route_list]); }
-          );
-        },
-        error: (error) => {
-          this.notificationService.show(error.error.message, 'error', 5000)
-        }
-      })
-    }
+      }
+    );
+  }
+
+  onClearReset(reset: boolean) {
+    this.resetForm = reset;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new ShiftActions.clearEntity);
   }
 }

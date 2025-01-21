@@ -1,96 +1,11 @@
-<!-- <h3 class="text-xl text-gray-800 font-semibold">{{ id ? 'EDITAR' : 'NUEVO' }} TRABAJADOR</h3>
-<div class="bg-gray-50 flex items-center p-5 my-4 shadow-lg">
-  <form [formGroup]="myForm" class="w-full max-w-md"> -->
-    <!-- Código del Producto -->
-    <!-- <div class="mb-4">
-      <label for="name" class="block text-sm font-medium text-[#5F7E8A]">Nombre y apellidos</label>
-      <input
-        id="name"
-        type="text"
-        formControlName="name"
-        class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-gray-500 text-[#2E384D]"
-      />
-      <div *ngIf="myForm.get('name')?.touched && myForm.get('name')?.invalid" class="text-[#D81E0B] text-sm mt-1">
-        El nombre es obligatorio.
-      </div>
-    </div> -->
-
-    <!-- Código del Producto -->
-    <!-- <div class="mb-4">
-      <label for="dni" class="block text-sm font-medium text-[#5F7E8A]">DNI</label>
-      <input
-        id="dni"
-        type="text"
-        formControlName="dni"
-        class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-gray-500 text-[#2E384D]"
-      />
-      <div *ngIf="myForm.get('dni')?.touched && myForm.get('dni')?.invalid" class="text-[#D81E0B] text-sm mt-1">
-        El DNI es obligatorio.
-      </div>
-    </div>
-
-    <div class="relative mb-4">
-      <label class="block text-sm font-medium text-[#5F7E8A]">Fecha de Nacimiento</label>
-      <input
-        type="date"
-        formControlName="birth_date"
-        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700">
-        <div *ngIf="myForm.get('birth_date')?.touched && myForm.get('birth_date')?.invalid" class="text-[#D81E0B] text-sm mt-1">
-          Este campo es obligatorio.
-        </div>
-    </div> -->
-
-    <!-- Tipo de Producto -->
-    <!-- <div class="mb-4">
-      <label for="typeWorker" class="block text-sm font-medium text-[#5F7E8A]">Tipo de trabajador</label>
-      <select
-        id="typeWorker"
-        formControlName="type_worker_id"
-        class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
-      >
-        <option value="">Seleccione el tipo de trabajador</option>
-        <option *ngFor="let type of typesWorker$ | async" [value]="type.id">{{ type.name }}</option>
-      </select>
-      <div *ngIf="myForm.get('type_worker_id')?.touched && myForm.get('type_worker_id')?.invalid" class="text-[#D81E0B] text-sm mt-1">
-        Este campo es obligatorio.
-      </div>
-    </div> -->
-
-    <!-- Botón de Enviar -->
-    <!-- <div class="mt-6 border-t pt-5">
-      <button
-        type="button"
-        class="bg-main text-white py-2 px-4 rounded-md hover:bg-main_dark"
-        (click)="onSubmit(true)">
-        @if (id) {
-          Actualizar
-        }
-        @else {
-          Guardar
-        }
-      </button>
-      @if(!id) {
-        <button
-          type="button"
-          class="bg-secondary text-white py-2 px-4 rounded-md ms-2"
-          (click)="onSubmit(false)">Guardar y crear nuevo
-        </button>
-      }
-      <button
-        type="button"
-        class="bg-gray_dark_600 text-white py-2 px-4 rounded-md ms-2"
-        (click)="onCancel()">Cancelar
-      </button>
-    </div> -->
-  <!-- </form>
-</div> -->
 <app-formbuilder
   [module]="module"
-  [entity]="entity"
+  [entity]="entity$ | async"
   [subentities]="subentities"
   [id]="id"
   [title]="title"
   [route]="route_list"
   [reset]="resetForm"
-  (formSubmitted)="onSubmit($event)">
+  (formSubmitted)="onSubmit($event)"
+  (clearReset)="onClearReset($event)">
 </app-formbuilder>

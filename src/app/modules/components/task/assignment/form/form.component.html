@@ -1,9 +1,11 @@
 <app-formbuilder
   [module]="module"
-  [entity]="entity"
+  [entity]="entity$ | async"
   [id]="id"
   [subentities]="subentities"
   [title]="title"
   [route]="route_list"
-  [reset]="resetForm">
+  [reset]="resetForm"
+  (formSubmitted)="onSubmitted($event)"
+  (clearReset)="onClearReset($event)">
 </app-formbuilder>

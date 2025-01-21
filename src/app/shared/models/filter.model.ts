@@ -5,4 +5,5 @@ export interface FilterStateModel {
   shiftId?: number | null;
   typeworkerId?: number | null;
   centerId?: number | null;
+  searchTerm?: string | null;
 }

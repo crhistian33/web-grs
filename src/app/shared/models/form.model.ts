@@ -1,8 +1,8 @@
 export interface FieldForm {
-  type: 'text' | 'email' | 'tel' | 'select' | 'table' | 'date' | 'hidden';
+  type: 'text' | 'email' | 'tel' | 'select' | 'table' | 'date' | 'hidden' | 'checkbox';
   name: string;
   label?: string;
-  value?: string;
+  value?: string | boolean;
   validators?: IValidationForm[];
 }
 

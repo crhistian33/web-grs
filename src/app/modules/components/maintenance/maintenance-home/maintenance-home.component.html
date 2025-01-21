@@ -1,11 +1,11 @@
 <h3 class="text-xl text-gray-800 font-semibold mb-2">MANTENIMIENTO</h3>
-<div class="flex flex-wrap -mx-4">
+<div class="flex flex-wrap -mx-4" *ngIf="counts$ | async as counts">
   <div class="p-4 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
     <a class="inline-block bg-gray-200 border-t-4 border-secondary text-gray_dark_600 hover:bg-gray-300 hover:text-black transition-colors shadow p-6 w-full h-full"
       routerLink="trabajadores">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Trabajadores</h3>
-        <span class="text-secondary text-3xl ms-1">{{ workers$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.workers }}</span>
       </div>
     </a>
   </div>
@@ -14,7 +14,7 @@
       routerLink="tipos-trabajadores">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Tipos de trabajador</h3>
-        <span class="text-secondary text-3xl ms-1">{{ typeworkers$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.typeworkers }}</span>
       </div>
     </a>
   </div>
@@ -23,7 +23,7 @@
       routerLink="centros-costo">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Centros de costo</h3>
-        <span class="text-secondary text-3xl ms-1">{{ centers$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.centers }}</span>
       </div>
     </a>
   </div>
@@ -32,7 +32,7 @@
       routerLink="empresas">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Empresas</h3>
-        <span class="text-secondary text-3xl ms-1">{{ companies$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.companies }}</span>
       </div>
     </a>
   </div>
@@ -41,7 +41,7 @@
       routerLink="clientes">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Clientes</h3>
-        <span class="text-secondary text-3xl ms-1">{{ customers$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.customers }}</span>
       </div>
     </a>
   </div>
@@ -50,7 +50,7 @@
       routerLink="unidades">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Unidades</h3>
-        <span class="text-secondary text-3xl ms-1">{{ units$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.units }}</span>
       </div>
     </a>
   </div>
@@ -59,7 +59,7 @@
       routerLink="turnos">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">Turnos</h3>
-        <span class="text-secondary text-3xl ms-1">{{ shifts$ | async }}</span>
+        <span class="text-secondary text-3xl ms-1">{{ counts.shifts }}</span>
       </div>
     </a>
   </div>

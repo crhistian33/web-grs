@@ -85,4 +85,25 @@ export class SweetalertService {
         success()
     })
   }
+
+  confirmAction(title: string, message: string, confirmText: string, confirm: any) {
+    Swal.fire({
+      title: title,
+      text: message,
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: 'Cancelar',
+      confirmButtonText: confirmText,
+      confirmButtonColor: '#BB2124',
+      showCloseButton: true,
+      allowOutsideClick: false,
+      customClass: {
+        title: 'swal-title'
+      },
+    }).then((result) => {
+      if(result.isConfirmed) {
+        confirm()
+      }
+    });
+  }
 }

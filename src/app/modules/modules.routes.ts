@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from '../shared/components/layout/layout.component';
 import { ModuleHomeComponent } from './components/module-home/module-home.component';
+import { LoginComponent } from '../auth/pages/login/login.component';
 
 export const routes: Routes = [
   {
@@ -9,7 +10,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/inicio',
+        redirectTo: '/auth',
         pathMatch: 'full'
       },
       {
@@ -29,4 +30,8 @@ export const routes: Routes = [
       }
     ]
   },
+  {
+    path: 'auth',
+    component: LoginComponent
+  }
 ];

@@ -2,33 +2,42 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Center } from '@models/center.model';
 import { Store } from '@ngxs/store';
+import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { DataListComponent } from '@shared/components/data-list/data-list.component';
+import { FilterComponent } from '@shared/components/filter/filter.component';
 import { TitlePageComponent } from '@shared/components/title-page/title-page.component';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
+import { filterConfig } from '@shared/models/filter-config.model';
+import { FilterStateModel } from '@shared/models/filter.model';
 import { HeaderDatalistService } from '@shared/services/header-datalist.service';
 import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { CenterActions } from '@state/center/center.action';
 import { CenterState } from '@state/center/center.state';
-import { Observable, take } from 'rxjs';
+import { Observable, Subject, take } from 'rxjs';
 
 @Component({
   selector: 'app-removes',
-  imports: [CommonModule, DataListComponent, TitlePageComponent],
+  imports: [CommonModule, DataListComponent, TitlePageComponent, FilterComponent, ActionsComponent],
 templateUrl: './removes.component.html',
   styleUrl: './removes.component.scss'
 })
 export class RemovesComponent {
-  private store = inject(Store);
-  private sweetalertService = inject(SweetalertService);
-  private headerDataListService = inject(HeaderDatalistService);
-  private notificationService = inject(NotificationService);
+  private readonly store = inject(Store);
+  private readonly sweetalertService = inject(SweetalertService);
+  private readonly headerDataListService = inject(HeaderDatalistService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
-  title: string = TITLES.CENTERS_REMOVE;
-  page: string = TYPES.RECYCLE;
-  columns: DataListColumn<Center>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.CENTER);
-  colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.CENTER);
+  readonly title: string = TITLES.CENTERS_REMOVE;
+  readonly page: string = TYPES.RECYCLE;
+  readonly columns: DataListColumn<Center>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.CENTER);
+  readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.CENTER);
+
+  config: filterConfig = {
+    search: true,
+  }
 
   centers$: Observable<Center[] | null> = this.store.select(CenterState.getItems);
   areAllSelected$: Observable<boolean> = this.store.select(CenterState.areAllSelected);
@@ -37,10 +46,6 @@ export class RemovesComponent {
 
   ngOnInit() {
     this.store.dispatch(new CenterActions.GetDeletes)
-  }
-
-  onSearch(searchTerm: string) {
-    this.store.dispatch(new CenterActions.GetAllFilter(searchTerm, this.colFiltered));
   }
 
   onDelete(id: number) {
@@ -109,7 +114,7 @@ export class RemovesComponent {
       this.selectedItems$
       .pipe(take(1))
       .subscribe(data => {
-        this.store.dispatch(new CenterActions.DeleteAll(data, true))
+        this.store.dispatch(new CenterActions.DeleteAll(data, true, false))
         .pipe(take(1))
         .subscribe({
           next: (response: any)=> {
@@ -133,5 +138,15 @@ export class RemovesComponent {
 
   onToggleAll(checked: boolean) {
     this.store.dispatch(new CenterActions.ToggleAllItems(checked));
+  }
+
+  filtersData(filter: FilterStateModel) {
+    this.store.dispatch(new CenterActions.Filters(filter, this.colFiltered));
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new CenterActions.clearAll);
   }
 }

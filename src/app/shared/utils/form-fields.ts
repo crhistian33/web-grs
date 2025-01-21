@@ -372,6 +372,12 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         type: 'table',
       },
       {
+        name: 'state',
+        label: 'Activo',
+        type: 'checkbox',
+        value: true,
+      },
+      {
         name: 'user_id',
         type: 'hidden',
         value: '1'

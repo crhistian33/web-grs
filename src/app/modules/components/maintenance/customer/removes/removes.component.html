@@ -2,17 +2,22 @@
   [title]="title"
   [page]="page">
 </app-title-page>
-<app-data-list
-  [data]="customers$ | async"
-  [columns]="columns"
-  [page]="page"
-  [areAllSelected]="(areAllSelected$ | async) ?? false"
-  [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
-  (searchList)="onSearch($event)"
-  (deleteItem)="onDelete($event)"
-  (restoreItem)="onRestore($event)"
-  (toggleItem)="onToggleItem($event)"
-  (toggleAll)="onToggleAll($event)"
-  (restoreAll)="onRestoreAll()"
-  (deleteAll)="onDeleteAll()">
-</app-data-list>
+<app-filter [config]="config" (filters)="filtersData($event)"></app-filter>
+<div class="bg-white p-4 my-4 rounded shadow relative z-auto">
+  <app-actions
+    [page]="page"
+    [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
+    (restoreAll)="onRestoreAll()"
+    (deleteAll)="onDeleteAll()">
+  </app-actions>
+  <app-data-list
+    [page]="page"
+    [data]="customers$ | async"
+    [columns]="columns"
+    [areAllSelected]="(areAllSelected$ | async) ?? false"
+    (deleteItem)="onDelete($event)"
+    (restoreItem)="onRestore($event)"
+    (toggleItem)="onToggleItem($event)"
+    (toggleAll)="onToggleAll($event)">
+  </app-data-list>
+</div>

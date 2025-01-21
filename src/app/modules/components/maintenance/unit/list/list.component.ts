@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Unit } from '@models/unit.model';
 import { Store } from '@ngxs/store';
+import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { DataListComponent } from '@shared/components/data-list/data-list.component';
 import { FilterComponent } from '@shared/components/filter/filter.component';
 import { TitlePageComponent } from '@shared/components/title-page/title-page.component';
@@ -14,27 +15,26 @@ import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { UnitActions } from '@state/unit/unit.actions';
 import { UnitState } from '@state/unit/unit.state';
-import { Observable, take } from 'rxjs';
+import { catchError, Observable, Subject, take } from 'rxjs';
 
 @Component({
   selector: 'app-list',
-  imports: [CommonModule, DataListComponent, TitlePageComponent, FilterComponent],
+  imports: [CommonModule, DataListComponent, TitlePageComponent, FilterComponent, ActionsComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss'
 })
 export class ListComponent {
-  private store = inject(Store);
-  private sweetalertService = inject(SweetalertService);
-  private headerDataListService = inject(HeaderDatalistService);
-  private notificationService = inject(NotificationService);
+  private readonly store = inject(Store);
+  private readonly sweetalertService = inject(SweetalertService);
+  private readonly headerDataListService = inject(HeaderDatalistService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
-  title: string = TITLES.UNITS;
-  page: string = TYPES.LIST;
-  columns: DataListColumn<Unit>[] =
-    this.headerDataListService.getHeaderDataList(PARAMETERS.UNIT);
-  colFiltered: string[] = this.headerDataListService.getFiltered(
-    PARAMETERS.UNIT
-  );
+  readonly title: string = TITLES.UNITS;
+  readonly page: string = TYPES.LIST;
+  readonly columns: DataListColumn<Unit>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.UNIT);
+  readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.UNIT);
+
   config: filterConfig = {
     company: true,
     customer: true,
@@ -42,35 +42,19 @@ export class ListComponent {
     shift: true,
   }
 
-  units$: Observable<Unit[] | null> = this.store.select(
-    UnitState.getItems
-  );
-  trashedItems$: Observable<Unit[] | null> = this.store.select(
-    UnitState.getTrasheds
-  );
-  areAllSelected$: Observable<boolean> = this.store.select(
-    UnitState.areAllSelected
-  );
-  hasSelectedItems$: Observable<boolean> = this.store.select(
-    UnitState.hasSelectedItems
-  );
-  selectedItems$: Observable<Unit[]> = this.store.select(
-    UnitState.getSelectedItems
-  );
+  units$: Observable<Unit[] | null> = this.store.select(UnitState.getItems);
+  trashedItems$: Observable<Unit[] | null> = this.store.select(UnitState.getTrasheds);
+  areAllSelected$: Observable<boolean> = this.store.select(UnitState.areAllSelected);
+  hasSelectedItems$: Observable<boolean> = this.store.select(UnitState.hasSelectedItems);
+  selectedItems$: Observable<Unit[]> = this.store.select(UnitState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new UnitActions.GetAll());
+    this.store.dispatch(new UnitActions.GetAll())
     this.onCountTrasheds();
   }
 
   onCountTrasheds() {
     this.store.dispatch(new UnitActions.countDeletes());
-  }
-
-  onSearch(searchTerm: string) {
-    this.store.dispatch(
-      new UnitActions.GetAllFilter(searchTerm, this.colFiltered)
-    );
   }
 
   onDelete(id: number) {
@@ -122,7 +106,7 @@ export class ListComponent {
   onDeleteOrRecycleAll(del: boolean) {
     this.selectedItems$.pipe(take(1)).subscribe((data) => {
       this.store
-        .dispatch(new UnitActions.DeleteAll(data, del))
+        .dispatch(new UnitActions.DeleteAll(data, del, true))
         .pipe(take(1))
         .subscribe({
           next: (response: any) => {
@@ -153,6 +137,12 @@ export class ListComponent {
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new UnitActions.DropFilter(filter));
+    this.store.dispatch(new UnitActions.Filters(filter, this.colFiltered));
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new UnitActions.clearAll);
   }
 }

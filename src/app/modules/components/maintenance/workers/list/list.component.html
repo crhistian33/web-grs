@@ -4,15 +4,19 @@
   [numTrashed]="(trashedWorkers$ | async)?.length ?? 0">
 </app-title-page>
 <app-filter [config]="config" (filters)="filtersData($event)"></app-filter>
-<app-data-list
-  [data]="workers$ | async"
-  [columns]="columns"
-  [page]="page"
-  [areAllSelected]="(areAllSelected$ | async) ?? false"
-  [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
-  (searchList)="onSearch($event)"
-  (deleteItem)="onDelete($event)"
-  (deleteAll)="onDeleteAll()"
-  (toggleItem)="onToggleItem($event)"
-  (toggleAll)="onToggleAll($event)">
-</app-data-list>
+<div class="bg-white p-4 my-4 rounded shadow relative z-auto">
+  <app-actions
+    [page]="page"
+    [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
+    (deleteAll)="onDeleteAll()">
+  </app-actions>
+  <app-data-list
+    [page]="page"
+    [data]="workers$ | async"
+    [columns]="columns"
+    [areAllSelected]="(areAllSelected$ | async) ?? false"
+    (deleteItem)="onDelete($event)"
+    (toggleItem)="onToggleItem($event)"
+    (toggleAll)="onToggleAll($event)">
+  </app-data-list>
+</div>

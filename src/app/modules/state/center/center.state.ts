@@ -28,6 +28,11 @@ export class CenterState extends BaseState<Center> {
   }
 
   @Selector()
+  static getEntity(state: CenterStateModel): Center | null {
+    return state.selectedEntity;
+  }
+
+  @Selector()
   static getTrasheds(state: CenterStateModel): Center[] {
     return state.trashedItems;
   }
@@ -68,17 +73,14 @@ export class CenterState extends BaseState<Center> {
     return this.getOne(ctx, id, CenterActions.GetById.type);
   }
 
-  @Action(CenterActions.GetAllFilter)
-  getAllFilter(
-    ctx: StateContext<CenterStateModel>,
-    { searchTerm, columns }: CenterActions.GetAllFilter<Center>
-  ) {
-    return this.getItemsFilter(ctx, searchTerm, columns);
-  }
-
   @Action(CenterActions.countDeletes)
   countTrasheds(ctx: StateContext<CenterStateModel>) {
     return this.countItemsTrashed(ctx);
+  }
+
+  @Action(CenterActions.Filters)
+  Filters(ctx: StateContext<CenterStateModel>, { payload, columns }: CenterActions.Filters<Center>) {
+    return super.filtersItems(ctx, CenterActions.Filters.type, payload, columns);
   }
 
   @Action(CenterActions.Create)
@@ -116,12 +118,13 @@ export class CenterState extends BaseState<Center> {
   @Action(CenterActions.DeleteAll)
   deleteAll(
     ctx: StateContext<CenterStateModel>,
-    { payload, del }: CenterActions.DeleteAll
+    { payload, del, active }: CenterActions.DeleteAll
   ) {
     return this.deleteAllItem(
       ctx,
       payload,
       del,
+      active,
       CenterActions.DeleteAll.type
     );
   }
@@ -148,5 +151,20 @@ export class CenterState extends BaseState<Center> {
     { selected }: CenterActions.ToggleAllItems
   ) {
     return this.toggleAllItem(ctx, selected);
+  }
+
+  @Action(CenterActions.clearEntity)
+  clearItem(ctx: StateContext<CenterStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(CenterActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<CenterStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(CenterActions.clearAll)
+  clearAll(ctx: StateContext<CenterStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

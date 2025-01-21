@@ -29,6 +29,11 @@ export class CustomerState extends BaseState<Customer> {
   }
 
   @Selector()
+  static getEntity(state: CustomerStateModel): Customer | null {
+    return state.selectedEntity;
+  }
+
+  @Selector()
   static getTrasheds(state: CustomerStateModel): Customer[] {
     return state.trashedItems;
   }
@@ -69,17 +74,14 @@ export class CustomerState extends BaseState<Customer> {
     return this.getOne(ctx, id, CustomerActions.GetById.type);
   }
 
-  @Action(CustomerActions.GetAllFilter)
-  getAllFilter(
-    ctx: StateContext<CustomerStateModel>,
-    { searchTerm, columns }: CustomerActions.GetAllFilter<Customer>
-  ) {
-    return this.getItemsFilter(ctx, searchTerm, columns);
-  }
-
   @Action(CustomerActions.countDeletes)
   countTrasheds(ctx: StateContext<CustomerStateModel>) {
     return this.countItemsTrashed(ctx);
+  }
+
+  @Action(CustomerActions.Filters)
+  Filters(ctx: StateContext<CustomerStateModel>, { payload, columns }: CustomerActions.Filters<Customer>) {
+    return super.filtersItems(ctx, CustomerActions.Filters.type, payload, columns);
   }
 
   @Action(CustomerActions.Create)
@@ -117,12 +119,13 @@ export class CustomerState extends BaseState<Customer> {
   @Action(CustomerActions.DeleteAll)
   deleteAll(
     ctx: StateContext<CustomerStateModel>,
-    { payload, del }: CustomerActions.DeleteAll
+    { payload, del, active }: CustomerActions.DeleteAll
   ) {
     return this.deleteAllItem(
       ctx,
       payload,
       del,
+      active,
       CustomerActions.DeleteAll.type
     );
   }
@@ -151,16 +154,18 @@ export class CustomerState extends BaseState<Customer> {
     return this.toggleAllItem(ctx, selected);
   }
 
-  @Action(CustomerActions.DropFilter)
-  dropFilter(ctx: StateContext<CustomerStateModel>, { payload }: CustomerActions.DropFilter) {
-    ctx.dispatch(new SetLoading(CustomerActions.DropFilter.type, true));
-    const state = ctx.getState();
-    const filtered = state.entities.filter(item => {
-      return (
-        (!payload.companyId || item.company.id === payload.companyId)
-      )
-    })
-    ctx.patchState({ filteredItems: filtered });
-    ctx.dispatch(new SetLoading(CustomerActions.DropFilter.type, false));
+  @Action(CustomerActions.clearEntity)
+  clearItem(ctx: StateContext<CustomerStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(CustomerActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<CustomerStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(CustomerActions.clearAll)
+  clearAll(ctx: StateContext<CustomerStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

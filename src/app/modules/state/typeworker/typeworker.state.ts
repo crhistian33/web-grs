@@ -28,6 +28,11 @@ export class TypeworkerState extends BaseState<TypeWorker> {
   }
 
   @Selector()
+  static getEntity(state: TypeWorkerStateModel): TypeWorker | null {
+    return state.selectedEntity;
+  }
+
+  @Selector()
   static getTrasheds(state: TypeWorkerStateModel): TypeWorker[] {
     return state.trashedItems;
   }
@@ -68,17 +73,14 @@ export class TypeworkerState extends BaseState<TypeWorker> {
     return this.getOne(ctx, id, TypeWorkerActions.GetById.type);
   }
 
-  @Action(TypeWorkerActions.GetAllFilter)
-  getAllFilter(
-    ctx: StateContext<TypeWorkerStateModel>,
-    { searchTerm, columns }: TypeWorkerActions.GetAllFilter<TypeWorker>
-  ) {
-    return this.getItemsFilter(ctx, searchTerm, columns);
-  }
-
   @Action(TypeWorkerActions.countDeletes)
   countTrasheds(ctx: StateContext<TypeWorkerStateModel>) {
     return this.countItemsTrashed(ctx);
+  }
+
+  @Action(TypeWorkerActions.Filters)
+  Filters(ctx: StateContext<TypeWorkerStateModel>, { payload, columns }: TypeWorkerActions.Filters<TypeWorker>) {
+    return super.filtersItems(ctx, TypeWorkerActions.Filters.type, payload, columns);
   }
 
   @Action(TypeWorkerActions.Create)
@@ -116,12 +118,13 @@ export class TypeworkerState extends BaseState<TypeWorker> {
   @Action(TypeWorkerActions.DeleteAll)
   deleteAll(
     ctx: StateContext<TypeWorkerStateModel>,
-    { payload, del }: TypeWorkerActions.DeleteAll
+    { payload, del, active }: TypeWorkerActions.DeleteAll
   ) {
     return this.deleteAllItem(
       ctx,
       payload,
       del,
+      active,
       TypeWorkerActions.DeleteAll.type
     );
   }
@@ -148,5 +151,20 @@ export class TypeworkerState extends BaseState<TypeWorker> {
     { selected }: TypeWorkerActions.ToggleAllItems
   ) {
     return this.toggleAllItem(ctx, selected);
+  }
+
+  @Action(TypeWorkerActions.clearEntity)
+  clearItem(ctx: StateContext<TypeWorkerStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(TypeWorkerActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<TypeWorkerStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(TypeWorkerActions.clearAll)
+  clearAll(ctx: StateContext<TypeWorkerStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

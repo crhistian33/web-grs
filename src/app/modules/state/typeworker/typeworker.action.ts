@@ -1,4 +1,5 @@
 import { TypeWorker } from "@models/type-worker.model";
+import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace TypeWorkerActions {
   export class GetAll {
@@ -9,11 +10,6 @@ export namespace TypeWorkerActions {
     static readonly type = '[TypeWorker] Get All Deletes';
   }
 
-  export class GetAllFilter<T> {
-    static readonly type = '[TypeWorker] Get All Filter';
-    constructor(public searchTerm: string, public columns: (keyof T)[]) {}
-  }
-
   export class GetById {
     static readonly type = '[TypeWorker] Get By Id';
     constructor(public id: number) {}
@@ -21,6 +17,11 @@ export namespace TypeWorkerActions {
 
   export class countDeletes {
     static readonly type = '[TypeWorker] Count Deletes';
+  }
+
+  export class Filters<T> {
+    static readonly type = '[TypeWorker] Filters Entities';
+    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -45,7 +46,7 @@ export namespace TypeWorkerActions {
 
   export class DeleteAll {
     static readonly type = '[TypeWorker] Delete All';
-    constructor(public payload: TypeWorker[], public del: boolean) {}
+    constructor(public payload: TypeWorker[], public del: boolean, public active: boolean) {}
   }
 
   export class RestoreAll {
@@ -61,5 +62,17 @@ export namespace TypeWorkerActions {
   export class ToggleAllItems {
     static readonly type = '[TypeWorker] Toggle All';
     constructor(public selected: boolean) {}
+  }
+
+  export class ClearItemSelection {
+    static readonly type = '[TypeWorker] Clear Selection';
+  }
+
+  export class clearEntity {
+    static readonly type = '[TypeWorker] Clear entity';
+  }
+
+  export class clearAll {
+    static readonly type = '[TypeWorker] Clear All';
   }
 }

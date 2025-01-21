@@ -42,8 +42,8 @@ export class BaseCrudService<T extends BaseModel> {
       .pipe(catchError(this.handleError));
   }
 
-  deleteAll(resource: T[], del: boolean): Observable<T[]> {
-    return this.httpClient.post<T[]>(`${this.apiUrl}/destroyes`, { resources: resource, del })
+  deleteAll(resource: T[], del: boolean, active: boolean): Observable<T[]> {
+    return this.httpClient.post<T[]>(`${this.apiUrl}/destroyes`, { resources: resource, del, active })
       .pipe(catchError(this.handleError));
   }
 

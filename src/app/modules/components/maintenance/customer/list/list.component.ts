@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Customer } from '@models/customer.model';
 import { Store } from '@ngxs/store';
+import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { DataListComponent } from '@shared/components/data-list/data-list.component';
 import { FilterComponent } from '@shared/components/filter/filter.component';
 import { TitlePageComponent } from '@shared/components/title-page/title-page.component';
@@ -14,46 +15,36 @@ import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { CustomerActions } from '@state/customer/customer.action';
 import { CustomerState } from '@state/customer/customer.state';
-import { Observable, take } from 'rxjs';
+import { Observable, Subject, take } from 'rxjs';
 
 @Component({
   selector: 'app-list',
-  imports: [CommonModule, DataListComponent, TitlePageComponent, FilterComponent],
+  imports: [CommonModule, DataListComponent, TitlePageComponent, FilterComponent, ActionsComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss'
 })
 export class ListComponent {
-  private store = inject(Store);
-  private sweetalertService = inject(SweetalertService);
-  private headerDataListService = inject(HeaderDatalistService);
-  private notificationService = inject(NotificationService);
+  private readonly store = inject(Store);
+  private readonly sweetalertService = inject(SweetalertService);
+  private readonly headerDataListService = inject(HeaderDatalistService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroy$ = new Subject<void>();
 
-  title: string = TITLES.CUSTOMERS;
-  page: string = TYPES.LIST;
-  columns: DataListColumn<Customer>[] =
-    this.headerDataListService.getHeaderDataList(PARAMETERS.CUSTOMER);
-  colFiltered: string[] = this.headerDataListService.getFiltered(
-    PARAMETERS.CUSTOMER
-  );
+  readonly title: string = TITLES.CUSTOMERS;
+  readonly page: string = TYPES.LIST;
+  readonly columns: DataListColumn<Customer>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.CUSTOMER);
+  readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.CUSTOMER);
+
   config: filterConfig = {
     company: true,
+    search: true,
   }
 
-  customers$: Observable<Customer[] | null> = this.store.select(
-    CustomerState.getItems
-  );
-  trashedItems$: Observable<Customer[] | null> = this.store.select(
-    CustomerState.getTrasheds
-  );
-  areAllSelected$: Observable<boolean> = this.store.select(
-    CustomerState.areAllSelected
-  );
-  hasSelectedItems$: Observable<boolean> = this.store.select(
-    CustomerState.hasSelectedItems
-  );
-  selectedItems$: Observable<Customer[]> = this.store.select(
-    CustomerState.getSelectedItems
-  );
+  customers$: Observable<Customer[] | null> = this.store.select(CustomerState.getItems);
+  trashedItems$: Observable<Customer[] | null> = this.store.select(CustomerState.getTrasheds);
+  areAllSelected$: Observable<boolean> = this.store.select(CustomerState.areAllSelected);
+  hasSelectedItems$: Observable<boolean> = this.store.select(CustomerState.hasSelectedItems);
+  selectedItems$: Observable<Customer[]> = this.store.select(CustomerState.getSelectedItems);
 
   ngOnInit() {
     this.store.dispatch(new CustomerActions.GetAll());
@@ -62,12 +53,6 @@ export class ListComponent {
 
   onCountTrasheds() {
     this.store.dispatch(new CustomerActions.countDeletes());
-  }
-
-  onSearch(searchTerm: string) {
-    this.store.dispatch(
-      new CustomerActions.GetAllFilter(searchTerm, this.colFiltered)
-    );
   }
 
   onDelete(id: number) {
@@ -119,7 +104,7 @@ export class ListComponent {
   onDeleteOrRecycleAll(del: boolean) {
     this.selectedItems$.pipe(take(1)).subscribe((data) => {
       this.store
-        .dispatch(new CustomerActions.DeleteAll(data, del))
+        .dispatch(new CustomerActions.DeleteAll(data, del, true))
         .pipe(take(1))
         .subscribe({
           next: (response: any) => {
@@ -150,6 +135,12 @@ export class ListComponent {
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new CustomerActions.DropFilter(filter));
+    this.store.dispatch(new CustomerActions.Filters(filter, this.colFiltered));
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new CustomerActions.clearAll);
   }
 }

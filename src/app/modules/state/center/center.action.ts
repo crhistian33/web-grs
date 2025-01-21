@@ -1,4 +1,5 @@
 import { Center } from "@models/center.model";
+import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace CenterActions {
   export class GetAll {
@@ -9,11 +10,6 @@ export namespace CenterActions {
     static readonly type = '[Center] Get All Deletes';
   }
 
-  export class GetAllFilter<T> {
-    static readonly type = '[Center] Get All Filter';
-    constructor(public searchTerm: string, public columns: (keyof T)[]) {}
-  }
-
   export class GetById {
     static readonly type = '[Center] Get By Id';
     constructor(public id: number) {}
@@ -21,6 +17,11 @@ export namespace CenterActions {
 
   export class countDeletes {
     static readonly type = '[Center] Count Deletes';
+  }
+
+  export class Filters<T> {
+    static readonly type = '[Center] Filters Entities';
+    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -45,7 +46,7 @@ export namespace CenterActions {
 
   export class DeleteAll {
     static readonly type = '[Center] Delete All';
-    constructor(public payload: Center[], public del: boolean) {}
+    constructor(public payload: Center[], public del: boolean, public active: boolean) {}
   }
 
   export class RestoreAll {
@@ -61,5 +62,17 @@ export namespace CenterActions {
   export class ToggleAllItems {
     static readonly type = '[Center] Toggle All';
     constructor(public selected: boolean) {}
+  }
+
+  export class ClearItemSelection {
+    static readonly type = '[Center] Clear Selection';
+  }
+
+  export class clearEntity {
+    static readonly type = '[Center] Clear entity';
+  }
+
+  export class clearAll {
+    static readonly type = '[Center] Clear All';
   }
 }

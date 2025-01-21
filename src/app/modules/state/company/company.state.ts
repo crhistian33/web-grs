@@ -29,6 +29,11 @@ export class CompanyState extends BaseState<Company> {
   }
 
   @Selector()
+  static getEntity(state: CompanyStateModel): Company | null {
+    return state.selectedEntity;
+  }
+
+  @Selector()
   static getTrasheds(state: CompanyStateModel): Company[] {
     return state.trashedItems;
   }
@@ -69,17 +74,14 @@ export class CompanyState extends BaseState<Company> {
     return this.getOne(ctx, id, CompanyActions.GetById.type);
   }
 
-  @Action(CompanyActions.GetAllFilter)
-  getAllFilter(
-    ctx: StateContext<CompanyStateModel>,
-    { searchTerm, columns }: CompanyActions.GetAllFilter<Company>
-  ) {
-    return this.getItemsFilter(ctx, searchTerm, columns);
-  }
-
   @Action(CompanyActions.countDeletes)
   countTrasheds(ctx: StateContext<CompanyStateModel>) {
     return this.countItemsTrashed(ctx);
+  }
+
+  @Action(CompanyActions.Filters)
+  Filters(ctx: StateContext<CompanyStateModel>, { payload, columns }: CompanyActions.Filters<Company>) {
+    return super.filtersItems(ctx, CompanyActions.Filters.type, payload, columns);
   }
 
   @Action(CompanyActions.Create)
@@ -117,12 +119,13 @@ export class CompanyState extends BaseState<Company> {
   @Action(CompanyActions.DeleteAll)
   deleteAll(
     ctx: StateContext<CompanyStateModel>,
-    { payload, del }: CompanyActions.DeleteAll
+    { payload, del, active }: CompanyActions.DeleteAll
   ) {
     return this.deleteAllItem(
       ctx,
       payload,
       del,
+      active,
       CompanyActions.DeleteAll.type
     );
   }
@@ -149,5 +152,20 @@ export class CompanyState extends BaseState<Company> {
     { selected }: CompanyActions.ToggleAllItems
   ) {
     return this.toggleAllItem(ctx, selected);
+  }
+
+  @Action(CompanyActions.clearEntity)
+  clearItem(ctx: StateContext<CompanyStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(CompanyActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<CompanyStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(CompanyActions.clearAll)
+  clearAll(ctx: StateContext<CompanyStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

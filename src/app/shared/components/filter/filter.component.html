@@ -6,13 +6,17 @@
     </div>
     <ng-icon name="heroChevronDownSolid" class="scale-75 transition-transform duration-300" [class.rotate-180]="isShown"></ng-icon>
   </div>
-  <div [@fadeInOut]="isShown ? 'active' : 'void'">
+  <div *ngIf="isShown" [@fadeInOut]="isShown ? 'active' : 'void'">
     <form [formGroup]="filterForm">
       <div class="flex flex-wrap px-4 py-2">
         <div class="flex flex-1 items-center">
           <div class="flex flex-col flex-grow">
             <div class="flex flex-wrap">
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.company">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-3 top-3 relative" *ngIf="config.search">
+                <input type="text" class="border border-gray-300 p-2 rounded w-full" formControlName="searchTerm" (input)="onSearch($event)">
+                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Búsqueda</label>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3 " *ngIf="config.company">
                 <ng-select
                   [items]="companies$ | async"
                   [clearable]="true"
@@ -32,7 +36,7 @@
                   </ng-template>
                 </ng-select>
               </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.customer">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.customer">
                 <ng-select
                   [items]="filteredCustomers$ | async"
                   [clearable]="true"
@@ -52,7 +56,7 @@
                   </ng-template>
                 </ng-select>
               </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.unit">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.unit">
                 <ng-select
                   [items]="filteredUnits$ | async"
                   [clearable]="true"
@@ -72,7 +76,7 @@
                   </ng-template>
                 </ng-select>
               </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.shift">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.shift">
                 <ng-select
                   [items]="filteredShifts$ | async"
                   [clearable]="true"
@@ -91,7 +95,7 @@
                   </ng-template>
                 </ng-select>
               </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.typeworker">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.typeworker">
                 <ng-select
                   [items]="typeworkers$ | async"
                   [clearable]="true"
@@ -110,11 +114,11 @@
                   </ng-template>
                 </ng-select>
               </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.fromDate">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.fromDate">
                 <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa">
                 <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha hasta</label>
               </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 mb-1" *ngIf="config.toDate">
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.toDate">
                 <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa">
                 <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha desde</label>
               </div>

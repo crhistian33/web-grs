@@ -5,6 +5,8 @@ import { WorkerService } from '@services/worker.service';
 import { BaseState } from '@shared/state/base.state';
 import { WorkerActions } from './worker.action';
 import { SetLoading } from '@shared/state/loading/loading.actions';
+import { tap } from 'rxjs';
+import { BaseActions } from '@shared/state/base.actions';
 
 @State<WorkerStateModel>({
   name: 'worker',
@@ -27,6 +29,11 @@ export class WorkerState extends BaseState<Worker> {
   @Selector()
   static getItems(state: WorkerStateModel): Worker[] {
     return state.filteredItems;
+  }
+
+  @Selector()
+  static getEntity(state: WorkerStateModel): Worker | null {
+    return state.selectedEntity;
   }
 
   @Selector()
@@ -64,9 +71,22 @@ export class WorkerState extends BaseState<Worker> {
     return this.getOne(ctx, id, WorkerActions.GetById.type)
   }
 
-  @Action(WorkerActions.GetAllFilter)
-  getAllFilter(ctx: StateContext<WorkerStateModel>, { searchTerm, columns }: WorkerActions.GetAllFilter<Worker>) {
-    return this.getItemsFilter(ctx, searchTerm, columns)
+  @Action(WorkerActions.GetAssignsId)
+  getAssigns(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.GetAssignsId) {
+    ctx.dispatch(new SetLoading(WorkerActions.GetAssignsId.type, true));
+    return this.workerService.getAssignsId(id).pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({ entities: response.data, filteredItems: response.data })
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(WorkerActions.GetAssignsId.type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(WorkerActions.GetAssignsId.type, false));
+        }
+      })
+    );
   }
 
   @Action(WorkerActions.countDeletes)
@@ -95,8 +115,8 @@ export class WorkerState extends BaseState<Worker> {
   }
 
   @Action(WorkerActions.DeleteAll)
-  deleteAll(ctx: StateContext<WorkerStateModel>, { payload, del }: WorkerActions.DeleteAll) {
-    return this.deleteAllItem(ctx, payload, del, WorkerActions.DeleteAll.type)
+  deleteAll(ctx: StateContext<WorkerStateModel>, { payload, del, active }: WorkerActions.DeleteAll) {
+    return this.deleteAllItem(ctx, payload, del, active, WorkerActions.DeleteAll.type)
   }
 
   @Action(WorkerActions.RestoreAll)
@@ -114,16 +134,65 @@ export class WorkerState extends BaseState<Worker> {
     return this.toggleAllItem(ctx, selected)
   }
 
-  @Action(WorkerActions.DropFilter)
-  dropFilter(ctx: StateContext<WorkerStateModel>, { payload }: WorkerActions.DropFilter) {
-    ctx.dispatch(new SetLoading(WorkerActions.DropFilter.type, true));
-    const state = ctx.getState();
-    const filtered = state.entities.filter(item => {
-      return (
-        (!payload.typeworkerId || item.typeworker.id === payload.typeworkerId)
-      )
-    })
-    ctx.patchState({ filteredItems: filtered });
-    ctx.dispatch(new SetLoading(WorkerActions.DropFilter.type, false));
+  @Action(WorkerActions.Filters)
+  Filters(ctx: StateContext<WorkerStateModel>, { payload, columns }: WorkerActions.Filters<Worker>) {
+    return super.filtersItems(ctx, WorkerActions.Filters.type, payload, columns);
+  }
+
+  @Action(WorkerActions.GetUnassignment)
+  getUnassignments(ctx: StateContext<WorkerStateModel>) {
+    ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, true));
+    return this.workerService.getUnassignments().pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({
+            entities: response.data,
+            filteredItems: response.data,
+          })
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, false));
+        }
+      })
+    )
+  }
+
+  @Action(WorkerActions.GetTitulars)
+  getTitulars(ctx: StateContext<WorkerStateModel>) {
+    ctx.dispatch(new SetLoading(WorkerActions.GetTitulars.type, true));
+    return this.workerService.getTitulars().pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({
+            entities: response.data,
+            filteredItems: response.data,
+          })
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(WorkerActions.GetTitulars.type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(WorkerActions.GetTitulars.type, false));
+        }
+      })
+    )
+  }
+
+  @Action(WorkerActions.clearEntity)
+  clearItem(ctx: StateContext<WorkerStateModel>) {
+    return this.clearEntity(ctx);
+  }
+
+  @Action(WorkerActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<WorkerStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
+
+  @Action(WorkerActions.clearAll)
+  clearAll(ctx: StateContext<WorkerStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

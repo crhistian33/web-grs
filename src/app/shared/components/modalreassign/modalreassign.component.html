@@ -21,13 +21,13 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <tr class="bg-gray-100">
               <td class="px-4 py-1 whitespace-nowrap">
-                <span class="text-lg font-medium text-gray-900 uppercase">{{ workerReassign.name }}</span>
+                <span class="text-lg font-medium text-gray-900 uppercase">{{ workerReassign.worker.name }}</span>
               </td>
               <td class="px-4 py-1 whitespace-nowrap">
-                <span class="font-medium text-gray-900">{{ workerReassign.assignments[0].unitshift.unit.name }}</span>
+                <span class="font-medium text-gray-900">{{ workerReassign.assignment.unitshift.unit.name }}</span>
               </td>
               <td class="px-4 py-1 whitespace-nowrap">
-                <span class="font-medium text-gray-900">{{ workerReassign.assignments[0].unitshift.shift.name }}</span>
+                <span class="font-medium text-gray-900">{{ workerReassign.assignment.unitshift.shift.name }}</span>
               </td>
               <!-- <td class="px-6 py-4 whitespace-nowrap">
                 <span class="text-sm text-gray-900">{{ workerReassign.dni }}</span>
@@ -43,9 +43,9 @@
           <select
             name="unit-shift"
             class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
-            formControlName="unit_shift_id">
+            formControlName="assignment_id">
             <option value="">Seleccionar unidad por turno</option>
-            <option [value]="item.id" *ngFor="let item of unitshiftsActive$ | async">{{ item.name }}</option>
+            <option [value]="item.assignments[0].id" *ngFor="let item of unitshiftsActive$ | async">{{ item.name }}</option>
           </select>
           <div *ngIf="reassignForm.get('unit_shift_id')?.touched && reassignForm.get('unit_shift_id')?.invalid" class="text-[#D81E0B] text-sm mt-1">
             Seleccione la unidad turno

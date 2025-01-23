@@ -32,6 +32,11 @@ export class UnitshiftState extends BaseState<UnitShift> {
     return state.filteredItems;
   }
 
+  @Selector()
+  static getAssigns(state: UnitshiftStateModel) {
+    return state.filteredItems.filter(item => item.assignments.some(assign => assign.state));
+  }
+
   @Action(UnitShiftActions.GetAll)
   getAll(ctx: StateContext<UnitshiftStateModel>) {
     return this.getItems(ctx, UnitShiftActions.GetAll.type)

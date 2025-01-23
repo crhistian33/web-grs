@@ -13,6 +13,7 @@ export class ActionsComponent {
   @Output() searchList = new EventEmitter<string>();
   @Output() deleteAll = new EventEmitter<void>();
   @Output() restoreAll = new EventEmitter<void>();
+  @Output() reassignAll = new EventEmitter<void>();
   @Input() hasSelectedItem: boolean = false;
   @Input() page!: string;
 
@@ -27,5 +28,9 @@ export class ActionsComponent {
 
   onDeleteAll() {
     this.deleteAll.emit();
+  }
+
+  onReassignAll() {
+    this.reassignAll.emit();
   }
 }

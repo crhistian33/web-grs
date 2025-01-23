@@ -51,14 +51,14 @@
               {{ startIndex * totalItems + (i + 1) }}
               }
               @else {
-              {{ item[column.key] | cellValue:column.type }}
+              {{ item[column.key] | cellValue:column.type:column.key.toString() }}
               }
             </div>
           </td>
           }
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" *ngIf="!hiddenActions">
             <div class="flex items-center justify-center">
-              <button class="ms-2" (click)="onReassign(item)" *ngIf="page === 'reassign'">
+              <button class="ms-2" (click)="onReassign(item)" *ngIf="page === 'reasigna'">
                 <ng-icon name="heroClipboardDocumentCheckSolid"
                   class="text-gray_dark_600 hover:text-orange-600 transition-colors"></ng-icon>
               </button>

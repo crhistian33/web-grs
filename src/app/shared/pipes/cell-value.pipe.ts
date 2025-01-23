@@ -10,12 +10,14 @@ export class CellValuePipe implements PipeTransform {
 
   private datePipe = inject(DatePipe);
 
-  transform(value: any, type?: string): string {
+  transform(value: any, type?: string, key?: string): string {
     if (value === null || value === undefined) return '';
 
     switch(type) {
       case 'relation-name':
         return this.getRelationName(value);
+      case 'relation-dni':
+        return this.getRelationDni(value);
       case 'relation-name-multi':
         return this.getRelationNameMulti(value);
       case 'date':
@@ -37,7 +39,14 @@ export class CellValuePipe implements PipeTransform {
 
   private getRelationName(value: any): string {
     if (value && typeof value === 'object' && 'name' in value) {
-      return (value as RelationType).name;
+      return (value as RelationType)['name'];
+    }
+    return '';
+  }
+
+  private getRelationDni(value: any): string {
+    if (value && typeof value === 'object' && 'name' in value) {
+      return (value as RelationType)['dni'];
     }
     return '';
   }

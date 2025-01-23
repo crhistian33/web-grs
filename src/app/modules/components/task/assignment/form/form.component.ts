@@ -88,7 +88,6 @@ export class FormComponent {
   }
 
   onSubmitted(event: any) {
-    console.log('DATAAAA', event.data);
     const verifiedAction = this.id
       ? new VerifiedAction.IfAssign(event.data.unit_shift_id, this.id)
       : new VerifiedAction.IfAssign(event.data.unit_shift_id)

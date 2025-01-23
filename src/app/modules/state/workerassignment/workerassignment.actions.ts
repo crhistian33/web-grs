@@ -21,6 +21,16 @@ export namespace WorkerAssignmentActions {
     constructor(public id: number, public payload: Partial<WorkerAssignment>) {}
   }
 
+  export class Delete {
+    static readonly type = '[WorkerAssignment] Delete';
+    constructor(public id: number, public del: boolean) {}
+  }
+
+  export class DeleteAll {
+    static readonly type = '[WorkerAssignment] Delete All';
+    constructor(public payload: WorkerAssignment[], public del: boolean, public active: boolean) {}
+  }
+
   export class ToggleItemSelection {
     static readonly type = '[WorkerAssignment] Toggle Selection';
     constructor(public id: number) {}

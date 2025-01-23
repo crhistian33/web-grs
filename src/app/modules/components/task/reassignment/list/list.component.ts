@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Assignment } from '@models/assignment.model';
-import { Worker } from '@models/worker.model';
 import { WorkerAssignment } from '@models/workerassignment.model';
 import { Store } from '@ngxs/store';
 import { ActionsComponent } from '@shared/components/actions/actions.component';
@@ -17,9 +16,7 @@ import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { AssignmentActions } from '@state/assignment/assignment.actions';
-import { AssignmentState } from '@state/assignment/assignment.state';
 import { WorkerActions } from '@state/worker/worker.action';
-import { WorkerState } from '@state/worker/worker.state';
 import { WorkerAssignmentActions } from '@state/workerassignment/workerassignment.actions';
 import { WorkerassignmentState } from '@state/workerassignment/workerassignment.state';
 import { Observable, Subject, take } from 'rxjs';
@@ -48,7 +45,7 @@ export class ListComponent {
   readonly columns: DataListColumn<WorkerAssignment>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.REASSIGNMENT);
 
   isOpen: boolean = false;
-  workerReassign!: Worker;
+  workerReassign!: WorkerAssignment;
   assignments: Assignment[] = [];
   filterAssignments: Assignment[] = [];
 
@@ -59,7 +56,6 @@ export class ListComponent {
 
   ngOnInit() {
     this.store.dispatch(new WorkerAssignmentActions.GetAll);
-    //this.store.dispatch(new WorkerActions.GetAllReassigns);
   }
 
   onToggleItem(id: number) {
@@ -74,71 +70,75 @@ export class ListComponent {
     this.store.dispatch(new WorkerAssignmentActions.Filters(filter));
   }
 
-  // onDelete(id: number) {
-  //   this.sweetalertService.confirmDelete(
-  //     TITLES.ASSIGNMENT,
-  //     MESSAGES.CONFIRM_DELETES,
-  //     () => {
-  //       this.handleConfirmDelete(id, true);
-  //     }
-  //   );
-  // }
+  onDelete(id: number) {
+    this.sweetalertService.confirmDelete(
+      TITLES.ASSIGNMENT,
+      MESSAGES.CONFIRM_DELETE,
+      () => {
+        this.handleConfirmDelete(id, true);
+      }
+    );
+  }
 
-  // handleConfirmDelete(id: number, del: boolean) {
-  //   this.store.dispatch(new AssignmentActions.Delete(id, del)).subscribe({
-  //     next: (response: any) => {
-  //       this.sweetalertService.confirmSuccess(
-  //         response.assignment.result.title,
-  //         response.assignment.result.message
-  //       );
-  //     },
-  //     error: (error) => {
-  //       const errors: string[] = Array.isArray(error.error.message)
-  //         ? error.error.message
-  //         : [error.error.message];
-  //       this.notificationService.show(errors, 'error');
-  //     },
-  //   });
-  // }
+  handleConfirmDelete(id: number, del: boolean) {
+    this.store.dispatch(new WorkerAssignmentActions.Delete(id, del)).subscribe({
+      next: (response: any) => {
+        this.sweetalertService.confirmSuccess(
+          response.workerassignment.result.title,
+          response.workerassignment.result.message
+        );
+      },
+      error: (error) => {
+        const errors: string[] = Array.isArray(error.error.message)
+          ? error.error.message
+          : [error.error.message];
+        this.notificationService.show(errors, 'error');
+      },
+    });
+  }
 
-  // onDeleteAll() {
-  //   this.sweetalertService.confirmDelete(TITLES.ASSIGNMENTS, MESSAGES.CONFIRM_DELETES, () => {
-  //     this.handleConfirmDeleteAll(true)
-  //   })
-  // }
+  onDeleteAll() {
+    this.sweetalertService.confirmDelete(TITLES.ASSIGNMENTS, MESSAGES.CONFIRM_DELETES, () => {
+      this.handleConfirmDeleteAll(true)
+    })
+  }
 
-  // handleConfirmDeleteAll(del: boolean) {
-  //   this.selectedItems$
-  //   .pipe(take(1))
-  //   .subscribe(data => {
-  //     this.store.dispatch(new WorkerActions.DeleteAll(data, del, true))
-  //     .pipe(take(1))
-  //     .subscribe({
-  //       next: (response: any)=> {
-  //         this.sweetalertService.confirmSuccess(
-  //           response.assignment.result.title,
-  //           response.assignment.result.message
-  //         )
-  //       },
-  //       error: (error) => {
-  //         const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-  //         this.notificationService.show(errors, "error");
-  //       }
-  //     })
-  //   })
-  // }
+  handleConfirmDeleteAll(del: boolean) {
+    this.selectedItems$
+    .pipe(take(1))
+    .subscribe(data => {
+      this.store.dispatch(new WorkerAssignmentActions.DeleteAll(data, del, true))
+      .pipe(take(1))
+      .subscribe({
+        next: (response: any)=> {
+          this.sweetalertService.confirmSuccess(
+            response.workerassignment.result.title,
+            response.workerassignment.result.message
+          )
+        },
+        error: (error) => {
+          const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
+          this.notificationService.show(errors, "error");
+        }
+      })
+    })
+  }
 
   onReassign(assign: any) {
     this.workerReassign = assign;
     this.isOpen = true;
   }
 
+  // onReassignAll() {
+
+  // }
+
   handleClose() {
     this.isOpen = false;
   }
 
   handleUpdate() {
-    this.store.dispatch(new WorkerActions.GetAllReassigns);
+    this.store.dispatch(new WorkerAssignmentActions.GetAll);
   }
 
   ngOnDestroy() {

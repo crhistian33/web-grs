@@ -10,6 +10,6 @@ import { BaseCrudService } from '@shared/services/base-crud.service';
 export class WorkerassignmentService extends BaseCrudService<WorkerAssignment> {
 
   constructor(private http: HttpClient) {
-    super(http, `${environment.API_URL}/workerassignments`);
+    super(http, `${environment.API_URL}/worker_assignments`);
   }
 }

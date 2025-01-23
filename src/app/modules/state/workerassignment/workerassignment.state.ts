@@ -53,6 +53,21 @@ export class WorkerassignmentState extends BaseState<WorkerAssignment> {
     return this.getItems(ctx, WorkerAssignmentActions.GetAll.type)
   }
 
+  @Action(WorkerAssignmentActions.Update)
+  update(ctx: StateContext<WorkerassignmentStateModel>, { id, payload }: WorkerAssignmentActions.Update) {
+    return this.updateItem(ctx, payload, id, WorkerAssignmentActions.Update.type)
+  }
+
+  @Action(WorkerAssignmentActions.Delete)
+  delete(ctx: StateContext<WorkerassignmentStateModel>, { id, del }: WorkerAssignmentActions.Delete) {
+    return this.deleteItem(ctx, id, del, WorkerAssignmentActions.Delete.type)
+  }
+
+  @Action(WorkerAssignmentActions.DeleteAll)
+  deleteAll(ctx: StateContext<WorkerassignmentStateModel>, { payload, del, active }: WorkerAssignmentActions.DeleteAll) {
+    return this.deleteAllItem(ctx, payload, del, active, WorkerAssignmentActions.DeleteAll.type)
+  }
+
   @Action(WorkerAssignmentActions.ToggleItemSelection)
   toggleSelection(ctx: StateContext<WorkerassignmentStateModel>, { id }: WorkerAssignmentActions.ToggleItemSelection) {
     return this.toggleSelectionItem(ctx, id)

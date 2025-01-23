@@ -25,7 +25,7 @@ export class HeaderDatalistService {
   private headWorkerAssign: DataListColumn<WorkerAssignment>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false, internal: false },
     { key: 'worker', label: 'Nombres y apellidos', type: 'relation-name', filtered: true, internal: true },
-    { key: 'worker', label: 'DNI', type: 'relation-name', filtered: true, internal: true },
+    { key: 'worker', label: 'DNI', type: 'relation-dni', filtered: true, internal: true },
     { key: 'assignment', label: 'Unidad asignada', type: 'relations-unit', filtered: true, internal: false },
     { key: 'assignment', label: 'Turno asignado', type: 'relations-shift', filtered: true, internal: false },
   ];

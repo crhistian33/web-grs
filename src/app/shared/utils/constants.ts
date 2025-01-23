@@ -56,7 +56,7 @@ export const TYPES = {
   LIST: 'lista',
   RECYCLE: 'papelera',
   NONE: 'none',
-  REASSIGN: 'reassign',
+  REASSIGN: 'reasigna',
 }
 
 export const MESSAGES = {

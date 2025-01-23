@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { UnitShift } from '@models/unitshift.model';
 import { Worker } from '@models/worker.model';
+import { WorkerAssignment } from '@models/workerassignment.model';
 import { NgIconsModule } from '@ng-icons/core';
 import { Store } from '@ngxs/store';
 import { NotificationService } from '@shared/services/notification.service';
@@ -9,6 +11,9 @@ import { SweetalertService } from '@shared/services/sweetalert.service';
 import { AssignmentActions } from '@state/assignment/assignment.actions';
 import { AssignmentState } from '@state/assignment/assignment.state';
 import { UnitActions } from '@state/unit/unit.actions';
+import { UnitShiftActions } from '@state/unitshift/unitshift.actions';
+import { UnitshiftState } from '@state/unitshift/unitshift.state';
+import { WorkerAssignmentActions } from '@state/workerassignment/workerassignment.actions';
 import { Observable, Subject, take, takeUntil } from 'rxjs';
 
 @Component({
@@ -27,41 +32,37 @@ export class ModalreassignComponent implements OnInit {
   @Output() closeEvent = new EventEmitter<void>();
   @Output() updateEvent = new EventEmitter<void>();
   @Input() isOpen: boolean = false;
-  @Input() workerReassign!: Worker;
+  @Input() workerReassign!: WorkerAssignment;
 
   unitshifts: any;
   reassignForm: FormGroup = this.fb.group({
-    unit_shift_id: ['', Validators.required],
-    user_id: [1],
+    'worker_id': ['', Validators.required],
+    'assignment_id': ['', Validators.required],
   });
 
-  unitshiftsActive$: Observable<any> = this.store.select(AssignmentState.getUnitShiftsActive);
+  unitshiftsActive$: Observable<UnitShift[]> = this.store.select(UnitshiftState.getAssigns);
 
   ngOnInit(): void {
     this.store.dispatch(new AssignmentActions.GetAll);
-    //this.store.dispatch(new UnitActions.GetAllToShift)
-    // .pipe(take(1))
-    // .subscribe((data: any)=> {
-    //   this.unitshifts = data.unit.entities;
-    // })
+    this.store.dispatch(new UnitShiftActions.GetAll);
   }
 
   onReassign(item: any) {
-    console.log('ITEM', item)
+    this.reassignForm.get('worker_id')?.patchValue(item.worker.id);
     if(this.reassignForm.valid) {
-      const assignment = item.assignments[0];
-      const old_unitshift = parseInt(assignment.unitshift.id);
-      const unitshift = parseInt(this.reassignForm.get('unit_shift_id')?.value);
-      const validated = old_unitshift === unitshift ? false : true;
+      const id = item.id;
+      const current_id = parseInt(item.assignment.id);
+      const assignment_id = parseInt(this.reassignForm.get('assignment_id')?.value);
+      const validated = current_id === assignment_id ? false : true;
 
       if(!validated) {
         this.notificationService.show(['Está intentando reasignar a la misma unidad turno.'], 'error');
       } else {
-        this.store.dispatch(new AssignmentActions.Update(assignment.id, this.reassignForm.getRawValue()))
+        this.store.dispatch(new WorkerAssignmentActions.Update(id, this.reassignForm.getRawValue()))
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: any) => {
-            const result = response.assignment.result;
+            const result = response.workerassignment.result;
             this.sweetAlertService.confirmSuccess(
               result.title,
               result.message,
@@ -78,12 +79,20 @@ export class ModalreassignComponent implements OnInit {
               5000
             );
           },
+          complete: () => {
+            this.resetForm();
+          }
         });
       }
     } else {
       this.reassignForm.markAllAsTouched();
     }
 
+  }
+
+  private resetForm() {
+    this.reassignForm.reset();
+    this.reassignForm.get('assignment_id')?.setValue('');
   }
 
   closeModal() {

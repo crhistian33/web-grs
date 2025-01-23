@@ -4,6 +4,8 @@ import { Assignment, AssignmentStateModel } from '@models/assignment.model';
 import { AssignmentActions } from './assignment.actions';
 import { BaseState } from '@shared/state/base.state';
 import { AssignmentService } from '@services/assignment.service';
+import { SetLoading } from '@shared/state/loading/loading.actions';
+import { tap } from 'rxjs';
 
 @State<AssignmentStateModel>({
   name: 'assignment',
@@ -38,6 +40,13 @@ export class AssignmentState extends BaseState<Assignment> {
   }
 
   @Selector()
+  static getUnitShiftsActive(state: AssignmentStateModel) {
+    return state.entities
+      .filter(assignment => assignment.state)
+      .map(assignment => assignment.unitshift)
+  }
+
+  @Selector()
   static areAllSelected(state: AssignmentStateModel) {
     return (
       state.entities.length > 0 &&
@@ -53,6 +62,28 @@ export class AssignmentState extends BaseState<Assignment> {
   @Action(AssignmentActions.GetAll)
   getAll(ctx: StateContext<AssignmentStateModel>) {
     return this.getItems(ctx, AssignmentActions.GetAll.type);
+  }
+
+  @Action(AssignmentActions.GetAllReassigns)
+  protected getAllReassigns(ctx: StateContext<AssignmentStateModel>) {
+    ctx.dispatch(new SetLoading(AssignmentActions.GetAllReassigns.type, true));
+    return this.assignmentService.getReassignments().pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({
+            entities: response.data,
+            filteredItems: response.data,
+          })
+        },
+        error: (error) => {
+          ctx.dispatch(new SetLoading(AssignmentActions.GetAllReassigns.type, false));
+          // const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(AssignmentActions.GetAllReassigns.type, false));
+        }
+      })
+    );
   }
 
   @Action(AssignmentActions.GetById)

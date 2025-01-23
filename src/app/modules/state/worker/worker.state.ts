@@ -6,7 +6,6 @@ import { BaseState } from '@shared/state/base.state';
 import { WorkerActions } from './worker.action';
 import { SetLoading } from '@shared/state/loading/loading.actions';
 import { tap } from 'rxjs';
-import { BaseActions } from '@shared/state/base.actions';
 
 @State<WorkerStateModel>({
   name: 'worker',
@@ -88,6 +87,28 @@ export class WorkerState extends BaseState<Worker> {
       })
     );
   }
+
+  // @Action(WorkerActions.GetAllReassigns)
+  // protected getAllReassigns(ctx: StateContext<WorkerStateModel>) {
+  //   ctx.dispatch(new SetLoading(WorkerActions.GetAllReassigns.type, true));
+  //   return this.workerService.getReassignments().pipe(
+  //     tap({
+  //       next: (response: any) => {
+  //         ctx.patchState({
+  //           entities: response.data,
+  //           filteredItems: response.data,
+  //         })
+  //       },
+  //       error: (error) => {
+  //         ctx.dispatch(new SetLoading(WorkerActions.GetAllReassigns.type, false));
+  //         // const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
+  //       },
+  //       finalize: () => {
+  //         ctx.dispatch(new SetLoading(WorkerActions.GetAllReassigns.type, false));
+  //       }
+  //     })
+  //   );
+  // }
 
   @Action(WorkerActions.countDeletes)
   countTrasheds(ctx: StateContext<WorkerStateModel>) {

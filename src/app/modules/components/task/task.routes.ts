@@ -11,4 +11,9 @@ export const routes: Routes = [
     loadChildren: () => import('./assignment/assignment.routes').then(m => m.routes),
     data: { breadcrumb: 'asignaciones' }
   },
+  {
+    path:'reasignaciones',
+    loadChildren: () => import('./reassignment/reassignment.routes').then(m => m.routes),
+    data: { breadcrumb: 'reasignaciones' }
+  },
 ];

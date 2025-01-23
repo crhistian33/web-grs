@@ -6,6 +6,10 @@ export namespace WorkerActions {
     static readonly type = '[Worker] Get All';
   }
 
+  export class GetAllReassigns {
+    static readonly type = '[Worker] Get All Reassigns';
+  }
+
   export class GetDeletes {
     static readonly type = '[Worker] Get All Deletes';
   }

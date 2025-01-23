@@ -1,0 +1,19 @@
+<app-title-page [title]="title" [page]="page" />
+<app-filter [config]="config" (filters)="filtersData($event)" />
+<div class="bg-white p-4 my-4 rounded shadow relative z-auto">
+  <app-actions
+    [page]="page"
+    [hasSelectedItem]="(hasSelectedItems$ | async) ?? false">
+  </app-actions>
+  <!-- (deleteAll)="onDeleteAll()" -->
+  <app-data-list
+    [data]="workerassignments$ | async"
+    [columns]="columns"
+    [page]="page"
+    [areAllSelected]="(areAllSelected$ | async) ?? false"
+    (toggleItem)="onToggleItem($event)"
+    (toggleAll)="onToggleAll($event)"
+    (assign)="onReassign($event)"/>
+</div>
+<!-- (deleteItem)="onDelete($event)" -->
+<app-modalreassign [isOpen]="isOpen" [workerReassign]="workerReassign" (closeEvent)="handleClose()" (updateEvent)="handleUpdate()"></app-modalreassign>

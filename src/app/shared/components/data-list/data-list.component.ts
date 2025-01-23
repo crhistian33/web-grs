@@ -40,6 +40,7 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
   @Output() restoreItem = new EventEmitter<number>();
   @Output() toggleItem = new EventEmitter<number>();
   @Output() toggleAll = new EventEmitter<boolean>();
+  @Output() assign = new EventEmitter<any>();
   @Input() data: T[] | null = [];
   @Input() columns: DataListColumn<T>[] = [];
   @Input() areAllSelected: boolean = false;
@@ -122,6 +123,11 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
 
   onRestore(id: number) {
     this.restoreItem.emit(id);
+  }
+
+  onReassign(item: any) {
+    //const assign_id = item.assignments.map((element: any) => element.id);
+    this.assign.emit(item);
   }
 
   changePage(page: number) {

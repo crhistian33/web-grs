@@ -20,6 +20,14 @@ export class CellValuePipe implements PipeTransform {
         return this.getRelationNameMulti(value);
       case 'date':
         return this.datePipe.transform(value, 'dd/MM/yyyy') || '';
+      case 'relation-unit':
+        return this.getUnit(value);
+      case 'relation-shift':
+        return this.getShift(value);
+      case 'relations-unit':
+        return this.getUnits(value);
+      case 'relations-shift':
+        return this.getShifts(value);
       case 'state':
         return value ? 'Activo' : 'Inactivo';
       default:
@@ -37,5 +45,25 @@ export class CellValuePipe implements PipeTransform {
   private getRelationNameMulti(values: any): string {
     const fields = values.map((item: any) => item.name);
     return fields.join(', ');
+  }
+
+  private getUnit(value: any) {
+    const unit = value.unit.name;
+    return unit;
+  }
+
+  private getShift(value: any) {
+    const shift = value.shift.name;
+    return shift;
+  }
+
+  private getUnits(value: any) {
+    const unit = value.unitshift.unit.name;
+    return unit;
+  }
+
+  private getShifts(value: any) {
+    const shift = value.unitshift.shift.name;
+    return shift;
   }
 }

@@ -18,6 +18,10 @@ export class WorkerService extends BaseCrudService<Worker> {
     return this.http.get<Worker[]>(`${environment.API_URL}/workers/unassigneds`);
   }
 
+  // getReassignments(): Observable<Worker[]> {
+  //   return this.http.get<Worker[]>(`${environment.API_URL}/workers/reassigns`);
+  // }
+
   getTitulars(): Observable<Worker[]> {
     return this.http.get<Worker[]>(`${environment.API_URL}/workers/titulars`);
   }

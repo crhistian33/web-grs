@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { State, StateContext } from '@ngxs/store';
+import { StateContext } from '@ngxs/store';
 import { BaseStateModel } from '@shared/models/base-state.model';
 import { BaseModel } from '@shared/models/base.model';
 import { BaseCrudService } from '@shared/services/base-crud.service';
@@ -114,12 +114,23 @@ export class BaseState<T extends BaseModel> {
     const state = ctx.getState();
     const { centerId, companyId, customerId, shiftId, typeworkerId, unitId, searchTerm } = payload;
     const filtered = state.entities.filter((item: any) => {
+      console.log('ITEMMMMMM', item, companyId, item.assignment.unitshift.unit.customer.company.id);
       const matchDrop =
         (!typeworkerId || item.typeworker.id === typeworkerId) &&
-        (!companyId || (item.unit ? item.unit.customer.company.id === companyId : item.company.id === companyId)) &&
-        (!customerId || item.unit.customer.id === customerId) &&
-        (!unitId || item.unit.id === unitId) &&
-        (!shiftId || item.shift.id === shiftId) &&
+        (!companyId || (item.assignment
+          ? item.assignment.unitshift.unit.customer.company.id === companyId
+          : (item.unitshift ? item.unitshift.unit.customer.company.id === companyId : item.company.id === companyId))) &&
+        (!customerId || (item.assignment
+          ? item.assignment.unitshift.unit.customer.id === customerId
+          : (item.unitshift ? item.unitshift.unit.customer.id === customerId : item.customer.id === customerId))) &&
+        (!unitId || (item.assignment
+          ? item.assignment.unitshift.unit.id === unitId
+          : (item.unitshift ? item.unitshift.unit.id === unitId : item.unit.id === unitId)
+        )) &&
+        (!shiftId || (item.assignment
+          ? item.assignment.unitshift.shift.id === shiftId
+          : (item.unitshift ? item.unitshift.shift.id === shiftId : item.shift.id === shiftId)
+         )) &&
         (!centerId || item.center.id === centerId)
 
       if(!searchTerm)

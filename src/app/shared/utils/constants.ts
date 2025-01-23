@@ -7,6 +7,7 @@ export const PARAMETERS = {
   UNIT: 'unit',
   WORKER: 'worker',
   ASSIGNMENT: 'assignment',
+  REASSIGNMENT: 'reassignment',
 }
 
 export const IDENTIFIES = {
@@ -39,6 +40,7 @@ export const TITLES = {
   WORKERS_REMOVE: 'Trabajadores removidos',
   ASSIGNMENTS: 'Asignaciones',
   ASSIGNMENTS_REMOVE: 'Asignaciones removidas',
+  REASSIGNMENTS: 'Reasignaciones',
   CENTER: 'Centro de costo',
   COMPANY: 'Empresa',
   CUSTOMER: 'Cliente',
@@ -47,12 +49,14 @@ export const TITLES = {
   UNIT: 'Unidad',
   WORKER: 'Trabajador',
   ASSIGNMENT: 'Asignación',
+  REASSIGNMENT: 'Reasignación',
 }
 
 export const TYPES = {
   LIST: 'lista',
   RECYCLE: 'papelera',
   NONE: 'none',
+  REASSIGN: 'reassign',
 }
 
 export const MESSAGES = {

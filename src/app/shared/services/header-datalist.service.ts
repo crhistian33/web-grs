@@ -7,6 +7,7 @@ import { Shift } from '@models/shift.model';
 import { TypeWorker } from '@models/type-worker.model';
 import { Unit } from '@models/unit.model';
 import { Worker } from '@models/worker.model';
+import { WorkerAssignment } from '@models/workerassignment.model';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { PARAMETERS } from '@shared/utils/constants';
 
@@ -20,6 +21,13 @@ export class HeaderDatalistService {
     { key: 'dni', label: 'DNI', type: 'text', filtered: true, internal: true },
     { key: 'birth_date', label: 'Fecha Nac.', type: 'date', filtered: false, internal: false },
     { key: 'typeworker', label: 'Tipo', type: 'relation-name', filtered: false, internal: false },
+  ];
+  private headWorkerAssign: DataListColumn<WorkerAssignment>[] = [
+    { key: 'id', label: 'N°', type: 'number', filtered: false, internal: false },
+    { key: 'worker', label: 'Nombres y apellidos', type: 'relation-name', filtered: true, internal: true },
+    { key: 'worker', label: 'DNI', type: 'relation-name', filtered: true, internal: true },
+    { key: 'assignment', label: 'Unidad asignada', type: 'relations-unit', filtered: true, internal: false },
+    { key: 'assignment', label: 'Turno asignado', type: 'relations-shift', filtered: true, internal: false },
   ];
   private headTypeWorker: DataListColumn<TypeWorker>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false, },
@@ -59,8 +67,8 @@ export class HeaderDatalistService {
   ];
   private headAssignment: DataListColumn<Assignment>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false },
-    { key: 'unit', label: 'Unidad', type: 'relation-name', filtered: false },
-    { key: 'shift', label: 'Turno', type: 'relation-name', filtered: false },
+    { key: 'unitshift', label: 'Unidad', type: 'relation-unit', filtered: false },
+    { key: 'unitshift', label: 'Turno', type: 'relation-shift', filtered: false },
     { key: 'start_date', label: 'Fecha de asignación', type: 'date', filtered: true },
     { key: 'end_date', label: 'Fin de asignación', type: 'date', filtered: true },
     { key: 'state', label: 'Estado', type: 'state', filtered: false },
@@ -71,6 +79,9 @@ export class HeaderDatalistService {
     switch (param) {
       case PARAMETERS.WORKER:
         return this.headWorker;
+        break;
+      case PARAMETERS.REASSIGNMENT:
+        return this.headWorkerAssign;
         break;
       case PARAMETERS.TYPEWORKER:
         return this.headTypeWorker;

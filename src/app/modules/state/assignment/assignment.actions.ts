@@ -6,6 +6,14 @@ export namespace AssignmentActions {
     static readonly type = '[Assignment] Get All';
   }
 
+  export class GetAllReassigns {
+    static readonly type = '[Assignment] Get All Reassigns';
+  }
+
+  export class GetUnitToShift {
+    static readonly type = '[Assignment] Get Unit to Shift';
+  }
+
   export class GetById {
     static readonly type = '[Assignment] Get By Id';
     constructor(public id: number) {}

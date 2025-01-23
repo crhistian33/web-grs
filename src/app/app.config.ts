@@ -7,7 +7,7 @@ import { provideStore } from '@ngxs/store';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
-import { heroArrowLeftOnRectangleSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroDocumentCheckSolid, heroHomeSolid, heroListBulletSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroPencilSquareSolid, heroPlusSolid, heroTrashSolid, heroUserCircleSolid, heroUsersSolid, heroWrenchSolid } from '@ng-icons/heroicons/solid';
+import { heroArrowLeftOnRectangleSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroClipboardDocumentCheckSolid, heroDocumentCheckSolid, heroHomeSolid, heroListBulletSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroPencilSquareSolid, heroPlusSolid, heroTrashSolid, heroUserCircleSolid, heroUsersSolid, heroWrenchSolid, heroXMarkSolid } from '@ng-icons/heroicons/solid';
 
 import { routes } from './app.routes';
 import { environment } from '@environments/environment.development';
@@ -24,6 +24,8 @@ import { FilterState } from '@shared/state/filter/filter.state';
 import { AssignmentState } from '@state/assignment/assignment.state';
 import { CountState } from '@state/count/count.state';
 import { VerifiedState } from '@shared/state/verified/verified.state';
+import { WorkerassignmentState } from '@state/workerassignment/workerassignment.state';
+import { UnitshiftState } from '@state/unitshift/unitshift.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -52,6 +54,8 @@ export const appConfig: ApplicationConfig = {
       ShiftState,
       UnitState,
       AssignmentState,
+      WorkerassignmentState,
+      UnitshiftState,
     ], {
       developmentMode: !environment.production,
       selectorOptions: {
@@ -64,7 +68,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     ReactiveFormsModule,
     provideNgIconsConfig({ size: '1.5em' }),
-    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid })
+    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid, heroClipboardDocumentCheckSolid, heroXMarkSolid })
 
   ]
 };

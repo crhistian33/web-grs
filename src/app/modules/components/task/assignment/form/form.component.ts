@@ -18,6 +18,9 @@ import { WorkerActions } from '@state/worker/worker.action';
 import { WorkerState } from '@state/worker/worker.state';
 import { VerifiedAction } from '@shared/state/verified/verified.actions';
 import { VerifiedState } from '@shared/state/verified/verified.state';
+import { UnitShiftActions } from '@state/unitshift/unitshift.actions';
+import { UnitshiftState } from '@state/unitshift/unitshift.state';
+import { UnitShift } from '@models/unitshift.model';
 
 @Component({
   selector: 'app-form',
@@ -39,7 +42,7 @@ export class FormComponent {
 
   resetForm = false;
 
-  unitshifts$: Observable<any[]> = this.store.select(UnitState.getItems);
+  unitshifts$: Observable<UnitShift[]> = this.store.select(UnitshiftState.getItems);
   workers$: Observable<Worker[]> = this.store.select(WorkerState.getItems);
   selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
   entity$: Observable<Assignment | null> = this.store.select(AssignmentState.getEntity).pipe(filter(Boolean));
@@ -51,7 +54,7 @@ export class FormComponent {
   ];
 
   ngOnInit() {
-    this.store.dispatch(new UnitActions.GetAllToShift);
+    this.store.dispatch(new UnitShiftActions.GetAll);
     if(!this.id) {
       this.store.dispatch(new WorkerActions.GetUnassignment)
     }
@@ -85,6 +88,7 @@ export class FormComponent {
   }
 
   onSubmitted(event: any) {
+    console.log('DATAAAA', event.data);
     const verifiedAction = this.id
       ? new VerifiedAction.IfAssign(event.data.unit_shift_id, this.id)
       : new VerifiedAction.IfAssign(event.data.unit_shift_id)

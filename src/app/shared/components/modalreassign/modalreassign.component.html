@@ -1,0 +1,65 @@
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300" [ngClass]="{ 'opacity-100': isOpen, 'opacity-0 pointer-events-none': !isOpen }">
+  <div class="bg-white rounded-lg shadow-lg w-5/6 md:w-2/3 lg:w-1/2 transform transition-transform duration-300 divide-y divide-gray-200" [ngClass]="{ 'scale-100': isOpen, 'scale-90 opacity-0': !isOpen }" *ngIf="workerReassign">
+    <div class="modal-title flex justify-between items-center px-4 py-2">
+      <h2 class="text-lg font-semibold">REASIGNAR TRABAJADOR</h2>
+      <button (click)="closeModal()">
+        <ng-icon name="heroXMarkSolid"></ng-icon>
+      </button>
+    </div>
+    <div class="modal-content p-4">
+      <form [formGroup]="reassignForm">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray_dark_500 text-white">
+            <tr>
+              <th class="px-4 py-1 text-left text-sm font-medium">Trabajador a reasignar</th>
+              <th class="px-4 py-1 text-left text-sm font-medium">Unidad asignada</th>
+              <th class="px-4 py-1 text-left text-sm font-medium">Turno asignado</th>
+              <!-- <th class="px-6 py-3 text-left text-xs font-medium uppercase">DNI</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase">Fecha de nacimiento</th> -->
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr class="bg-gray-100">
+              <td class="px-4 py-1 whitespace-nowrap">
+                <span class="text-lg font-medium text-gray-900 uppercase">{{ workerReassign.name }}</span>
+              </td>
+              <td class="px-4 py-1 whitespace-nowrap">
+                <span class="font-medium text-gray-900">{{ workerReassign.assignments[0].unitshift.unit.name }}</span>
+              </td>
+              <td class="px-4 py-1 whitespace-nowrap">
+                <span class="font-medium text-gray-900">{{ workerReassign.assignments[0].unitshift.shift.name }}</span>
+              </td>
+              <!-- <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">{{ workerReassign.dni }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">{{ workerReassign.birth_date }}</span>
+              </td> -->
+            </tr>
+          </tbody>
+        </table>
+        <div class="mt-4">
+          <label for="unit-shift" class="block text-sm font-medium text-gray_dark_600 mb-2">Seleccionar unidad por turno a reasignar</label>
+          <select
+            name="unit-shift"
+            class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
+            formControlName="unit_shift_id">
+            <option value="">Seleccionar unidad por turno</option>
+            <option [value]="item.id" *ngFor="let item of unitshiftsActive$ | async">{{ item.name }}</option>
+          </select>
+          <div *ngIf="reassignForm.get('unit_shift_id')?.touched && reassignForm.get('unit_shift_id')?.invalid" class="text-[#D81E0B] text-sm mt-1">
+            Seleccione la unidad turno
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer flex justify-end px-4 py-2">
+      <button class="bg-main text-white px-4 py-2 rounded hover:bg-main_dark transition-colors" (click)="onReassign(workerReassign)">
+        Reasignar
+      </button>
+      <button class="bg-gray_dark_500 text-white px-4 py-2 rounded hover:bg-gray_dark_600 transition-colors ms-2" (click)="closeModal()">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

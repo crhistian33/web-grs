@@ -14,7 +14,7 @@
                 [checked]="areAllSelected" (change)="onToggleAll($event)">
             </div>
           </th>
-          @for (column of columns; track column.key) {
+          @for (column of columns; track $index) {
           <th
             class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors"
             [ngClass]="{'w-1': column.key==='id'}">
@@ -44,7 +44,7 @@
               class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 focus:ring-2 cursor-pointer"
               type="checkbox" [checked]="item.selected" (change)="onToggleItem(item.id)">
           </td>
-          @for (column of columns; track column.key) {
+          @for (column of columns; track $index) {
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm text-gray-900">
               @if(column.key === 'id') {
@@ -58,6 +58,10 @@
           }
           <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" *ngIf="!hiddenActions">
             <div class="flex items-center justify-center">
+              <button class="ms-2" (click)="onReassign(item)" *ngIf="page === 'reassign'">
+                <ng-icon name="heroClipboardDocumentCheckSolid"
+                  class="text-gray_dark_600 hover:text-orange-600 transition-colors"></ng-icon>
+              </button>
               <a [routerLink]="['editar', item.id]" *ngIf="page === 'lista' || page === 'none'">
                 <ng-icon name="heroPencilSquareSolid"
                   class="text-gray_dark_600 hover:text-orange-500 transition-colors"></ng-icon>

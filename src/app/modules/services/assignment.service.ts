@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Assignment } from '@models/assignment.model';
 import { BaseCrudService } from '@shared/services/base-crud.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,5 +15,9 @@ export class AssignmentService extends BaseCrudService<Assignment> {
 
   verfiiedAssign(id: number) {
     return this.http.get(`${environment.API_URL}/assignments/verified/${id}`);
+  }
+
+  getReassignments(): Observable<Assignment[]> {
+    return this.http.get<Assignment[]>(`${environment.API_URL}/assignments/reassignments`);
   }
 }

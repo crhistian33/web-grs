@@ -20,6 +20,21 @@ export class SweetalertService {
     })
   }
 
+  openWarning(title: string, message: string, success?: any) {
+    Swal.fire({
+      title: `${title}`,
+      text: `${message}`,
+      icon: "warning",
+      showConfirmButton: false,
+      timer: 3000,
+      customClass: {
+        title: 'swal-title'
+      },
+    }).then(() => {
+      if(success) success()
+    })
+  }
+
   confirmRemoveOrDelete(model: string, message: string, confirm: any, cancel: any) {
     Swal.fire({
       title: `¿Eliminar ${model}?`,

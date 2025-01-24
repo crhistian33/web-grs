@@ -9,6 +9,7 @@ export interface Unit extends BaseModel {
   name: string;
   center: Center;
   customer: Customer;
+  min_assign: number;
   shifts: Shift[];
 }
 

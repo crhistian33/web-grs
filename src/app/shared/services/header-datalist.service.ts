@@ -22,6 +22,11 @@ export class HeaderDatalistService {
     { key: 'birth_date', label: 'Fecha Nac.', type: 'date', filtered: false, internal: false },
     { key: 'typeworker', label: 'Tipo', type: 'relation-name', filtered: false, internal: false },
   ];
+  private headFormWorker: DataListColumn<Worker>[] = [
+    { key: 'id', label: 'N°', type: 'number'},
+    { key: 'name', label: 'Nombres y apellidos', type: 'text'},
+    { key: 'dni', label: 'DNI', type: 'text'},
+  ];
   private headWorkerAssign: DataListColumn<WorkerAssignment>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false, internal: false },
     { key: 'worker', label: 'Nombres y apellidos', type: 'relation-name', filtered: true, internal: true },
@@ -57,12 +62,17 @@ export class HeaderDatalistService {
     { key: 'name', label: 'Nombre', type: 'text', filtered: true, },
     { key: 'shortName', label: 'Nombre corto', type: 'text', filtered: true, },
   ];
+  private headFormShift: DataListColumn<Shift>[] = [
+    { key: 'id', label: 'N°', type: 'number', filtered: false, },
+    { key: 'name', label: 'Nombre', type: 'text', filtered: true, },
+  ];
   private headUnit: DataListColumn<Unit>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false, },
     { key: 'code', label: 'Código', type: 'text', filtered: true, },
     { key: 'name', label: 'Nombre', type: 'text', filtered: true, },
     { key: 'customer', label: 'Cliente', type: 'relation-name', filtered: false, },
     { key: 'center', label: 'Centro de costo', type: 'relation-name', filtered: true, },
+    { key: 'min_assign', label: '# Trabajadores', type: 'text', filtered: true, },
     { key: 'shifts', label: 'Turnos', type: 'relation-name-multi', filtered: true, },
   ];
   private headAssignment: DataListColumn<Assignment>[] = [
@@ -103,6 +113,20 @@ export class HeaderDatalistService {
         break;
       case PARAMETERS.ASSIGNMENT:
         return this.headAssignment;
+        break;
+      default:
+        return [];
+        break;
+    }
+  }
+
+  getHeaderFormDataList(param: string): DataListColumn<any>[] {
+    switch (param) {
+      case PARAMETERS.WORKER:
+        return this.headFormWorker;
+        break;
+      case PARAMETERS.SHIFT:
+        return this.headFormShift;
         break;
       default:
         return [];

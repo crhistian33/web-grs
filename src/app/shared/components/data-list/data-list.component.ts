@@ -42,7 +42,7 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
   @Output() toggleAll = new EventEmitter<boolean>();
   @Output() assign = new EventEmitter<any>();
   @Input() data: T[] | null = [];
-  @Input() columns: DataListColumn<T>[] = [];
+  @Input() columns: DataListColumn<T>[] | null = [];
   @Input() areAllSelected: boolean = false;
   @Input() nestedColumns?: DataListColumn<N>[];
   @Input() getNestedDataFn?: (item: T) => N[];

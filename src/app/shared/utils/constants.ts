@@ -21,6 +21,7 @@ export const IDENTIFIES = {
   ASSIGNMENT: 'assignment_id',
   UNIT_SHIFT: 'unit_shift_id',
   WORKERS: 'workers',
+  SHIFTS: 'shifts',
 }
 
 export const TITLES = {

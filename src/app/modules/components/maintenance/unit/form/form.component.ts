@@ -3,10 +3,14 @@ import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Center } from '@models/center.model';
 import { Customer } from '@models/customer.model';
+import { Shift } from '@models/shift.model';
 import { Unit } from '@models/unit.model';
+import { Worker } from '@models/worker.model';
 import { Store } from '@ngxs/store';
 import { FormBuilderComponent } from '@shared/components/formbuilder/formbuilder.component';
+import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { SubEntity } from '@shared/models/subentity.model';
+import { HeaderDatalistService } from '@shared/services/header-datalist.service';
 import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { IDENTIFIES, PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
@@ -14,6 +18,8 @@ import { CenterActions } from '@state/center/center.action';
 import { CenterState } from '@state/center/center.state';
 import { CustomerActions } from '@state/customer/customer.action';
 import { CustomerState } from '@state/customer/customer.state';
+import { ShiftActions } from '@state/shift/shift.action';
+import { ShiftState } from '@state/shift/shift.state';
 import { UnitActions } from '@state/unit/unit.actions';
 import { UnitState } from '@state/unit/unit.state';
 import { Observable, Subject, takeUntil } from 'rxjs';
@@ -29,6 +35,7 @@ export class FormComponent {
   private readonly router = inject(Router);
   private readonly sweetAlertService = inject(SweetalertService);
   private readonly notificationService = inject(NotificationService);
+  private readonly headerDataListService = inject(HeaderDatalistService);
   private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
@@ -37,19 +44,23 @@ export class FormComponent {
   readonly module = PARAMETERS.UNIT;
 
   resetForm: boolean = false;
+  readonly columnsShift: DataListColumn<Shift>[] = this.headerDataListService.getHeaderFormDataList(PARAMETERS.SHIFT);
   centers$: Observable<Center[]> = this.store.select(CenterState.getItems);
   customers$: Observable<Customer[]> = this.store.select(CustomerState.getItems);
+  shifts$: Observable<Shift[]> = this.store.select(ShiftState.getItems);
   entity$: Observable<Unit | null> = this.store.select(UnitState.getEntity);
 
-  readonly subentities = [
-    { id: IDENTIFIES.CENTER, data: this.centers$ },
-    { id: IDENTIFIES.CUSTOMER, data: this.customers$ }
+  readonly subentities: SubEntity[] = [
+    { id: IDENTIFIES.CENTER, data: this.centers$, type:'select' },
+    { id: IDENTIFIES.CUSTOMER, data: this.customers$, type: 'select' },
+    { id: IDENTIFIES.SHIFTS, data: this.shifts$, type: 'table', columns: this.columnsShift },
   ];
 
   ngOnInit() {
     this.store.dispatch([
       new CenterActions.GetAll,
       new CustomerActions.GetAll,
+      new ShiftActions.GetAll,
     ]);
     if(this.id) {
       this.store.dispatch(new UnitActions.GetById(this.id));

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Count } from '@models/counts.model';
 import { Store } from '@ngxs/store';
@@ -19,7 +19,7 @@ import { UnitActions } from '@state/unit/unit.actions';
 import { UnitState } from '@state/unit/unit.state';
 import { WorkerActions } from '@state/worker/worker.action';
 import { WorkerState } from '@state/worker/worker.state';
-import { map, Observable } from 'rxjs';
+import { map, Observable, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-maintenance-home',
@@ -27,12 +27,16 @@ import { map, Observable } from 'rxjs';
   templateUrl: './maintenance-home.component.html',
   styleUrl: './maintenance-home.component.scss'
 })
-export class MaintenanceHomeComponent {
-  private store = inject(Store);
+export class MaintenanceHomeComponent implements OnInit, OnDestroy {
+  private readonly store = inject(Store);
 
   counts$: Observable<Count | null> = this.store.select(CountState.getCounts);
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.store.dispatch(new CountActions.GetCounts);
+  }
+
+  ngOnDestroy(): void {
+    this.store.dispatch(new CountActions.ClearCounts);
   }
 }

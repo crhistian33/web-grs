@@ -344,6 +344,24 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         ]
       },
       {
+        name: 'min_assign',
+        label: 'N° trabajadores a asignar',
+        type: 'text',
+        value: '',
+        validators: [
+          {
+            name: 'required',
+            validator: 'required',
+            message: 'El N° de trabajadores es requerido',
+          },
+        ]
+      },
+      {
+        name: 'shifts',
+        label: 'Turnos',
+        type: 'table',
+      },
+      {
         name: 'user_id',
         type: 'hidden',
         value: '1'

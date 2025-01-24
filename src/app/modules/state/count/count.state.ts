@@ -45,4 +45,9 @@ export class CountState {
       })
     )
   }
+
+  @Action(CountActions.ClearCounts)
+  clearCounts(ctx: StateContext<CountStateModel>) {
+    return ctx.patchState({ counts: null });
+  }
 }

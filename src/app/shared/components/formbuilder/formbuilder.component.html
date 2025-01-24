@@ -46,7 +46,9 @@
           >
             <option value="">Seleccionar {{ item.label }}</option>
             <ng-container *ngIf="getSubEntityItems$(item.name) | async as subItems">
-              <option *ngFor="let subItem of subItems" [value]="subItem.id">{{ subItem.name }}</option>
+              <option *ngFor="let subItem of subItems" [value]="subItem.id">
+                {{ subItem.mount ? subItem.name + ' - ' + subItem.mount : subItem.name }}
+              </option>
             </ng-container>
           </select>
           <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
@@ -57,13 +59,16 @@
         @case ('table') {
           <div class="mb-4">
             <span class="block text-sm font-medium text-[#5F7E8A] mb-1">{{ item.label }}</span>
-            <app-data-list
-              [data]="getSubEntityItems$(item.name) | async"
-              [columns]="columns"
-              [hiddenActions]="true"
-              (toggleAll)="onToggleAll($event)"
-              (toggleItem)="onToggleItem($event)">
-            </app-data-list>
+            <ng-container *ngIf="getSubEntityColumns$(item.name) | async as columns">
+              <app-data-list
+                [data]="getSubEntityItems$(item.name) | async"
+                [columns]="columns"
+                [hiddenActions]="true"
+                [areAllSelected]="(getAreAllSelected$() | async) ?? false"
+                (toggleAll)="onToggleAll($event)"
+                (toggleItem)="onToggleItem($event)">
+              </app-data-list>
+            </ng-container>
           </div>
         }
       }

@@ -21,6 +21,9 @@ import { VerifiedState } from '@shared/state/verified/verified.state';
 import { UnitShiftActions } from '@state/unitshift/unitshift.actions';
 import { UnitshiftState } from '@state/unitshift/unitshift.state';
 import { UnitShift } from '@models/unitshift.model';
+import { DataListColumn } from '@shared/models/dataListColumn.model';
+import { SubEntity } from '@shared/models/subentity.model';
+import { HeaderDatalistService } from '@shared/services/header-datalist.service';
 
 @Component({
   selector: 'app-form',
@@ -33,6 +36,7 @@ export class FormComponent {
   private readonly router = inject(Router);
   private readonly sweetAlertService = inject(SweetalertService);
   private readonly notificationService = inject(NotificationService);
+  private readonly headerDataListService = inject(HeaderDatalistService);
   private readonly destroy$ = new Subject<void>();
 
   @Input() id!: number;
@@ -41,6 +45,7 @@ export class FormComponent {
   readonly module = PARAMETERS.ASSIGNMENT;
 
   resetForm = false;
+  readonly columnsWorker: DataListColumn<Worker>[] = this.headerDataListService.getHeaderFormDataList(PARAMETERS.WORKER);
 
   unitshifts$: Observable<UnitShift[]> = this.store.select(UnitshiftState.getItems);
   workers$: Observable<Worker[]> = this.store.select(WorkerState.getItems);
@@ -48,9 +53,9 @@ export class FormComponent {
   entity$: Observable<Assignment | null> = this.store.select(AssignmentState.getEntity).pipe(filter(Boolean));
   $ifAssign: Observable<boolean> = this.store.select(VerifiedState.getVerified);
 
-  readonly subentities = [
-    { id: IDENTIFIES.UNIT_SHIFT, data: this.unitshifts$ },
-    { id: IDENTIFIES.WORKERS, data: this.workers$ }
+  readonly subentities: SubEntity[] = [
+    { id: IDENTIFIES.UNIT_SHIFT, data: this.unitshifts$, type: 'select' },
+    { id: IDENTIFIES.WORKERS, data: this.workers$, type: 'table', columns: this.columnsWorker }
   ];
 
   ngOnInit() {

@@ -56,7 +56,7 @@ export class BaseCrudService<T extends BaseModel> {
     if (error.status !== 500) {
       return throwError(() => error);
     }
-    //return throwError(() => new Error('Error del servidor. Inténtelo más tarde'));
-    return throwError(() => error);
+    return throwError(() => new Error('Error del servidor. Inténtelo más tarde'));
+    //return throwError(() => error);
   }
 }

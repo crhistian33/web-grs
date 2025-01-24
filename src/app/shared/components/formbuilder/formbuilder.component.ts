@@ -12,6 +12,10 @@ import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { Store } from '@ngxs/store';
 import { WorkerState } from '@state/worker/worker.state';
 import { WorkerActions } from '@state/worker/worker.action';
+import { IDENTIFIES } from '@shared/utils/constants';
+import { Shift } from '@models/shift.model';
+import { ShiftState } from '@state/shift/shift.state';
+import { ShiftActions } from '@state/shift/shift.action';
 
 @Component({
   selector: 'app-formbuilder',
@@ -40,16 +44,32 @@ export class FormBuilderComponent {
   nameControlTable?: string;
 
   readonly dataMap = new Map<string, any[]>();
-  selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
-
-  columns: DataListColumn<Worker>[] = [
-    { key: 'id', label: 'N°', type: 'number'},
-    { key: 'name', label: 'Nombres y apellidos', type: 'text'},
-    { key: 'dni', label: 'DNI', type: 'text'},
-  ];
+  selectedWorkers$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
+  selectedShifts$: Observable<Shift[]> = this.store.select(ShiftState.getSelectedItems);
+  areAllSelected$!: Observable<boolean>;
 
   getSubEntityItems$(id: string): Observable<any[]> {
     return this.subentities.find(e => e.id === id)?.data || of([]);
+  }
+
+  getSubEntityColumns$(id: string): Observable<DataListColumn<any>[]> {
+    const subEntity = this.subentities.find(e => e.id === id);
+    return subEntity ? of(subEntity.columns) : of([]);
+  }
+
+  getAreAllSelected$(): Observable<boolean> {
+    const controlId = this.subentities.find(e => e.type === 'table')?.id
+    switch (controlId) {
+      case IDENTIFIES.WORKERS:
+        return this.store.select(WorkerState.areAllSelected);
+        break;
+      case IDENTIFIES.SHIFTS:
+        return this.store.select(ShiftState.areAllSelected);
+        break;
+      default:
+        return of(false);
+        break;
+    }
   }
 
   ngOnInit() {
@@ -102,11 +122,26 @@ export class FormBuilderComponent {
     .filter(controlName => entity.hasOwnProperty(controlName))
     .forEach(controlName => {
       if (controlName === this.nameControlTable) {
-        this.selectedItems$
-          .pipe(takeUntil(this.destroy$))
-          .subscribe(selectedWorkers => {
-            this.myForm.get(controlName)?.patchValue(selectedWorkers);
-          });
+        const controlId = this.subentities.find(e => e.type === 'table')?.id
+        switch (controlId) {
+          case IDENTIFIES.WORKERS:
+            this.selectedWorkers$
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(selectedWorkers => {
+                this.myForm.get(controlName)?.patchValue(selectedWorkers);
+              });
+            break;
+          case IDENTIFIES.SHIFTS:
+            this.selectedShifts$
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(selectedShifts => {
+                this.myForm.get(controlName)?.patchValue(selectedShifts);
+              });
+            break;
+          default:
+            break;
+        }
+
       } else {
         if(controlName === 'state') {
           this.myForm.get(controlName)?.setValue(!!entity[controlName]);
@@ -159,20 +194,82 @@ export class FormBuilderComponent {
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new WorkerActions.ToggleItemSelection(id));
-    this.selectedItems$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(selectedWorkers => {
-        this.myForm.get('workers')?.patchValue(selectedWorkers);
-      });
+    const controlId = this.subentities.find(e => e.type === 'table')?.id
+    switch (controlId) {
+      case IDENTIFIES.WORKERS:
+        this.selectedWorker(id);
+        break;
+      case IDENTIFIES.SHIFTS:
+        this.selectedShift(id);
+        break;
+      default:
+        break;
+    }
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new WorkerActions.ToggleAllItems(checked));
-    this.selectedItems$
+    const controlId = this.subentities.find(e => e.type === 'table')?.id
+    switch (controlId) {
+      case IDENTIFIES.WORKERS:
+        this.selectedWorkers(checked);
+        break;
+      case IDENTIFIES.SHIFTS:
+        this.selectedShifts(checked);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private selectedWorker(id: number) {
+    this.store.dispatch(new WorkerActions.ToggleItemSelection(id));
+    this.selectedWorkers$
       .pipe(takeUntil(this.destroy$))
       .subscribe(selectedWorkers => {
-        this.myForm.get('workers')?.patchValue(selectedWorkers);
+        this.formModule!.fields.forEach(field => {
+          if(field.type === 'table') {
+            this.myForm.get(field.name)?.patchValue(selectedWorkers);
+          }
+        })
+      });
+  }
+
+  private selectedShift(id: number) {
+    this.store.dispatch(new ShiftActions.ToggleItemSelection(id));
+    this.selectedShifts$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(selectedShifts => {
+        this.formModule!.fields.forEach(field => {
+          if(field.type === 'table') {
+            this.myForm.get(field.name)?.patchValue(selectedShifts);
+          }
+        })
+      });
+  }
+
+  private selectedWorkers(checked: boolean) {
+    this.store.dispatch(new WorkerActions.ToggleAllItems(checked));
+    this.selectedWorkers$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(selectedWorkers => {
+        this.formModule!.fields.forEach(field => {
+          if(field.type === 'table') {
+            this.myForm.get(field.name)?.patchValue(selectedWorkers);
+          }
+        })
+      });
+  }
+
+  private selectedShifts(checked: boolean) {
+    this.store.dispatch(new ShiftActions.ToggleAllItems(checked));
+    this.selectedShifts$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(selectedShifts => {
+        this.formModule!.fields.forEach(field => {
+          if(field.type === 'table') {
+            this.myForm.get(field.name)?.patchValue(selectedShifts);
+          }
+        })
       });
   }
 

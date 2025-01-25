@@ -360,6 +360,7 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         name: 'shifts',
         label: 'Turnos',
         type: 'table',
+        value: '',
       },
       {
         name: 'user_id',

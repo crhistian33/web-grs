@@ -112,9 +112,8 @@ export class BaseState<T extends BaseModel> {
   protected filtersItems(ctx: StateContext<BaseStateModel<T>>, type:string, payload: Partial<FilterStateModel>, columns?: (keyof T)[]) {
     ctx.dispatch(new SetLoading(type, true));
     const state = ctx.getState();
-    const { centerId, companyId, customerId, shiftId, typeworkerId, unitId, searchTerm } = payload;
+    const { centerId, companyId, customerId, shiftId, typeworkerId, unitId, fromDate, toDate, searchTerm } = payload;
     const filtered = state.entities.filter((item: any) => {
-      console.log('ITEMMMMMM', item, companyId, item.assignment.unitshift.unit.customer.company.id);
       const matchDrop =
         (!typeworkerId || item.typeworker.id === typeworkerId) &&
         (!companyId || (item.assignment
@@ -131,7 +130,9 @@ export class BaseState<T extends BaseModel> {
           ? item.assignment.unitshift.shift.id === shiftId
           : (item.unitshift ? item.unitshift.shift.id === shiftId : item.shift.id === shiftId)
          )) &&
-        (!centerId || item.center.id === centerId)
+        (!centerId || item.center.id === centerId) &&
+        (!fromDate || new Date(item.start_date) >= new Date(fromDate)) &&
+        (!toDate || new Date(item.start_date) <= new Date(toDate))
 
       if(!searchTerm)
         return matchDrop;

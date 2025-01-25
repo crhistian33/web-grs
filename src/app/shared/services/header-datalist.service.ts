@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Assignment } from '@models/assignment.model';
+import { Assist } from '@models/assist.model';
 import { Center } from '@models/center.model';
 import { Company } from '@models/company.model';
 import { Customer } from '@models/customer.model';
@@ -85,6 +86,15 @@ export class HeaderDatalistService {
     { key: 'workers_count', label: '# Asignados', type: 'text', filtered: false },
   ];
 
+  private headAssist: DataListColumn<Assist>[] = [
+    { key: 'id', label: 'N°', type: 'number', filtered: false },
+    { key: 'start_date', label: 'Fecha', type: 'date', filtered: false },
+    { key: 'unitshift', label: 'Unidad', type: 'relation-unit', filtered: false },
+    { key: 'unitshift', label: 'Turno', type: 'relation-shift', filtered: false },
+    { key: 'total_attended', label: '# Asistencias', type: 'text', filtered: false },
+    { key: 'total_absent', label: '# Inasistencias', type: 'text', filtered: false },
+  ];
+
   getHeaderDataList(param: string): DataListColumn<any>[] {
     switch (param) {
       case PARAMETERS.WORKER:
@@ -113,6 +123,9 @@ export class HeaderDatalistService {
         break;
       case PARAMETERS.ASSIGNMENT:
         return this.headAssignment;
+        break;
+      case PARAMETERS.ASSIST:
+        return this.headAssist;
         break;
       default:
         return [];

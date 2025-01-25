@@ -6,4 +6,6 @@ export interface FilterStateModel {
   typeworkerId?: number | null;
   centerId?: number | null;
   searchTerm?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
 }

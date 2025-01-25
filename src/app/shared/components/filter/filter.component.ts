@@ -241,6 +241,22 @@ export class FilterComponent {
     this.filters.emit(this.filterForm.value);
   }
 
+  onFromDate(event: any) {
+    const date = event.target.value;
+    this.filterForm.patchValue({
+      fromDate: date
+    });
+    this.filters.emit(this.filterForm.value);
+  }
+
+  onToDate(event: any) {
+    const date = event.target.value;
+    this.filterForm.patchValue({
+      toDate: date
+    });
+    this.filters.emit(this.filterForm.value);
+  }
+
   onClear() {
     this.filterForm.reset();
     this.store.dispatch(new FilterActions.updateFilters(this.filterForm.value));

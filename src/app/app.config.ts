@@ -26,6 +26,7 @@ import { CountState } from '@state/count/count.state';
 import { VerifiedState } from '@shared/state/verified/verified.state';
 import { WorkerassignmentState } from '@state/workerassignment/workerassignment.state';
 import { UnitshiftState } from '@state/unitshift/unitshift.state';
+import { AssistState } from '@state/assist/assist.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -56,6 +57,7 @@ export const appConfig: ApplicationConfig = {
       AssignmentState,
       WorkerassignmentState,
       UnitshiftState,
+      AssistState,
     ], {
       developmentMode: !environment.production,
       selectorOptions: {

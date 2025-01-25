@@ -16,6 +16,14 @@
                 <input type="text" class="border border-gray-300 p-2 rounded w-full" formControlName="searchTerm" (input)="onSearch($event)">
                 <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Búsqueda</label>
               </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3 top-3 relative" *ngIf="config.fromDate">
+                <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa" formControlName="fromDate" (input)="onFromDate($event)">
+                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha desde</label>
+              </div>
+              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3 top-3 relative" *ngIf="config.toDate">
+                <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa" formControlName="toDate" (input)="onToDate($event)">
+                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha hasta</label>
+              </div>
               <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3 " *ngIf="config.company">
                 <ng-select
                   [items]="companies$ | async"
@@ -113,14 +121,6 @@
                     </span>
                   </ng-template>
                 </ng-select>
-              </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.fromDate">
-                <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa">
-                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha hasta</label>
-              </div>
-              <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3" *ngIf="config.toDate">
-                <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa">
-                <label class="lb-float scale-75 absolute -top-5 bg-white -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha desde</label>
               </div>
             </div>
           </div>

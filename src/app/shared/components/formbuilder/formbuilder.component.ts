@@ -154,17 +154,6 @@ export class FormBuilderComponent {
     });
   }
 
-  private resetForm() {
-    if (!this.myForm) return;
-
-    this.myForm.reset();
-    this.formModule?.fields
-      .filter(field => field.value !== undefined)
-      .forEach(field => {
-        this.myForm.get(field.name)?.setValue(field.value);
-      });
-  }
-
   onSubmit(redirect: boolean) {
     if (this.myForm.valid) {
       this.formSubmitted.emit({
@@ -174,6 +163,19 @@ export class FormBuilderComponent {
     } else {
       this.myForm.markAllAsTouched();
     }
+  }
+
+  private resetForm() {
+    if (!this.myForm) return;
+
+    this.myForm.reset();
+    this.formModule?.fields
+      .filter(field => field.value !== undefined)
+      .forEach(field => {
+        this.myForm.get(field.name)?.setValue(field.value);
+        if(field.name === 'shifts')
+          this.store.dispatch(new ShiftActions.ToggleAllItems(false));
+      });
   }
 
   onCancel() {

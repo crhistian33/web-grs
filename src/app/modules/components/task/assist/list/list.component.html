@@ -1,0 +1,17 @@
+<app-title-page [title]="title" [page]="page" />
+<app-filter [config]="config" (filters)="filtersData($event)" />
+<div class="bg-white p-4 my-4 rounded shadow relative z-auto">
+  <app-actions
+    [page]="page"
+    [hasSelectedItem]="(hasSelectedItems$ | async) ?? false"
+    (deleteAll)="onDeleteAll()">
+  </app-actions>
+  <app-data-list
+    [data]="assists$ | async"
+    [columns]="columns"
+    [page]="page"
+    [areAllSelected]="(areAllSelected$ | async) ?? false"
+    (deleteItem)="onDelete($event)"
+    (toggleItem)="onToggleItem($event)"
+    (toggleAll)="onToggleAll($event)"/>
+</div>

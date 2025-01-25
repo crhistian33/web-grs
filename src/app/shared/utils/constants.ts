@@ -8,6 +8,7 @@ export const PARAMETERS = {
   WORKER: 'worker',
   ASSIGNMENT: 'assignment',
   REASSIGNMENT: 'reassignment',
+  ASSIST: 'assist',
 }
 
 export const IDENTIFIES = {
@@ -51,6 +52,8 @@ export const TITLES = {
   WORKER: 'Trabajador',
   ASSIGNMENT: 'Asignación',
   REASSIGNMENT: 'Reasignación',
+  ASSIST: 'Asistencia',
+  ASSISTS: 'Asistencias',
 }
 
 export const TYPES = {

@@ -1,0 +1,8 @@
+.nav-item {
+  transition: all 0.05s ease;
+}
+.nav-item.active, .nav-item:hover {
+  @apply border-secondary;
+  background: linear-gradient(to right, rgba(245, 103, 27, 0.5), rgba(216, 30, 11, 0.5));
+  color: #fff;
+}

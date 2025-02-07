@@ -38,23 +38,23 @@
         }
         @case ('select') {
           <div class="mb-4">
-          <label [for]="item.name" class="block text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
-          <select
-            [id]="item.name"
-            [formControlName]="item.name"
-            class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
-          >
-            <option value="">Seleccionar {{ item.label }}</option>
-            <ng-container *ngIf="getSubEntityItems$(item.name) | async as subItems">
-              <option *ngFor="let subItem of subItems" [value]="subItem.id">
-                {{ subItem.mount ? subItem.name + ' - ' + subItem.mount : subItem.name }}
-              </option>
-            </ng-container>
-          </select>
-          <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
-            {{ getErrorMessage(item) }}
+            <label [for]="item.name" class="block text-sm font-medium text-[#5F7E8A]">{{ item.label }}</label>
+            <select
+              [id]="item.name"
+              [formControlName]="item.name"
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
+            >
+              <option value="">Seleccionar {{ item.label }}</option>
+              <ng-container *ngIf="getSubEntityItems$(item.name) | async as subItems">
+                <option *ngFor="let subItem of subItems" [value]="subItem.id">
+                  {{ subItem.mount ? subItem.name + ' - ' + subItem.mount : subItem.name }}
+                </option>
+              </ng-container>
+            </select>
+            <div *ngIf="myForm.get(item.name)?.touched && myForm.get(item.name)?.invalid" class="text-[#D81E0B] text-sm mt-1">
+              {{ getErrorMessage(item) }}
+            </div>
           </div>
-        </div>
         }
         @case ('table') {
           <div class="mb-4">

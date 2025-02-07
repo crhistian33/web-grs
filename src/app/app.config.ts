@@ -1,13 +1,13 @@
 import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideStore } from '@ngxs/store';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
-import { heroArrowLeftOnRectangleSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroClipboardDocumentCheckSolid, heroDocumentCheckSolid, heroHomeSolid, heroListBulletSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroPencilSquareSolid, heroPlusSolid, heroTrashSolid, heroUserCircleSolid, heroUsersSolid, heroWrenchSolid, heroXMarkSolid } from '@ng-icons/heroicons/solid';
+import { heroArrowLeftOnRectangleSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroClipboardDocumentCheckSolid, heroDocumentCheckSolid, heroEllipsisVerticalSolid, heroHomeSolid, heroKeySolid, heroListBulletSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroPencilSquareSolid, heroPlusSolid, heroTrashSolid, heroUserCircleSolid, heroUserSolid, heroUsersSolid, heroWrenchSolid, heroXMarkSolid } from '@ng-icons/heroicons/solid';
 
 import { routes } from './app.routes';
 import { environment } from '@environments/environment.development';
@@ -27,6 +27,11 @@ import { VerifiedState } from '@shared/state/verified/verified.state';
 import { WorkerassignmentState } from '@state/workerassignment/workerassignment.state';
 import { UnitshiftState } from '@state/unitshift/unitshift.state';
 import { AssistState } from '@state/assist/assist.state';
+import { CalendarState } from '@shared/state/calendar/calendar.state';
+import { AuthState } from './auth/state/auth.state';
+import { NgxsStoragePluginModule } from '@ngxs/storage-plugin';
+import { UserState } from '@state/user/user.state';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -39,6 +44,9 @@ export const appConfig: ApplicationConfig = {
       }),
       NgxsLoggerPluginModule.forRoot({
         disabled: environment.production
+      }),
+      NgxsStoragePluginModule.forRoot({
+        keys: ['auth.access_token', 'auth.refresh_token', 'auth.isAuthenticated']
       })
     ]),
     provideStore([
@@ -58,6 +66,9 @@ export const appConfig: ApplicationConfig = {
       WorkerassignmentState,
       UnitshiftState,
       AssistState,
+      CalendarState,
+      AuthState,
+      UserState,
     ], {
       developmentMode: !environment.production,
       selectorOptions: {
@@ -66,11 +77,13 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(
+      withInterceptorsFromDi(),
+      withInterceptors([authInterceptor])
+    ),
     provideAnimations(),
     ReactiveFormsModule,
     provideNgIconsConfig({ size: '1.5em' }),
-    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid, heroClipboardDocumentCheckSolid, heroXMarkSolid })
-
+    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid, heroClipboardDocumentCheckSolid, heroXMarkSolid, heroUserSolid, heroKeySolid, heroEllipsisVerticalSolid }),
   ]
 };

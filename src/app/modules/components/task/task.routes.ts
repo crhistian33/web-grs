@@ -21,4 +21,9 @@ export const routes: Routes = [
     loadChildren: () => import('./assist/assist.routes').then(m => m.routes),
     data: { breadcrumb: 'asistencias' }
   },
+  {
+    path:'descansos',
+    loadChildren: () => import('./break/break.routes').then(m => m.routes),
+    data: { breadcrumb: 'descansos' }
+  },
 ];

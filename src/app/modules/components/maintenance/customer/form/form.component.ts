@@ -38,8 +38,8 @@ export class FormComponent {
   companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
   entity$: Observable<Customer | null> = this.store.select(CustomerState.getEntity);
 
-  readonly subentities = [
-    { id: IDENTIFIES.COMPANY, data: this.companies$ }
+  readonly subentities: SubEntity[] = [
+    { id: IDENTIFIES.COMPANY, data: this.companies$, type: 'select' }
   ]
 
   ngOnInit() {

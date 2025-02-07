@@ -1,0 +1,75 @@
+<h3 class="text-xl text-gray-800 font-semibold">{{ 'REGISTRAR DESCANSO' }}</h3>
+<div class="bg-gray-50 flex items-center p-5 my-4 shadow-lg">
+  <form class="w-full divide-y divide-gray-200">
+    <div class="flex gap-x-4 mb-5">
+      <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3">
+        <ng-select
+          [items]="unitshifts$ | async"
+          [clearable]="false"
+          [searchable]="true"
+          bindLabel="name"
+          bindValue="id"
+          placeholder="Seleccionar unidad por turno"
+          class=" pb-2"
+          (change)="selectedUnits($event)">
+        </ng-select>
+      </div>
+      <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3">
+        <ng-select
+          [items]="months"
+          [clearable]="false"
+          [searchable]="true"
+          bindLabel="name"
+          bindValue="id"
+          placeholder="Seleccionar mes"
+          class=" pb-2"
+          (change)="selectedMonth($event)">
+        </ng-select>
+      </div>
+    </div>
+    <div class="flex justify-between py-4" >
+      <div class="w-1/3">
+        <h2 class="text-lg font-medium mb-2">Trabajadores asignados</h2>
+        <div class="flex items-center my-2" *ngFor="let item of workers$ | async">
+          <input type="radio" name="worker" (change)="selectItem(item.id)">
+          <label for="worker" class="ms-2">{{ item.name }}</label>
+        </div>
+      </div>
+      <div class="w-2/3">
+        <div class="grid grid-rows-[auto_1fr]">
+          <div class="grid grid-cols-7 text-center">
+            @for (day of weekdays; track day) {
+              <div class="weekday">{{ day }}</div>
+            }
+          </div>
+          <div class="grid grid-cols-7" *ngIf="calendarDays" formArrayName="items">
+            @for (day of calendarDays; track $index; let i = $index) {
+              @if(day) {
+                <button
+                  type="button"
+                  class="border cursor-pointer p-2.5"
+                  (click)="onDateSelect(day, i)"
+                  [disabled]="!day || isDaySelected(day) === 2"
+                  [ngClass]="[isDaySelected(day) === 0 ? 'bg-orange-200' : (isDaySelected(day) === 1 ? 'bg-green-300' : 'bg-gray-300 disabled:cursor-not-allowed')]">
+                  {{ day?.getDate() }}
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="border cursor-pointer p-2.5 disabled:cursor-not-allowed"
+                  [disabled]="!day">
+                </button>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Botón de Enviar -->
+    <div class="mt-6 border-t pt-5">
+      <button type="button" class="bg-main text-white py-2 px-4 rounded-md hover:bg-main_dark">Guardar</button>
+      <button type="button" class="bg-secondary text-white py-2 px-4 rounded-md ms-2">Guardar y crear nuevo</button>
+      <button type="button" class="bg-gray_dark_600 text-white py-2 px-4 rounded-md ms-2">Cancelar</button>
+    </div>
+  </form>
+</div>

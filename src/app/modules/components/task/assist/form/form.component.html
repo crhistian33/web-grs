@@ -1,0 +1,132 @@
+<h3 class="text-xl text-gray-800 font-semibold">{{ 'REGISTRAR ASISTENCIA' }}</h3>
+<div class="bg-gray-50 flex items-center p-5 my-4 shadow-lg">
+  <form class="w-full divide-y divide-gray-200">
+    <div class="flex gap-x-4 mb-5">
+      <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3 top-3 relative">
+        <input type="date" class="bg-gray-50 border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa" formControlName="toDate">
+        <label class="lb-float scale-75 absolute -top-5 bg-gray-50 -left-2 px-1 pt-2 text-gray-400 font-semibold">Fecha de asistencia</label>
+      </div>
+      <div class="w-full sm:w-1/2 md:w-1/4 pr-6 -mb-3">
+        <ng-select
+          [clearable]="true"
+          [searchable]="true"
+          bindLabel="name"
+          bindValue="id"
+          placeholder="Seleccionar unidad por turno"
+          formControlName="companyId"
+          class=" pb-2">
+          <ng-template ng-option-tmp let-item="item">
+            <span class="flex items-center">
+              <span>Indeci 1 - Mañana</span>
+            </span>
+          </ng-template>
+        </ng-select>
+      </div>
+    </div>
+    <div class="pt-2 mb-4">
+      <span class="block text-sm font-medium text-gray_dark_600 mb-1">Asistencias confirmadas: 0/6</span>
+      <div class="bg-white shadow-md rounded-b-lg overflow-visible">
+        <div>
+          <table class="min-w-full">
+            <thead class="bg-gray_dark_500 text-white">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors">
+                  <div class="flex items-center gap-2">
+                    Nombre del trabajador
+                  </div>
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors">
+                  <div class="flex items-center gap-2">
+                    DNI
+                  </div>
+                </th>
+                <th
+                  class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors">
+                  Estado
+                </th>
+                <th
+                  class="px-6 py-3 text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors text-center">
+                  Asistencia
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors">
+                  <div class="flex items-center gap-2">
+                    Comentario
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    Juan Perez
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    12457845
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="text-sm text-gray-900">
+                    D
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center bg-green-200">
+                  <div class="flex items-center justify-center">
+                    <input
+                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 focus:ring-2 cursor-pointer"
+                    type="checkbox" [checked]="true">
+                    <app-navfloat [state]="'A'"></app-navfloat>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    Juan Perez
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    12457845
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="text-sm text-gray-900">
+                    D
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center bg-green-200 ">
+                  <div class="flex items-center justify-center">
+                    <input
+                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 focus:ring-2 cursor-pointer"
+                    type="checkbox" [checked]="true">
+                    <app-navfloat></app-navfloat>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Botón de Enviar -->
+    <div class="mt-6 border-t pt-5">
+      <button type="button" class="bg-main text-white py-2 px-4 rounded-md hover:bg-main_dark">Guardar</button>
+      <button type="button" class="bg-secondary text-white py-2 px-4 rounded-md ms-2">Guardar y crear nuevo</button>
+      <button type="button" class="bg-gray_dark_600 text-white py-2 px-4 rounded-md ms-2">Cancelar</button>
+    </div>
+  </form>
+</div>

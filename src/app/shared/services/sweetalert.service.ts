@@ -101,7 +101,7 @@ export class SweetalertService {
     })
   }
 
-  confirmAction(title: string, message: string, confirmText: string, confirm: any) {
+  confirmAction(title: string, message: string, confirmText: string, confirm: any, cancel?: any) {
     Swal.fire({
       title: title,
       text: message,
@@ -118,6 +118,10 @@ export class SweetalertService {
     }).then((result) => {
       if(result.isConfirmed) {
         confirm()
+      } else {
+        if(result.dismiss?.toString() === 'cancel') {
+          cancel()
+        }
       }
     });
   }

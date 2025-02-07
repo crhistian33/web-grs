@@ -1,0 +1,12 @@
+.lb-float {
+  color: rgba(0, 0, 0, 0.54) !important;
+}
+
+.slide-down {
+  height: 20px;
+  overflow: hidden;
+}
+
+.slide-down.active {
+  height: auto;
+}

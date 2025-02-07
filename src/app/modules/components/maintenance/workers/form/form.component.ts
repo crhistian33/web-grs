@@ -39,8 +39,8 @@ export class FormComponent {
   typesWorker$: Observable<TypeWorker[]> = this.store.select(TypeworkerState.getItems);
   entity$: Observable<Worker | null> = this.store.select(WorkerState.getEntity);
 
-  readonly subentities = [
-    { id: IDENTIFIES.TYPEWORKER, data: this.typesWorker$ }
+  readonly subentities: SubEntity[] = [
+    { id: IDENTIFIES.TYPEWORKER, data: this.typesWorker$, type: 'select' }
   ]
 
   ngOnInit() {

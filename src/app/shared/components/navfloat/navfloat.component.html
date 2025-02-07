@@ -1,0 +1,19 @@
+<div class="relative">
+  <ng-icon name="heroChevronDownSolid" class="scale-75 cursor-pointer ms-2" (click)="toggleNav($event)"></ng-icon>
+
+  <div class="absolute left-10 top-0" *ngIf="isOpen" [@fadeInOut]="isOpen ? 'active' : 'void'">
+    <div class="bg-gray-100 shadow-lg rounded">
+      <div class="flex flex-col text-left text-gray-800">
+        <a class="px-3 py-1 text-sm hover:bg-gray_dark_500 hover:text-white transition-colors" href="" *ngIf="state === 'A'">
+          Cubrir falta
+        </a>
+        <a class="px-3 py-1 text-sm hover:bg-gray_dark_500 hover:text-white transition-colors" href="">
+          Cubrir permiso
+        </a>
+        <a class="px-3 py-1 text-sm hover:bg-gray_dark_500 hover:text-white transition-colors" href="">
+          Cubrir licencia
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

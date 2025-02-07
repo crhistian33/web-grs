@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { Count } from '@models/counts.model';
 import { catchError, Observable, throwError } from 'rxjs';
+import { checkToken } from '../../interceptors/auth.interceptor';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class CountService {
   constructor(private http: HttpClient) {}
 
   getCounts(): Observable<Count> {
-      return this.http.get<Count>(this.apiUrl).pipe(catchError(this.handleError));
+      return this.http.get<Count>(this.apiUrl, { context: checkToken() }).pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse) {

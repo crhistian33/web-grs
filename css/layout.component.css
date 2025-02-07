@@ -1,0 +1,6 @@
+.bg-auth {
+  background: url("../../../assets/images/bg_login.jpg") no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  width: 100%;
+}

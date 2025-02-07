@@ -4,6 +4,7 @@ import { Worker } from '../models/worker.model';
 import { environment } from '@environments/environment';
 import { BaseCrudService } from '@shared/services/base-crud.service';
 import { Observable } from 'rxjs';
+import { checkToken } from 'src/app/interceptors/auth.interceptor';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class WorkerService extends BaseCrudService<Worker> {
   }
 
   getUnassignments(): Observable<Worker[]> {
-    return this.http.get<Worker[]>(`${environment.API_URL}/workers/unassigneds`);
+    return this.http.get<Worker[]>(`${environment.API_URL}/workers/unassigneds`, { context: checkToken() });
   }
 
   // getReassignments(): Observable<Worker[]> {
@@ -23,10 +24,10 @@ export class WorkerService extends BaseCrudService<Worker> {
   // }
 
   getTitulars(): Observable<Worker[]> {
-    return this.http.get<Worker[]>(`${environment.API_URL}/workers/titulars`);
+    return this.http.get<Worker[]>(`${environment.API_URL}/workers/titulars`, { context: checkToken() });
   }
 
   getAssignsId(id: number): Observable<Worker[]> {
-    return this.http.get<Worker[]>(`${environment.API_URL}/workers/assigns/${id}`);
+    return this.http.get<Worker[]>(`${environment.API_URL}/workers/assigns/${id}`, { context: checkToken() });
   }
 }

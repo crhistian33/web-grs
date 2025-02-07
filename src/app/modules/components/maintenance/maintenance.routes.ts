@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MaintenanceHomeComponent } from './maintenance-home/maintenance-home.component';
+import { authGuard } from 'src/app/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -8,37 +9,44 @@ export const routes: Routes = [
   },
   {
     path:'trabajadores',
-    data: { moduleKey: 'Worker', breadcrumb: 'Trabajadores' },
     loadChildren: () => import('./workers/workers.routes').then(m => m.routes),
+    canActivate: [authGuard],
+    data: { moduleKey: 'Worker', breadcrumb: 'Trabajadores' },
   },
   {
     path:'tipos-trabajadores',
-    data: { moduleKey: 'TypeWorker', breadcrumb: 'Tipos de trabajadores' },
     loadChildren: () => import('./typeWorker/typeworker.routes').then(m => m.routes),
+    canActivate: [authGuard],
+    data: { moduleKey: 'TypeWorker', breadcrumb: 'Tipos de trabajadores' },
   },
   {
     path: 'centros-costo',
+    loadChildren: () => import('./center/center.routes').then(m => m.routes),
+    canActivate: [authGuard],
     data: { moduleKey: 'Center', breadcrumb: 'Centros de costo' },
-    loadChildren: () => import('./center/center.routes').then(m => m.routes)
   },
   {
     path: 'empresas',
+    loadChildren: () => import('./company/company.routes').then(m => m.routes),
+    canActivate: [authGuard],
     data: { moduleKey: 'Company', breadcrumb: 'Empresas' },
-    loadChildren: () => import('./company/company.routes').then(m => m.routes)
   },
   {
     path: 'clientes',
+    loadChildren: () => import('./customer/customer.routes').then(m => m.routes),
+    canActivate: [authGuard],
     data: { moduleKey: 'Customer', breadcrumb: 'Clientes' },
-    loadChildren: () => import('./customer/customer.routes').then(m => m.routes)
   },
   {
     path: 'unidades',
+    loadChildren: () => import('./unit/unit.routes').then(m => m.routes),
+    canActivate: [authGuard],
     data: { moduleKey: 'Unit', breadcrumb: 'Unidades' },
-    loadChildren: () => import('./unit/unit.routes').then(m => m.routes)
   },
   {
     path: 'turnos',
+    loadChildren: () => import('./shift/shift.routes').then(m => m.routes),
+    canActivate: [authGuard],
     data: { moduleKey: 'Shift', breadcrumb: 'Turnos' },
-    loadChildren: () => import('./shift/shift.routes').then(m => m.routes)
   },
 ];

@@ -12,12 +12,14 @@ import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { HeaderDatalistService } from '@shared/services/header-datalist.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
-import { Observable, Subject, take } from 'rxjs';
+import { filter, Observable, Subject, take, tap } from 'rxjs';
 import { NotificationService } from '@shared/services/notification.service';
 import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { filterConfig } from '@shared/models/filter-config.model';
 import { FilterStateModel } from '@shared/models/filter.model';
 import { FilterComponent } from '@shared/components/filter/filter.component';
+import { CompanyState } from '@state/company/company.state';
+import { Company } from '@models/company.model';
 
 @Component({
   selector: 'app-removes',
@@ -37,10 +39,11 @@ export class RemovesComponent {
   readonly columns: DataListColumn<Worker>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.WORKER);
   readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.WORKER);
 
-  workers$: Observable<Worker[] | null> = this.store.select(WorkerState.getItems);
-  areAllSelected$: Observable<boolean> = this.store.select(WorkerState.areAllSelected);
-  hasSelectedItems$: Observable<boolean> = this.store.select(WorkerState.hasSelectedItems);
-  selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
+  companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
+  workers$: Observable<Worker[] | null> = this.store.select(WorkerState.getTrasheds);
+  areAllSelected$: Observable<boolean> = this.store.select(WorkerState.areTrashedAllSelected);
+  hasSelectedItems$: Observable<boolean> = this.store.select(WorkerState.hasTrashedSelectedItems);
+  selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getTrashedSelectedItems);
 
   config: filterConfig = {
     typeworker: true,
@@ -52,7 +55,18 @@ export class RemovesComponent {
   }
 
   getWorkers() {
-    this.store.dispatch(new WorkerActions.GetDeletes)
+    this.companies$.pipe(
+      filter((companies): companies is Company[] => !!companies),
+      take(1),
+      tap(companies => {
+        if(companies.length > 1) {
+          this.store.dispatch(new WorkerActions.GetDeletes)
+        } else if(companies.length === 0) {
+          const companyId = companies[0].id;
+          this.store.dispatch(new WorkerActions.GetDeletesByCompany(companyId));
+        }
+      })
+    ).subscribe();
   }
 
   onDelete(id: number) {
@@ -62,7 +76,7 @@ export class RemovesComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new WorkerActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new WorkerActions.Delete(id, del, TYPES.RECYCLE)).subscribe({
       next: (response: any)=> {
         this.sweetalertService.confirmSuccess(
           response.worker.result.title,
@@ -121,7 +135,7 @@ export class RemovesComponent {
       this.selectedItems$
       .pipe(take(1))
       .subscribe(data => {
-        this.store.dispatch(new WorkerActions.DeleteAll(data, true, false))
+        this.store.dispatch(new WorkerActions.DeleteAll(data, true, false, TYPES.RECYCLE))
         .pipe(take(1))
         .subscribe({
           next: (response: any)=> {
@@ -140,20 +154,20 @@ export class RemovesComponent {
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new WorkerActions.ToggleItemSelection(id));
+    this.store.dispatch(new WorkerActions.ToggleItemSelection(id, TYPES.RECYCLE));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new WorkerActions.ToggleAllItems(checked));
+    this.store.dispatch(new WorkerActions.ToggleAllItems(checked, TYPES.RECYCLE));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new WorkerActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new WorkerActions.Filters(filter, TYPES.RECYCLE, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new WorkerActions.clearAll);
+    //this.store.dispatch(new WorkerActions.clearAll);
   }
 }

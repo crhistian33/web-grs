@@ -6,15 +6,19 @@ import { BaseState } from '@shared/state/base.state';
 import { WorkerActions } from './worker.action';
 import { SetLoading } from '@shared/state/loading/loading.actions';
 import { tap } from 'rxjs';
+import { ExcelService } from '@shared/services/excel.service';
 
 @State<WorkerStateModel>({
   name: 'worker',
   defaults: {
     entities: [],
+    entitiesUpload: [],
     filteredItems: [],
     trashedItems: [],
+    filterTrashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   },
 })
@@ -37,7 +41,7 @@ export class WorkerState extends BaseState<Worker> {
 
   @Selector()
   static getTrasheds(state: WorkerStateModel): Worker[] {
-    return state.trashedItems;
+    return state.filterTrashedItems || [];
   }
 
   @Selector()
@@ -55,14 +59,39 @@ export class WorkerState extends BaseState<Worker> {
     return state.entities.some(entity => entity.selected);
   }
 
+  @Selector()
+  static getTrashedSelectedItems(state: WorkerStateModel) {
+    return state.trashedItems.filter(entity => entity.selected);
+  }
+
+  @Selector()
+  static areTrashedAllSelected(state: WorkerStateModel) {
+    return state.trashedItems.length > 0 && state.trashedItems.every(entity => entity.selected);
+  }
+
+  @Selector()
+  static hasTrashedSelectedItems(state: WorkerStateModel) {
+    return state.trashedItems.some(entity => entity.selected);
+  }
+
   @Action(WorkerActions.GetAll)
   getAll(ctx: StateContext<WorkerStateModel>) {
     return this.getItems(ctx, WorkerActions.GetAll.type)
   }
 
+  @Action(WorkerActions.GetByCompany)
+  getAllCompany(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.GetByCompany) {
+    return this.getItemsByCompany(ctx, id, WorkerActions.GetByCompany.type)
+  }
+
   @Action(WorkerActions.GetDeletes)
   getDeletes(ctx: StateContext<WorkerStateModel>) {
     return this.getItemsDelete(ctx, WorkerActions.GetDeletes.type)
+  }
+
+  @Action(WorkerActions.GetDeletesByCompany)
+  getDeletesByCompany(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.GetDeletesByCompany) {
+    return this.getItemsDeleteByCompany(ctx, WorkerActions.GetDeletesByCompany.type, id)
   }
 
   @Action(WorkerActions.GetById)
@@ -126,18 +155,18 @@ export class WorkerState extends BaseState<Worker> {
   }
 
   @Action(WorkerActions.Delete)
-  delete(ctx: StateContext<WorkerStateModel>, { id, del }: WorkerActions.Delete) {
-    return this.deleteItem(ctx, id, del, WorkerActions.Delete.type)
+  delete(ctx: StateContext<WorkerStateModel>, { id, del, page }: WorkerActions.Delete) {
+    return this.deleteItem(ctx, id, del, WorkerActions.Delete.type, page)
+  }
+
+  @Action(WorkerActions.DeleteAll)
+  deleteAll(ctx: StateContext<WorkerStateModel>, { payload, del, active, page }: WorkerActions.DeleteAll) {
+    return this.deleteAllItem(ctx, payload, del, active, WorkerActions.DeleteAll.type, page)
   }
 
   @Action(WorkerActions.Restore)
   restore(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.Restore) {
     return this.restoreItem(ctx, id, WorkerActions.Restore.type)
-  }
-
-  @Action(WorkerActions.DeleteAll)
-  deleteAll(ctx: StateContext<WorkerStateModel>, { payload, del, active }: WorkerActions.DeleteAll) {
-    return this.deleteAllItem(ctx, payload, del, active, WorkerActions.DeleteAll.type)
   }
 
   @Action(WorkerActions.RestoreAll)
@@ -146,18 +175,18 @@ export class WorkerState extends BaseState<Worker> {
   }
 
   @Action(WorkerActions.ToggleItemSelection)
-  toggleSelection(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.ToggleItemSelection) {
-    return this.toggleSelectionItem(ctx, id)
+  toggleSelection(ctx: StateContext<WorkerStateModel>, { id, page }: WorkerActions.ToggleItemSelection) {
+    return this.toggleSelectionItem(ctx, id, page)
   }
 
   @Action(WorkerActions.ToggleAllItems)
-  toggleAll(ctx: StateContext<WorkerStateModel>, { selected }: WorkerActions.ToggleAllItems) {
-    return this.toggleAllItem(ctx, selected)
+  toggleAll(ctx: StateContext<WorkerStateModel>, { selected, page }: WorkerActions.ToggleAllItems) {
+    return this.toggleAllItem(ctx, selected, page)
   }
 
   @Action(WorkerActions.Filters)
-  Filters(ctx: StateContext<WorkerStateModel>, { payload, columns }: WorkerActions.Filters<Worker>) {
-    return super.filtersItems(ctx, WorkerActions.Filters.type, payload, columns);
+  Filters(ctx: StateContext<WorkerStateModel>, { payload, page, columns }: WorkerActions.Filters<Worker>) {
+    return super.filtersItems(ctx, WorkerActions.Filters.type, payload, columns, page);
   }
 
   @Action(WorkerActions.GetUnassignment)
@@ -207,13 +236,16 @@ export class WorkerState extends BaseState<Worker> {
     return this.clearEntity(ctx);
   }
 
-  @Action(WorkerActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<WorkerStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(WorkerActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<WorkerStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(WorkerActions.clearAll)
   clearAll(ctx: StateContext<WorkerStateModel>) {
     return this.clearAllItems(ctx);
   }
+
+
+
 }

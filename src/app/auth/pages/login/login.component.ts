@@ -27,7 +27,6 @@ export class LoginComponent {
     })
 
     this.store.select(AuthState.getError).subscribe(error => {
-      console.log('Constructor error', error)
       if(error)
         this.notificationService.show([error], 'error');
     })

@@ -8,6 +8,10 @@ import { CommonModule } from '@angular/common';
 import { NotificationComponent } from '../notification/notification.component';
 import { Store } from '@ngxs/store';
 import { UserAction } from '@state/user/user.actions';
+import { Observable } from 'rxjs';
+import { User } from '@models/user.model';
+import { UserState } from '@state/user/user.state';
+import { InitialLoaderService } from '@shared/services/initial-loader.service';
 
 @Component({
   selector: 'app-layout',
@@ -16,9 +20,9 @@ import { UserAction } from '@state/user/user.actions';
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent implements OnInit {
-  private readonly store = inject(Store);
+  private readonly initialLoaderService = inject(InitialLoaderService);
 
   ngOnInit(): void {
-    this.store.dispatch(new UserAction.GetProfile);
+    this.initialLoaderService.loadAsync();
   }
 }

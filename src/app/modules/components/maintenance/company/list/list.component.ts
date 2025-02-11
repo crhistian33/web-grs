@@ -46,7 +46,7 @@ export class ListComponent {
   selectedItems$: Observable<Company[]> = this.store.select(CompanyState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new CompanyActions.GetAll());
+    //this.store.dispatch(new CompanyActions.GetAll());
     this.onCountTrasheds();
   }
 

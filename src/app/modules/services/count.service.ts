@@ -9,13 +9,17 @@ import { checkToken } from '../../interceptors/auth.interceptor';
   providedIn: 'root'
 })
 export class CountService {
-  private apiUrl = `${environment.API_URL}/counts`;
+  private apiUrl = environment.API_URL;
 
   constructor(private http: HttpClient) {}
 
   getCounts(): Observable<Count> {
-      return this.http.get<Count>(this.apiUrl, { context: checkToken() }).pipe(catchError(this.handleError));
+      return this.http.get<Count>(`${this.apiUrl}/counts`, { context: checkToken() }).pipe(catchError(this.handleError));
   }
+
+  getCountsByCompany(id: number): Observable<Count> {
+    return this.http.get<Count>(`${this.apiUrl}/countsbycompany/${id}`, { context: checkToken() }).pipe(catchError(this.handleError));
+}
 
   private handleError(error: HttpErrorResponse) {
     if (error.status !== 500) {

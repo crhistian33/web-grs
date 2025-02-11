@@ -27,24 +27,41 @@ export class CountState {
 
   @Action(CountActions.GetCounts)
   getCounts(ctx: StateContext<CountStateModel>) {
-    console.log('Counts');
     ctx.dispatch(new SetLoading(CountActions.GetCounts.type, true));
     return this.countService.getCounts()
     .pipe(
       tap({
         next: (counts) => {
-          console.log('Serives count');
           ctx.patchState({
             counts,
         });
         },
         error: () => {
-          console.log('Serives count 2');
           ctx.dispatch(new SetLoading(CountActions.GetCounts.type, false));
         },
         complete: () => {
-          console.log('Serives count 3');
           ctx.dispatch(new SetLoading(CountActions.GetCounts.type, false));
+        }
+      })
+    )
+  }
+
+  @Action(CountActions.GetCountsByCompany)
+  getCountsByCompany(ctx: StateContext<CountStateModel>, { id }: CountActions.GetCountsByCompany) {
+    ctx.dispatch(new SetLoading(CountActions.GetCountsByCompany.type, true));
+    return this.countService.getCountsByCompany(id)
+    .pipe(
+      tap({
+        next: (counts) => {
+          ctx.patchState({
+            counts,
+        });
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(CountActions.GetCountsByCompany.type, false));
+        },
+        complete: () => {
+          ctx.dispatch(new SetLoading(CountActions.GetCountsByCompany.type, false));
         }
       })
     )

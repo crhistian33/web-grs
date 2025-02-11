@@ -5,14 +5,14 @@ import { Router } from '@angular/router';
 import { IModule } from '@shared/models/form.model';
 import { SubEntity } from '@shared/models/subentity.model';
 import { FORM_MODULE } from '@shared/utils/form-fields';
-import { BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, Subject, Subscription, take, takeUntil } from 'rxjs';
+import { BehaviorSubject, count, distinctUntilChanged, filter, map, Observable, of, Subject, Subscription, take, takeUntil, tap } from 'rxjs';
 import { DataListComponent } from '../data-list/data-list.component';
 import { Worker } from '@models/worker.model';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { Store } from '@ngxs/store';
 import { WorkerState } from '@state/worker/worker.state';
 import { WorkerActions } from '@state/worker/worker.action';
-import { IDENTIFIES } from '@shared/utils/constants';
+import { IDENTIFIES, TYPES } from '@shared/utils/constants';
 import { Shift } from '@models/shift.model';
 import { ShiftState } from '@state/shift/shift.state';
 import { ShiftActions } from '@state/shift/shift.action';
@@ -49,7 +49,19 @@ export class FormBuilderComponent {
   areAllSelected$!: Observable<boolean>;
 
   getSubEntityItems$(id: string): Observable<any[]> {
-    return this.subentities.find(e => e.id === id)?.data || of([]);
+    const subentities = this.subentities.find(e => e.id === id)?.data || of([]);
+    if(id === 'company_id') {
+      subentities.pipe(
+        take(1),
+        tap(items => {
+          if(items.length === 1) {
+            this.myForm.get(id)?.patchValue(items[0].id);
+            this.myForm.get(id)?.disable();
+          }
+        })
+      ).subscribe();
+    }
+    return subentities;
   }
 
   getSubEntityColumns$(id: string): Observable<DataListColumn<any>[]> {
@@ -224,7 +236,7 @@ export class FormBuilderComponent {
   }
 
   private selectedWorker(id: number) {
-    this.store.dispatch(new WorkerActions.ToggleItemSelection(id));
+    this.store.dispatch(new WorkerActions.ToggleItemSelection(id, TYPES.LIST));
     this.selectedWorkers$
       .pipe(takeUntil(this.destroy$))
       .subscribe(selectedWorkers => {
@@ -250,7 +262,7 @@ export class FormBuilderComponent {
   }
 
   private selectedWorkers(checked: boolean) {
-    this.store.dispatch(new WorkerActions.ToggleAllItems(checked));
+    this.store.dispatch(new WorkerActions.ToggleAllItems(checked, TYPES.LIST));
     this.selectedWorkers$
       .pipe(takeUntil(this.destroy$))
       .subscribe(selectedWorkers => {

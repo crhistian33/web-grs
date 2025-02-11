@@ -14,8 +14,16 @@ export class BaseCrudService<T extends BaseModel> {
     return this.httpClient.get<T[]>(this.apiUrl, { context: checkToken() }).pipe(catchError(this.handleError));
   }
 
+  getbyCompany(id: number): Observable<T[]> {
+    return this.httpClient.get<T[]>(`${this.apiUrl}/getbycompany/${id}`, { context: checkToken() });
+  }
+
   getDeletes(): Observable<T[]> {
     return this.httpClient.get<T[]>(`${this.apiUrl}/deletes`, { context: checkToken() }).pipe(catchError(this.handleError));
+  }
+
+  getDeletesByCompany(id: number): Observable<T[]> {
+    return this.httpClient.get<T[]>(`${this.apiUrl}/deletesbycompany/${id}`, { context: checkToken() }).pipe(catchError(this.handleError));
   }
 
   getById(id: number): Observable<T> {
@@ -57,7 +65,7 @@ export class BaseCrudService<T extends BaseModel> {
     if (error.status !== 500) {
       return throwError(() => error);
     }
-    return throwError(() => new Error('Error del servidor. Inténtelo más tarde'));
-    //return throwError(() => error);
+    //return throwError(() => new Error('Error del servidor. Inténtelo más tarde'));
+    return throwError(() => error);
   }
 }

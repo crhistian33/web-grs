@@ -1,22 +1,24 @@
 <img class="mx-auto my-2" src="assets/images/isotipo.png" width="40" alt="Grupo de resguardo y seguridad">
 <div class="mt-4">
   <!-- Inicio -->
-  <a routerLink="inicio" routerLinkActive="active" data-tooltip-target="tooltip-animation"
-    class="nav-item flex justify-center border-l-4 border-transparent py-3">
-    <ng-icon name="heroHomeSolid" class="scale-75 text-gray-200"></ng-icon>
-  </a>
-  <div id="tooltip-animation" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-    Inicio
-    <div class="tooltip-arrow" data-popper-arrow></div>
-  </div>
+  <app-tooltip text="Inicio" position="right">
+    <a routerLink="inicio" routerLinkActive="active" data-tooltip-target="tooltip-animation"
+      class="nav-item flex justify-center border-l-4 border-transparent py-3">
+      <ng-icon name="heroHomeSolid" class="scale-75 text-gray-200"></ng-icon>
+    </a>
+  </app-tooltip>
   <!-- Módulo de Tareo -->
-  <a routerLink="tareo" routerLinkActive="active"
-    class="nav-item flex justify-center border-l-4 border-transparent py-3">
-    <ng-icon name="heroDocumentCheckSolid" class="scale-75 text-gray-200"></ng-icon>
-  </a>
+  <app-tooltip text="Tareo" position="right">
+    <a routerLink="tareo" routerLinkActive="active"
+      class="nav-item flex justify-center border-l-4 border-transparent py-3">
+      <ng-icon name="heroDocumentCheckSolid" class="scale-75 text-gray-200"></ng-icon>
+    </a>
+  </app-tooltip>
   <!-- Módulo de Mantenimiento -->
-  <a routerLink="mantenimiento" routerLinkActive="active"
-    class="nav-item flex justify-center border-l-4 border-transparent py-3">
-    <ng-icon name="heroWrenchSolid" class="scale-75 text-gray-200"></ng-icon>
-  </a>
+  <app-tooltip text="Maestros" position="right">
+    <a routerLink="mantenimiento" routerLinkActive="active"
+      class="nav-item flex justify-center border-l-4 border-transparent py-3">
+      <ng-icon name="heroWrenchSolid" class="scale-75 text-gray-200"></ng-icon>
+    </a>
+  </app-tooltip>
 </div>

@@ -43,7 +43,7 @@ export class FormComponent {
   ]
 
   ngOnInit() {
-    this.store.dispatch(new CompanyActions.GetAll);
+    //this.store.dispatch(new CompanyActions.GetAll);
     if(this.id) {
       this.store.dispatch(new CustomerActions.GetById(this.id));
     }

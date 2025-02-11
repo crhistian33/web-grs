@@ -13,15 +13,6 @@ export abstract class AbstractBaseState<T extends BaseModel> {
   }
 
   getAll({ patchState }: StateContext<BaseStateModel<T>>) {
-    patchState({ loading: true, error: null });
-      return this.service.getAll().pipe(
-        tap({
-          next: (response: any) => {
-            console.log(response.data)
-            patchState({ entities: response.data, filteredItems: response.data, loading: false })
-          },
-          error: (error) => patchState({ error: error.message, loading: false })
-        })
-      )
+
   }
 }

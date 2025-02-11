@@ -32,6 +32,7 @@ import { AuthState } from './auth/state/auth.state';
 import { NgxsStoragePluginModule } from '@ngxs/storage-plugin';
 import { UserState } from '@state/user/user.state';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { CollapseState } from '@shared/state/collapse/collapse.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,11 +43,11 @@ export const appConfig: ApplicationConfig = {
       NgxsReduxDevtoolsPluginModule.forRoot({
         disabled: environment.production
       }),
-      NgxsLoggerPluginModule.forRoot({
-        disabled: environment.production
-      }),
+      // NgxsLoggerPluginModule.forRoot({
+      //   disabled: environment.production
+      // }),
       NgxsStoragePluginModule.forRoot({
-        keys: ['auth.access_token', 'auth.refresh_token', 'auth.isAuthenticated']
+        keys: ['auth.access_token', 'auth.refresh_token', 'auth.isAuthenticated', 'user']
       })
     ]),
     provideStore([
@@ -69,6 +70,7 @@ export const appConfig: ApplicationConfig = {
       CalendarState,
       AuthState,
       UserState,
+      CollapseState,
     ], {
       developmentMode: !environment.production,
       selectorOptions: {

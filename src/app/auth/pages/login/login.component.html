@@ -3,7 +3,7 @@
     <img src="assets/images/isotipo.png" class="w-full" alt="Grupo de resguardo y seguridad">
   </div>
   <div class="bg-white -mt-10 pt-14 pb-5 px-5">
-    <form [formGroup]="myForm">
+    <form [formGroup]="myForm" (submit)="onSubmit()">
       <div>
         <div class="border-b border-gray-900/10">
           <img src="assets/images/logo_sys.png" class="mx-auto scale-75" alt="GRS 1.0">
@@ -34,8 +34,8 @@
       </div>
 
       <div class="mt-4">
-        <button type="button"
-          class="w-full rounded-md bg-main_dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-main transition-colors" (click)="onSubmit()">Ingresar</button>
+        <button type="submit"
+          class="w-full rounded-md bg-main_dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-main transition-colors">Ingresar</button>
         <div class="text-center mt-2">
           <a href="#" class="text-sm text-gray_dark_600">¿Has olvidado tu contraseña?</a>
         </div>

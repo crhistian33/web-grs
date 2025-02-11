@@ -4,6 +4,7 @@ import { FilterStateModel } from "@shared/models/filter.model";
 export namespace CompanyActions {
   export class GetAll {
     static readonly type = '[Company] Get All';
+    constructor(public payload: Company[]) {};
   }
 
   export class GetDeletes {

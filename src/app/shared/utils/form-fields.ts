@@ -58,6 +58,19 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         ]
       },
       {
+        name: 'company_id',
+        label: 'Empresa',
+        type: 'select',
+        value: '',
+        validators: [
+          {
+            name: 'required',
+            validator: 'required',
+            message: 'La empresa es requerida',
+          }
+        ]
+      },
+      {
         name: 'user_id',
         type: 'hidden',
         value: '1'

@@ -13,6 +13,7 @@ import { ShiftActions } from './shift.action';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   },
 })
@@ -158,10 +159,10 @@ export class ShiftState extends BaseState<Shift> {
     return this.clearEntity(ctx);
   }
 
-  @Action(ShiftActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<ShiftStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(ShiftActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<ShiftStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(ShiftActions.clearAll)
   clearAll(ctx: StateContext<ShiftStateModel>) {

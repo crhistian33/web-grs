@@ -13,8 +13,4 @@ export class UserService extends BaseCrudService<User> {
   constructor(private http: HttpClient) {
     super(http, `${environment.API_URL}/users`);
   }
-
-  profile(): Observable<User> {
-    return this.http.get<User>(`${environment.API_URL}/users/profile`, { context: checkToken() });
-  }
 }

@@ -6,6 +6,11 @@ export namespace CustomerActions {
     static readonly type = '[Customer] Get All';
   }
 
+  export class GetByCompany {
+    static readonly type = '[Customer] Get All Company';
+    constructor(public id: number) {};
+  }
+
   export class GetDeletes {
     static readonly type = '[Customer] Get All Deletes';
   }

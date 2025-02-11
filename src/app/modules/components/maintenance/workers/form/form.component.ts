@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, Subject, take, takeUntil } from 'rxjs';
+import { map, Observable, Subject, take, takeUntil } from 'rxjs';
 import { Store } from '@ngxs/store';
 
 import { WorkerActions } from '@state/worker/worker.action';
@@ -16,6 +16,8 @@ import { FormBuilderComponent } from '@shared/components/formbuilder/formbuilder
 import { SubEntity } from '@shared/models/subentity.model';
 import { Worker } from '@models/worker.model';
 import { WorkerState } from '@state/worker/worker.state';
+import { Company } from '@models/company.model';
+import { UserState } from '@state/user/user.state';
 
 @Component({
   selector: 'app-form',
@@ -38,9 +40,13 @@ export class FormComponent {
   resetForm: boolean = false;
   typesWorker$: Observable<TypeWorker[]> = this.store.select(TypeworkerState.getItems);
   entity$: Observable<Worker | null> = this.store.select(WorkerState.getEntity);
+  companies$: Observable<Company[] | undefined> = this.store.select(UserState.getItem).pipe(
+    map(item => item?.companies)
+  );
 
   readonly subentities: SubEntity[] = [
-    { id: IDENTIFIES.TYPEWORKER, data: this.typesWorker$, type: 'select' }
+    { id: IDENTIFIES.TYPEWORKER, data: this.typesWorker$, type: 'select' },
+    { id: IDENTIFIES.COMPANY, data: this.companies$, type: 'select' }
   ]
 
   ngOnInit() {

@@ -1,0 +1,23 @@
+<div class="relative">
+  <!-- Trigger element -->
+  <div
+    (mouseenter)="showTooltip()"
+    (mouseleave)="hideTooltip()"
+    class="cursor-pointer">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Tooltip content -->
+  <div
+    *ngIf="isVisible"
+    [class]="tooltipPositionClass"
+    class="absolute z-50 px-3 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg shadow-sm transition-opacity duration-300"
+    role="tooltip">
+    {{ text }}
+    <!-- Tooltip arrow -->
+    <!-- <div
+      [class]="arrowPositionClass"
+      class="absolute w-2 h-2 bg-gray-900 rotate-45">
+    </div> -->
+  </div>
+</div>

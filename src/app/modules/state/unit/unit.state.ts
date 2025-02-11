@@ -15,6 +15,7 @@ import { tap } from 'rxjs';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   },
 })
@@ -57,6 +58,11 @@ export class UnitState extends BaseState<Unit> {
   @Action(UnitActions.GetAll)
   getAll(ctx: StateContext<UnitStateModel>) {
     return this.getItems(ctx, UnitActions.GetAll.type)
+  }
+
+  @Action(UnitActions.GetByCompany)
+  getAllCompany(ctx: StateContext<UnitStateModel>, { id }: UnitActions.GetByCompany) {
+    return this.getItemsByCompany(ctx, id, UnitActions.GetByCompany.type)
   }
 
   @Action(UnitActions.GetDeletes)
@@ -138,10 +144,10 @@ export class UnitState extends BaseState<Unit> {
     return this.clearEntity(ctx);
   }
 
-  @Action(UnitActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<UnitStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(UnitActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<UnitStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(UnitActions.clearAll)
   clearAll(ctx: StateContext<UnitStateModel>) {

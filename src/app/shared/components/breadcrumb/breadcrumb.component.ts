@@ -15,12 +15,8 @@ import { map, Observable } from 'rxjs';
   styleUrl: './breadcrumb.component.scss'
 })
 export class BreadcrumbComponent {
-  store = inject(Store)
-  breadcrumbService = inject(BreadcrumbService)
+  private readonly store = inject(Store)
+  private readonly breadcrumbService = inject(BreadcrumbService)
 
   breadcrumbs$: Observable<Breadcrumb[] | null> = this.store.select(BreadcrumbState.getBreadcrumbs);
-
-  isLast(item: Breadcrumb, breadcrumbs: Breadcrumb[]): boolean {
-    return breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].url === item.url;
-  }
 }

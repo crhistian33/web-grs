@@ -134,10 +134,10 @@ export class AssignmentState extends BaseState<Assignment> {
     return this.clearEntity(ctx);
   }
 
-  @Action(AssignmentActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<AssignmentStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(AssignmentActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<AssignmentStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(AssignmentActions.clearAll)
   clearAll(ctx: StateContext<AssignmentStateModel>) {

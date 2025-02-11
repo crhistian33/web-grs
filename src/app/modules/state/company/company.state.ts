@@ -14,6 +14,7 @@ import { CompanyActions } from './company.actions';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   }
 })
@@ -57,8 +58,12 @@ export class CompanyState extends BaseState<Company> {
   }
 
   @Action(CompanyActions.GetAll)
-  getAll(ctx: StateContext<CompanyStateModel>) {
-    return this.getItems(ctx, CompanyActions.GetAll.type);
+  getAll(ctx: StateContext<CompanyStateModel>, { payload }: CompanyActions.GetAll) {
+    ctx.patchState({
+      entities: payload,
+      filteredItems: payload
+    });
+    //return this.getItems(ctx, CompanyActions.GetAll.type);
   }
 
   @Action(CompanyActions.GetDeletes)
@@ -159,10 +164,10 @@ export class CompanyState extends BaseState<Company> {
     return this.clearEntity(ctx);
   }
 
-  @Action(CompanyActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<CompanyStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(CompanyActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<CompanyStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(CompanyActions.clearAll)
   clearAll(ctx: StateContext<CompanyStateModel>) {

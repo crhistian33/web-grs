@@ -22,6 +22,7 @@ export class HeaderDatalistService {
     { key: 'dni', label: 'DNI', type: 'text', filtered: true, internal: true },
     { key: 'birth_date', label: 'Fecha Nac.', type: 'date', filtered: false, internal: false },
     { key: 'typeworker', label: 'Tipo', type: 'relation-name', filtered: false, internal: false },
+    { key: 'company', label: 'Empresa', type: 'relation-name', filtered: false, internal: false },
   ];
   private headFormWorker: DataListColumn<Worker>[] = [
     { key: 'id', label: 'N°', type: 'number'},

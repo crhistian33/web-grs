@@ -46,7 +46,7 @@ export class ListComponent {
   selectedItems$: Observable<Center[]> = this.store.select(CenterState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new CenterActions.GetAll());
+    //this.store.dispatch(new CenterActions.GetAll());
     this.onCountTrasheds();
   }
 

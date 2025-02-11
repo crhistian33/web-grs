@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, take } from 'rxjs';
+import { filter, map, Observable, Subject, take, tap } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { NgIconsModule } from '@ng-icons/core';
 
@@ -18,6 +18,9 @@ import { filterConfig } from '@shared/models/filter-config.model';
 import { FilterComponent } from '@shared/components/filter/filter.component';
 import { FilterStateModel } from '@shared/models/filter.model';
 import { ActionsComponent } from '@shared/components/actions/actions.component';
+import { Company } from '@models/company.model';
+import { UserState } from '@state/user/user.state';
+import { CompanyState } from '@state/company/company.state';
 
 @Component({
   selector: 'app-list',
@@ -37,11 +40,8 @@ export class ListComponent {
   readonly columns: DataListColumn<Worker>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.WORKER);
   readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.WORKER);
 
-  config: filterConfig = {
-    typeworker: true,
-    search: true,
-  }
-
+  config!: filterConfig;
+  companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
   workers$: Observable<Worker[]> = this.store.select(WorkerState.getItems);
   trashedWorkers$: Observable<Worker[] | null> = this.store.select(WorkerState.getTrasheds);
   areAllSelected$: Observable<boolean> = this.store.select(WorkerState.areAllSelected);
@@ -49,7 +49,24 @@ export class ListComponent {
   selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new WorkerActions.GetAll);
+    this.companies$.pipe(
+      filter((companies): companies is Company[] => !!companies),
+      take(1),
+      tap(companies => {
+        if (companies.length > 1) {
+          this.config = {
+            company: true,
+            typeworker: true,
+            search: true,
+          }
+        } else if (companies.length === 1) {
+          this.config  = {
+            typeworker: true,
+            search: true,
+          }
+        }
+      })
+    ).subscribe();
     this.onCountTrasheds();
   }
 
@@ -66,7 +83,7 @@ export class ListComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new WorkerActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new WorkerActions.Delete(id, del, TYPES.LIST)).subscribe({
       next: (response: any)=> {
         this.sweetalertService.confirmSuccess(
           response.worker.result.title,
@@ -95,7 +112,7 @@ export class ListComponent {
     this.selectedItems$
     .pipe(take(1))
     .subscribe(data => {
-      this.store.dispatch(new WorkerActions.DeleteAll(data, del, true))
+      this.store.dispatch(new WorkerActions.DeleteAll(data, del, true, TYPES.LIST))
       .pipe(take(1))
       .subscribe({
         next: (response: any)=> {
@@ -116,20 +133,20 @@ export class ListComponent {
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new WorkerActions.ToggleItemSelection(id));
+    this.store.dispatch(new WorkerActions.ToggleItemSelection(id, TYPES.LIST));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new WorkerActions.ToggleAllItems(checked));
+    this.store.dispatch(new WorkerActions.ToggleAllItems(checked, TYPES.LIST));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new WorkerActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new WorkerActions.Filters(filter, TYPES.LIST, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new WorkerActions.clearAll);
+    //this.store.dispatch(new WorkerActions.clearAll);
   }
 }

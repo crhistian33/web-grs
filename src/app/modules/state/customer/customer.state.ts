@@ -14,6 +14,7 @@ import { SetLoading } from '@shared/state/loading/loading.actions';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   },
 })
@@ -59,6 +60,11 @@ export class CustomerState extends BaseState<Customer> {
   @Action(CustomerActions.GetAll)
   getAll(ctx: StateContext<CustomerStateModel>) {
     return this.getItems(ctx, CustomerActions.GetAll.type);
+  }
+
+  @Action(CustomerActions.GetByCompany)
+  getAllCompany(ctx: StateContext<CustomerStateModel>, { id }: CustomerActions.GetByCompany) {
+    return this.getItemsByCompany(ctx, id, CustomerActions.GetByCompany.type)
   }
 
   @Action(CustomerActions.GetDeletes)
@@ -159,10 +165,10 @@ export class CustomerState extends BaseState<Customer> {
     return this.clearEntity(ctx);
   }
 
-  @Action(CustomerActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<CustomerStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(CustomerActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<CustomerStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(CustomerActions.clearAll)
   clearAll(ctx: StateContext<CustomerStateModel>) {

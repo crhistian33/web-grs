@@ -13,6 +13,7 @@ import { CenterActions } from './center.action';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   },
 })
@@ -158,10 +159,10 @@ export class CenterState extends BaseState<Center> {
     return this.clearEntity(ctx);
   }
 
-  @Action(CenterActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<CenterStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(CenterActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<CenterStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(CenterActions.clearAll)
   clearAll(ctx: StateContext<CenterStateModel>) {

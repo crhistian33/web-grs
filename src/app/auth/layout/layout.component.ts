@@ -4,11 +4,11 @@ import { LoadingComponent } from '@shared/components/loading/loading.component';
 import { NotificationComponent } from '@shared/components/notification/notification.component';
 
 @Component({
-  selector: 'app-layout',
+  selector: 'app-layout-auth',
   imports: [RouterOutlet, LoadingComponent, NotificationComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })
-export class LayoutComponent {
+export class LayoutAuthComponent {
 
 }

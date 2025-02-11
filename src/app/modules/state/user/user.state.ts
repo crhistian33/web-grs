@@ -5,6 +5,7 @@ import { User, UserStateModel } from '@models/user.model';
 import { BaseState } from '@shared/state/base.state';
 import { UserService } from '@services/user.service';
 import { tap } from 'rxjs';
+import { CountActions } from '@state/count/count.actions';
 
 @State<UserStateModel>({
   name: 'user',
@@ -14,6 +15,7 @@ import { tap } from 'rxjs';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   }
 })
@@ -29,11 +31,18 @@ export class UserState extends BaseState<User> {
   }
 
   @Action(UserAction.GetProfile)
-  profile(ctx: StateContext<UserStateModel>) {
-    return this.userService.profile().pipe(
-      tap((response: any) => {
-        ctx.patchState({ selectedEntity: response.data })
-      })
-    );
+  profile(ctx: StateContext<UserStateModel>, { payload }: UserAction.GetProfile) {
+    const state = ctx.getState();
+    if(state.selectedEntity)
+      return;
+
+    ctx.patchState({
+      selectedEntity: payload
+    });
+  }
+
+  @Action(UserAction.ClearAll)
+  clearAll (ctx: StateContext<UserStateModel>) {
+    return this.clearAllItems(ctx);
   }
 }

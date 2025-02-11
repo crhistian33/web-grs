@@ -6,12 +6,22 @@ export namespace WorkerActions {
     static readonly type = '[Worker] Get All';
   }
 
+  export class GetByCompany {
+    static readonly type = '[Worker] Get All Company';
+    constructor(public id: number) {};
+  }
+
   export class GetAllReassigns {
     static readonly type = '[Worker] Get All Reassigns';
   }
 
   export class GetDeletes {
     static readonly type = '[Worker] Get All Deletes';
+  }
+
+  export class GetDeletesByCompany {
+    static readonly type = '[Worker] Get All Deletes by Company';
+    constructor(public id: number) {};
   }
 
   export class GetUnassignment<T> {
@@ -38,7 +48,7 @@ export namespace WorkerActions {
 
   export class Filters<T> {
     static readonly type = '[Worker] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -53,7 +63,7 @@ export namespace WorkerActions {
 
   export class Delete {
     static readonly type = '[Worker] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class Restore {
@@ -63,7 +73,7 @@ export namespace WorkerActions {
 
   export class DeleteAll {
     static readonly type = '[Worker] Delete All';
-    constructor(public payload: Worker[], public del: boolean, public active: boolean) {}
+    constructor(public payload: Worker[], public del: boolean, public active: boolean, public page: string) {}
   }
 
   export class RestoreAll {
@@ -73,12 +83,12 @@ export namespace WorkerActions {
 
   export class ToggleItemSelection {
     static readonly type = '[Worker] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[Worker] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {
@@ -92,4 +102,6 @@ export namespace WorkerActions {
   export class clearAll {
     static readonly type = '[Worker] Clear All';
   }
+
+
 }

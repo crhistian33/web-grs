@@ -13,6 +13,7 @@ import { TypeWorkerActions } from './typeworker.action';
     trashedItems: [],
     selectedEntity: null,
     searchTerm: '',
+    loaded: false,
     result: null,
   },
 })
@@ -158,10 +159,10 @@ export class TypeworkerState extends BaseState<TypeWorker> {
     return this.clearEntity(ctx);
   }
 
-  @Action(TypeWorkerActions.ClearItemSelection)
-  clearSelected(ctx: StateContext<TypeWorkerStateModel>) {
-    return this.clearSelectionItem(ctx);
-  }
+  // @Action(TypeWorkerActions.ClearItemSelection)
+  // clearSelected(ctx: StateContext<TypeWorkerStateModel>) {
+  //   return this.clearSelectionItem(ctx);
+  // }
 
   @Action(TypeWorkerActions.clearAll)
   clearAll(ctx: StateContext<TypeWorkerStateModel>) {

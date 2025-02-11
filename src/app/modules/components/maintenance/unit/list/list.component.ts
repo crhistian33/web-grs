@@ -49,7 +49,7 @@ export class ListComponent {
   selectedItems$: Observable<Unit[]> = this.store.select(UnitState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new UnitActions.GetAll())
+    //this.store.dispatch(new UnitActions.GetAll())
     this.onCountTrasheds();
   }
 
@@ -143,6 +143,6 @@ export class ListComponent {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new UnitActions.clearAll);
+    //this.store.dispatch(new UnitActions.clearAll);
   }
 }

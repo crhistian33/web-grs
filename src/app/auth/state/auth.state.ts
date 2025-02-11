@@ -2,9 +2,18 @@ import { inject, Injectable } from '@angular/core';
 import { State, Action, Selector, StateContext } from '@ngxs/store';
 import { AuthAction } from './auth.actions';
 import { AuthService } from '../services/auth.service';
-import { take, tap } from 'rxjs';
+import { switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { SetLoading } from '@shared/state/loading/loading.actions';
+import { UserAction } from '@state/user/user.actions';
+import { CompanyActions } from '@state/company/company.actions';
+import { InitialLoaderService } from '@shared/services/initial-loader.service';
+import { CenterActions } from '@state/center/center.action';
+import { CustomerActions } from '@state/customer/customer.action';
+import { UnitActions } from '@state/unit/unit.actions';
+import { ShiftActions } from '@state/shift/shift.action';
+import { TypeWorkerActions } from '@state/typeworker/typeworker.action';
+import { WorkerActions } from '@state/worker/worker.action';
 
 export interface AuthStateModel {
   access_token: string | null;
@@ -27,6 +36,7 @@ export interface AuthStateModel {
 export class AuthState {
   private readonly service = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly initialLoaderService = inject(InitialLoaderService);
 
   @Selector()
   static getError(state: AuthStateModel) {
@@ -57,13 +67,17 @@ export class AuthState {
       .pipe(
         tap({
           next: (response) => {
-            if(response.success) {
+            if(response.data && response.success) {
               ctx.patchState({
-                access_token: response.data?.access_token,
-                refresh_token: response.data?.refresh_token,
+                access_token: response.data.access_token,
+                refresh_token: response.data.refresh_token,
                 isAuthenticated: true,
                 error: null
               });
+              ctx.dispatch(new UserAction.GetProfile(response.data.user)).pipe(
+                switchMap(() => this.initialLoaderService.load())
+              )
+              .subscribe();
               this.router.navigate(['/inicio']);
               ctx.dispatch(new SetLoading(AuthAction.Login.type, false));
             } else {
@@ -103,12 +117,32 @@ export class AuthState {
 
   @Action(AuthAction.Logout)
   logout(ctx: StateContext<AuthStateModel>) {
-    ctx.setState({
-      access_token: null,
-      refresh_token: null,
-      isAuthenticated: false,
-      error: null
-    });
-    this.router.navigate(['/auth/login']);
+    ctx.dispatch(new SetLoading(AuthAction.Logout.type, true));
+    return this.service.logout().pipe(
+      tap(() => {
+        localStorage.removeItem('auth.access_token');
+        localStorage.removeItem('auth.isAuthenticated');
+        localStorage.removeItem('auth.refresh_token');
+        localStorage.removeItem('user');
+        ctx.setState({
+          access_token: null,
+          refresh_token: null,
+          isAuthenticated: false,
+          error: null
+        });
+        ctx.dispatch([
+          new CenterActions.clearAll,
+          new CompanyActions.clearAll,
+          new CustomerActions.clearAll,
+          new UnitActions.clearAll,
+          new ShiftActions.clearAll,
+          new TypeWorkerActions.clearAll,
+          new WorkerActions.clearAll,
+          new UserAction.ClearAll,
+        ]);
+        this.router.navigate(['/auth/login']);
+        ctx.dispatch(new SetLoading(AuthAction.Logout.type, false));
+      })
+    );
   }
 }

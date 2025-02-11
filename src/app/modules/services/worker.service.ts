@@ -30,4 +30,8 @@ export class WorkerService extends BaseCrudService<Worker> {
   getAssignsId(id: number): Observable<Worker[]> {
     return this.http.get<Worker[]>(`${environment.API_URL}/workers/assigns/${id}`, { context: checkToken() });
   }
+
+  uploadWorkers(payload: any) {
+    return this.http.post(`${environment.API_URL}/workers/bulk-upload`, payload, { context: checkToken() })
+  }
 }

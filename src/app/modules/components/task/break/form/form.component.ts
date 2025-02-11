@@ -160,7 +160,5 @@ export class FormComponent {
       const index = this.items.value.findIndex((item: any) => item.start_date === formattedDate);
       this.items.removeAt(index);
     }
-
-    console.log(this.myFormBreak.getRawValue());
   }
 }

@@ -9,7 +9,7 @@ import { Worker } from '@models/worker.model';
 import { FormBuilderComponent } from '@shared/components/formbuilder/formbuilder.component';
 import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
-import { IDENTIFIES, PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
+import { IDENTIFIES, PARAMETERS, ROUTES, TITLES, TYPES } from '@shared/utils/constants';
 import { AssignmentActions } from '@state/assignment/assignment.actions';
 import { AssignmentState } from '@state/assignment/assignment.state';
 import { UnitActions } from '@state/unit/unit.actions';
@@ -85,7 +85,7 @@ export class FormComponent {
     .subscribe(entity => {
       if (entity?.workers?.length) {
         entity.workers.forEach(worker => {
-          this.store.dispatch(new WorkerActions.ToggleItemSelection(worker.id))
+          this.store.dispatch(new WorkerActions.ToggleItemSelection(worker.id, TYPES.LIST))
           .pipe(takeUntil(this.destroy$));
         });
       }

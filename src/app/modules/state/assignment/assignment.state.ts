@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { State, Action, Selector, StateContext } from '@ngxs/store';
-import { Assignment, AssignmentStateModel } from '@models/assignment.model';
+import { Assignment, AssignmentRequest, AssignmentStateModel } from '@models/assignment.model';
 import { AssignmentActions } from './assignment.actions';
 import { BaseState } from '@shared/state/base.state';
 import { AssignmentService } from '@services/assignment.service';
@@ -13,13 +13,14 @@ import { tap } from 'rxjs';
     entities: [],
     filteredItems: [],
     trashedItems: [],
+    filterTrashedItems: [],
     selectedEntity: null,
     searchTerm: '',
     result: null,
   }
 })
 @Injectable()
-export class AssignmentState extends BaseState<Assignment> {
+export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
   constructor(private assignmentService: AssignmentService) {
     super(assignmentService);
   }

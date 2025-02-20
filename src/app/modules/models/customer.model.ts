@@ -10,4 +10,12 @@ export interface Customer extends BaseModel {
   company: Company;
 }
 
+export interface CustomerRequest {
+  code: string;
+  name: string;
+  ruc: string;
+  phone: string;
+  company_id: number;
+}
+
 export interface CustomerStateModel extends BaseStateModel<Customer> {}

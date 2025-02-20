@@ -36,13 +36,17 @@ export class InitialLoaderService {
   }
 
   private loadDependentData(user: User): Observable<boolean> {
-    return forkJoin({
-      companies: this.store.dispatch(new CompanyActions.GetAll(user.companies)),
-      data: this.getActionsByCompanyCount(user)
-    }).pipe(
+    return this.getActionsByCompanyCount(user).pipe(
       map(() => true),
       catchError(this.handleError)
     );
+    // forkJoin({
+    //   companies: this.store.dispatch(new CompanyActions.GetAll(user.companies)),
+    //   data: this.getActionsByCompanyCount(user)
+    // }).pipe(
+    //   map(() => true),
+    //   catchError(this.handleError)
+    // );
   }
 
   private getActionsByCompanyCount(user: User): Observable<any> {
@@ -56,6 +60,7 @@ export class InitialLoaderService {
 
   private getCommonActions(): any[] {
     return [
+      new CompanyActions.GetAll(),
       new TypeWorkerActions.GetAll(),
       new CenterActions.GetAll(),
       new ShiftActions.GetAll()
@@ -72,9 +77,9 @@ export class InitialLoaderService {
 
    private getSingleCompanyActions(companyId: number): any[] {
     return [
-      new WorkerActions.GetByCompany(companyId),
-      new CustomerActions.GetByCompany(companyId),
-      new UnitActions.GetByCompany(companyId)
+      new WorkerActions.GetAll(companyId),
+      new CustomerActions.GetAll(companyId),
+      new UnitActions.GetAll(companyId)
     ];
    }
 

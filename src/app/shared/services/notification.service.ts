@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 
 export interface INotification {
   message: string[];
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
   duration?: number;
 }
 
@@ -14,7 +14,7 @@ export class NotificationService {
   private notificationSubject = new Subject<INotification>();
   notification$ = this.notificationSubject.asObservable();
 
-  show(message: string[], type: 'success' | 'error' | 'info' = 'info', duration: number = 3000) {
+  show(message: string[], type: 'success' | 'error' | 'info' | 'warning' = 'info', duration: number = 3000) {
     this.notificationSubject.next({ message, type, duration });
   }
 }

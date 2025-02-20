@@ -1,11 +1,8 @@
-<div class="bg-white shadow-md rounded-b-lg overflow-hidden">
-  <!-- Tabla Responsive -->
+<div class="bg-white shadow-md rounded-b-lg">
   <div>
     <table class="min-w-full divide-y divide-gray-200">
-      <!-- Encabezados -->
       <thead class="bg-gray_dark_500 text-white">
         <tr>
-          <!-- <th class="px-3 py-3 w-1" *ngIf="isShown"></th> -->
           <th
             class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors w-1">
             <div class="flex items-center gap-2">
@@ -28,21 +25,13 @@
           </th>
         </tr>
       </thead>
-
-      <!-- Cuerpo de la tabla -->
       <tbody class="bg-white divide-y divide-gray-200">
         @for (item of paginatedData; track item.id; let i = $index) {
-        <tr class="hover:bg-gray-100" [ngClass]="{ 'bg-gray-100': hasNestedData(item) }">
-          <!-- <td class="px-3 py-4 text-center" *ngIf="isShown">
-            <button (click)="togglePanel(item.id)">
-              <ng-icon *ngIf="!panelStates.get(item.id)" name="heroPlusSolid" class="scale-75" />
-              <ng-icon *ngIf="panelStates.get(item.id)" name="heroMinusSolid" class="scale-75" />
-            </button>
-          </td> -->
+        <tr class="hover:bg-gray-200 cursor-pointer" (click)="onToggleItem(item.id)">
           <td class="p-3 whitespace-nowrap">
             <input
               class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 focus:ring-2 cursor-pointer"
-              type="checkbox" [checked]="item.selected" (change)="onToggleItem(item.id)">
+              type="checkbox" [checked]="item.selected">
           </td>
           @for (column of columns; track $index) {
           <td class="px-6 py-4 whitespace-nowrap">
@@ -56,62 +45,35 @@
             </div>
           </td>
           }
-          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" *ngIf="!hiddenActions">
+          <td class="w-40 px-6 py-4 whitespace-nowrap text-right text-sm font-medium" *ngIf="!hiddenActions">
             <div class="flex items-center justify-center">
-              <button class="ms-2" (click)="onReassign(item)" *ngIf="page === 'reasigna'">
-                <ng-icon name="heroClipboardDocumentCheckSolid"
-                  class="text-gray_dark_600 hover:text-orange-600 transition-colors"></ng-icon>
-              </button>
-              <a [routerLink]="['editar', item.id]" *ngIf="page === 'lista' || page === 'none'">
-                <ng-icon name="heroPencilSquareSolid"
-                  class="text-gray_dark_600 hover:text-orange-500 transition-colors"></ng-icon>
-              </a>
-              <button class="ms-2" (click)="onRestore(item.id)" *ngIf="page === 'papelera'">
-                <ng-icon name="heroArrowLeftOnRectangleSolid"
-                  class="text-gray_dark_600 hover:text-blue-500 transition-colors"></ng-icon>
-              </button>
-              <button class="ms-2" (click)="onDelete(item.id)">
-                <ng-icon name="heroTrashSolid"
-                  class="text-gray_dark_600 hover:text-red-600 transition-colors"></ng-icon>
-              </button>
+              <app-tooltip text="Reasignar" position="bottom" type="table">
+                <button class="ms-2" (click)="onReassign(item); $event.stopPropagation()" *ngIf="page === 'reasigna'">
+                  <ng-icon name="heroClipboardDocumentCheckSolid"
+                    class="text-gray_dark_600 hover:text-orange-600 transition-colors"></ng-icon>
+                </button>
+              </app-tooltip>
+              <app-tooltip text="Editar" position="bottom" type="table">
+                <a [routerLink]="['editar', item.id]" *ngIf="page === 'lista' || page === 'none'">
+                  <ng-icon name="heroPencilSquareSolid"
+                    class="text-gray_dark_600 hover:text-orange-500 transition-colors"></ng-icon>
+                </a>
+              </app-tooltip>
+              <app-tooltip text="Restaurar" position="bottom" type="table">
+                <button class="ms-2" (click)="onRestore(item.id); $event.stopPropagation()" *ngIf="page === 'papelera'">
+                  <ng-icon name="heroArrowLeftOnRectangleSolid"
+                    class="text-gray_dark_600 hover:text-blue-500 transition-colors"></ng-icon>
+                </button>
+              </app-tooltip>
+              <app-tooltip text="Eliminar" position="bottom" type="table">
+                <button class="ms-2" (click)="onDelete(item.id); $event.stopPropagation()">
+                  <ng-icon name="heroTrashSolid"
+                    class="text-gray_dark_600 hover:text-red-600 transition-colors"></ng-icon>
+                </button>
+              </app-tooltip>
             </div>
           </td>
         </tr>
-        <!-- <ng-container *ngIf="hasNestedData(item)">
-          <tr>
-            <td [colSpan]="columns.length + 3" class="p-0">
-              <div [@fadeInOut]="panelStates.get(item.id) ? 'active' : 'void'" class="hidden">
-                <div class="bg-gray-100 px-4 py-2">
-                  <h2 class="font-semibold text-gray_dark_600 mb-2">Trabajadores asignados</h2>
-                  <table class="bg-white min-w-full">
-                    <thead class="bg-cyan-700 text-white">
-                      <tr *ngIf="nestedColumns">
-                        <th *ngFor="let nestedColumn of nestedColumns" class="px-6 py-2 text-left text-xs font-medium">
-                          {{ nestedColumn.label }}
-                        </th>
-                        <th class="px-6 py-2"></th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 ">
-                      <tr *ngFor="let nestedItem of getNestedData(item)">
-                        <td *ngFor="let nestedColumn of nestedColumns" class="px-6 py-2 text-sm">
-                          {{ nestedItem[nestedColumn.key] }}
-                        </td>
-                        <td class="px-6 py-2 text-sm text-right">
-                          <button>
-                            <ng-icon name="heroTrashSolid"
-                              class="text-cyan-700 hover:text-red-600 transition-colors"></ng-icon>
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr></tr>
-        </ng-container> -->
         }
       </tbody>
     </table>
@@ -122,7 +84,6 @@
   </div>
   }
 </div>
-<!-- Paginación -->
 <div class="flex items-center justify-end gap-2 mt-4">
   <span class="text-sm text-gray-600">
     Mostrando {{ startIndex + 1 }} - {{ endIndex }} de {{ totalItems }}

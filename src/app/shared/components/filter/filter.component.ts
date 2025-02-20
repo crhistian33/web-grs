@@ -63,8 +63,6 @@ export class FilterComponent {
   @Input() config!: filterConfig;
   @Output() filters = new EventEmitter<FilterStateModel>();
   filterForm: FormGroup;
-  // isExpanded: boolean = true;
-  //isShown = false;
 
   isShowFilter$ = this.store.select(CollapseState.getFilter);
   companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
@@ -85,77 +83,81 @@ export class FilterComponent {
       searchTerm: [null],
     });
 
-    if(this.config && this.config.customer) {
-      this.filteredCustomers$ = combineLatest([
-        this.store.select(CustomerState.getItems),
-        this.store.select(FilterState.getSelectedCompanyId)
-      ]).pipe(
-        map(([customers, selectedCompanyId]) => {
-          if (selectedCompanyId)
-            return customers.filter(customer => customer.company.id === selectedCompanyId);
-          return customers;
-        })
-      );
+    this.filteredCustomers$ = combineLatest([
+      this.store.select(CustomerState.getItems),
+      this.store.select(FilterState.getSelectedCompanyId)
+    ]).pipe(
+      map(([customers, selectedCompanyId]) => {
+        if (selectedCompanyId)
+          return customers.filter(customer => customer.company.id === selectedCompanyId);
+        return customers;
+      })
+    );
 
-      this.filteredUnits$ = combineLatest([
-        this.store.select(UnitState.getItems),
-        this.store.select(FilterState.getSelectedCompanyId),
-        this.store.select(FilterState.getSelectedCustomerId),
-        this.filteredCustomers$
-      ]).pipe(
-        map(([units, selectedCompanyId, selectedCustomerId, filteredCustomers]) => {
-          if (selectedCustomerId) {
-            return units.filter(unit => unit.customer.id === selectedCustomerId);
-          }
-          if (selectedCompanyId) {
-            const customerIds = filteredCustomers.map(customer => customer.id);
-            return units.filter(unit => customerIds.includes(Number(unit.customer.id)));
-          }
-          return units;
-        })
-      );
+    this.filteredUnits$ = combineLatest([
+      this.store.select(UnitState.getItems),
+      this.store.select(FilterState.getSelectedCompanyId),
+      this.store.select(FilterState.getSelectedCustomerId),
+      this.filteredCustomers$
+    ]).pipe(
+      map(([units, selectedCompanyId, selectedCustomerId, filteredCustomers]) => {
+        if (selectedCustomerId) {
+          return units.filter(unit => unit.customer.id === selectedCustomerId);
+        }
+        if (selectedCompanyId) {
+          const customerIds = filteredCustomers.map(customer => customer.id);
+          return units.filter(unit => customerIds.includes(Number(unit.customer.id)));
+        }
+        return units;
+      })
+    );
 
-      this.filteredShifts$ = combineLatest([
-        this.store.select(ShiftState.getItems),
-        this.store.select(FilterState.getSelectedUnitId),
-        this.filteredUnits$
-      ]).pipe(
-        map(([shifts, selectedUnitId, filteredUnits]) => {
-          if (selectedUnitId) {
-            const unit = filteredUnits.find(unit => unit.id === selectedUnitId);
-            return unit?.shifts || [];
-          }
-          return shifts;
-        })
-      );
-    }
-
+    this.filteredShifts$ = combineLatest([
+      this.store.select(ShiftState.getItems),
+      this.store.select(FilterState.getSelectedUnitId),
+      this.filteredUnits$
+    ]).pipe(
+      map(([shifts, selectedUnitId, filteredUnits]) => {
+        if (selectedUnitId) {
+          const unit = filteredUnits.find(unit => unit.id === selectedUnitId);
+          return unit?.shifts || [];
+        }
+        return shifts;
+      })
+    );
   }
 
   ngOnInit() {
-    this.companies$.pipe(
-      filter((companies): companies is Company[] => !!companies),
-      take(1),
-      tap(companies => {
-        if(companies.length === 1) {
-          const companyId = companies[0].id;
-          this.onSelectCompany(companyId);
-        }
-      })
-    ).subscribe();
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if(companies && companies.length === 1) {
+      const companyId = companies[0].id;
+      this.onSelectCompany(companyId);
+    }
 
+    if(companies) {
+      if(companies.length > 1) {
+        this.loadDataSelects();
+      } else if(companies.length === 1) {
+        this.loadDataSelects(companies[0].id);
+      }
+    }
+  }
+
+  loadDataSelects(companyId?: number) {
     if(this.config.customer)
-      this.store.dispatch(new CustomerActions.GetAll);
+      companyId ? this.store.dispatch(new CustomerActions.GetAll(companyId)) : this.store.dispatch(new CustomerActions.GetAll());
+
     if(this.config.unit)
-      this.store.dispatch(new UnitActions.GetAll);
+      companyId ? this.store.dispatch(new UnitActions.GetAll(companyId)) : this.store.dispatch(new UnitActions.GetAll);
+
     if(this.config.shift)
-      this.store.dispatch(new ShiftActions.GetAll);
+      this.store.dispatch(new ShiftActions.GetAll());
+
     if(this.config.typeworker)
-      this.store.dispatch(new TypeWorkerActions.GetAll);
+      this.store.dispatch(new TypeWorkerActions.GetAll());
   }
 
   toggle() {
-    //this.isShown = !this.isShown;
     this.store.dispatch(new CollapseAction.toggleFilter);
   }
 

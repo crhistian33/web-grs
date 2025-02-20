@@ -10,4 +10,10 @@ export interface User extends BaseModel {
   companies: Company[];
 }
 
+export interface UserRequest {
+  name: string;
+  email: string;
+  role_id: number;
+}
+
 export interface UserStateModel extends BaseStateModel<User> {}

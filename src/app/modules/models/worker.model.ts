@@ -13,6 +13,15 @@ export interface Worker extends BaseModel {
   assignments: Assignment[];
 }
 
+export interface WorkerRequest {
+  name: string;
+  dni: string;
+  birth_date: string;
+  company_id: number;
+  type_worker_id: number;
+  user_id: number;
+}
+
 export interface WorkerUpload {
   name: string;
   dni: string;

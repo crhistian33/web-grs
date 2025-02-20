@@ -69,7 +69,7 @@ export class FormComponent {
   }
 
   private loadExistingAssignment(): void {
-    this.store.dispatch(new WorkerActions.GetAssignsId(this.id))
+    this.store.dispatch(new WorkerActions.GetUnassignment(this.id))
     .pipe(
       switchMap(() => this.workers$.pipe(
         filter(workers => workers.length > 0),

@@ -39,13 +39,13 @@ export class RemovesComponent {
     search: true,
   }
 
-  centers$: Observable<Center[] | null> = this.store.select(CenterState.getItems);
-  areAllSelected$: Observable<boolean> = this.store.select(CenterState.areAllSelected);
-  hasSelectedItems$: Observable<boolean> = this.store.select(CenterState.hasSelectedItems);
-  selectedItems$: Observable<Center[]> = this.store.select(CenterState.getSelectedItems);
+  centers$: Observable<Center[] | null> = this.store.select(CenterState.getTrasheds);
+  areAllSelected$: Observable<boolean> = this.store.select(CenterState.areTrashedAllSelected);
+  hasSelectedItems$: Observable<boolean> = this.store.select(CenterState.hasTrashedSelectedItems);
+  selectedItems$: Observable<Center[]> = this.store.select(CenterState.getTrashedSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new CenterActions.GetDeletes)
+    this.store.dispatch(new CenterActions.GetTrasheds)
   }
 
   onDelete(id: number) {
@@ -55,7 +55,7 @@ export class RemovesComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new CenterActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new CenterActions.Delete(id, del, TYPES.RECYCLE)).subscribe({
       next: (response: any)=> {
         this.sweetalertService.confirmSuccess(
           response.center.result.title,
@@ -63,8 +63,9 @@ export class RemovesComponent {
         )
       },
       error: (error) => {
+        const status = error.status === 422 ? 'warning' : 'error';
         const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-        this.notificationService.show(errors, "error");
+        this.notificationService.show(errors || 'Ocurrió un error', status);
       },
     })
   }
@@ -79,8 +80,9 @@ export class RemovesComponent {
           )
         },
         error: (error) => {
+          const status = error.status === 422 ? 'warning' : 'error';
           const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-          this.notificationService.show(errors, "error");
+          this.notificationService.show(errors || 'Ocurrió un error', status);
         },
       })
     })
@@ -101,8 +103,9 @@ export class RemovesComponent {
             )
           },
           error: (error) => {
+            const status = error.status === 422 ? 'warning' : 'error';
             const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-            this.notificationService.show(errors, "error");
+            this.notificationService.show(errors || 'Ocurrió un error', status);
           },
         })
       })
@@ -114,7 +117,7 @@ export class RemovesComponent {
       this.selectedItems$
       .pipe(take(1))
       .subscribe(data => {
-        this.store.dispatch(new CenterActions.DeleteAll(data, true, false))
+        this.store.dispatch(new CenterActions.DeleteAll(data, true, false, TYPES.RECYCLE))
         .pipe(take(1))
         .subscribe({
           next: (response: any)=> {
@@ -124,8 +127,9 @@ export class RemovesComponent {
             )
           },
           error: (error) => {
+            const status = error.status === 422 ? 'warning' : 'error';
             const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-            this.notificationService.show(errors, "error");
+            this.notificationService.show(errors || 'Ocurrió un error', status);
           },
         })
       })
@@ -133,20 +137,20 @@ export class RemovesComponent {
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new CenterActions.ToggleItemSelection(id));
+    this.store.dispatch(new CenterActions.ToggleItemSelection(id, TYPES.RECYCLE));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new CenterActions.ToggleAllItems(checked));
+    this.store.dispatch(new CenterActions.ToggleAllItems(checked, TYPES.RECYCLE));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new CenterActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new CenterActions.Filters(filter, TYPES.RECYCLE, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new CenterActions.clearAll);
+    this.store.dispatch(new CenterActions.ClearItemSelection);
   }
 }

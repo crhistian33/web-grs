@@ -15,6 +15,7 @@ import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { CustomerActions } from '@state/customer/customer.action';
 import { CustomerState } from '@state/customer/customer.state';
+import { UserState } from '@state/user/user.state';
 import { Observable, Subject, take } from 'rxjs';
 
 @Component({
@@ -35,11 +36,8 @@ export class ListComponent {
   readonly columns: DataListColumn<Customer>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.CUSTOMER);
   readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.CUSTOMER);
 
-  config: filterConfig = {
-    company: true,
-    search: true,
-  }
-
+  companyId!: number;
+  config!: filterConfig;
   customers$: Observable<Customer[] | null> = this.store.select(CustomerState.getItems);
   trashedItems$: Observable<Customer[] | null> = this.store.select(CustomerState.getTrasheds);
   areAllSelected$: Observable<boolean> = this.store.select(CustomerState.areAllSelected);
@@ -47,12 +45,29 @@ export class ListComponent {
   selectedItems$: Observable<Customer[]> = this.store.select(CustomerState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new CustomerActions.GetAll());
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if(companies) {
+      if(companies.length > 1) {
+        this.config = {
+          company: true,
+          search: true,
+        }
+      } else if(companies.length === 1) {
+        this.companyId = companies[0].id;
+        this.config = {
+          search: true,
+        }
+      }
+    }
     this.onCountTrasheds();
   }
 
   onCountTrasheds() {
-    this.store.dispatch(new CustomerActions.countDeletes());
+    const action = this.companyId
+      ? new CustomerActions.GetTrasheds(this.companyId)
+      : new CustomerActions.GetTrasheds();
+
+    this.store.dispatch(action);
   }
 
   onDelete(id: number) {
@@ -69,7 +84,7 @@ export class ListComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new CustomerActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new CustomerActions.Delete(id, del, TYPES.LIST)).subscribe({
       next: (response: any) => {
         this.sweetalertService.confirmSuccess(
           response.customer.result.title,
@@ -77,10 +92,11 @@ export class ListComponent {
         );
       },
       error: (error) => {
+        const status = error.status === 422 ? 'warning' : 'error';
         const errors: string[] = Array.isArray(error.error.message)
           ? error.error.message
           : [error.error.message];
-        this.notificationService.show(errors, 'error');
+        this.notificationService.show(errors || 'Ocurrió un error', status);
       },
       complete: () => {
         this.onCountTrasheds();
@@ -103,44 +119,48 @@ export class ListComponent {
 
   onDeleteOrRecycleAll(del: boolean) {
     this.selectedItems$.pipe(take(1)).subscribe((data) => {
-      this.store
-        .dispatch(new CustomerActions.DeleteAll(data, del, true))
-        .pipe(take(1))
-        .subscribe({
-          next: (response: any) => {
-            this.sweetalertService.confirmSuccess(
-              response.customer.result.title,
-              response.customer.result.message
-            );
-          },
-          error: (error) => {
-            const errors: string[] = Array.isArray(error.error.message)
-              ? error.error.message
-              : [error.error.message];
-            this.notificationService.show(errors, 'error');
-          },
-          complete: () => {
-            this.onCountTrasheds();
-          },
-        });
+      const action = this.companyId
+        ? new CustomerActions.DeleteAll(data, del, true, TYPES.LIST, this.companyId)
+        : new CustomerActions.DeleteAll(data, del, true, TYPES.LIST);
+
+      this.store.dispatch(action)
+      .pipe(take(1))
+      .subscribe({
+        next: (response: any) => {
+          this.sweetalertService.confirmSuccess(
+            response.customer.result.title,
+            response.customer.result.message
+          );
+        },
+        error: (error) => {
+          const status = error.status === 422 ? 'warning' : 'error';
+          const errors: string[] = Array.isArray(error.error.message)
+            ? error.error.message
+            : [error.error.message];
+          this.notificationService.show(errors || 'Ocurrió un error', status);
+        },
+        complete: () => {
+          this.onCountTrasheds();
+        },
+      });
     });
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new CustomerActions.ToggleItemSelection(id));
+    this.store.dispatch(new CustomerActions.ToggleItemSelection(id, TYPES.LIST));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new CustomerActions.ToggleAllItems(checked));
+    this.store.dispatch(new CustomerActions.ToggleAllItems(checked, TYPES.LIST));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new CustomerActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new CustomerActions.Filters(filter, TYPES.LIST, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new CustomerActions.clearAll);
+    this.store.dispatch(new CustomerActions.ClearItemSelection);
   }
 }

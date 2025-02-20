@@ -1,4 +1,4 @@
-import { TypeWorker } from "@models/type-worker.model";
+import { TypeWorker, TypeWorkerRequest } from "@models/type-worker.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace TypeWorkerActions {
@@ -6,8 +6,8 @@ export namespace TypeWorkerActions {
     static readonly type = '[TypeWorker] Get All';
   }
 
-  export class GetDeletes {
-    static readonly type = '[TypeWorker] Get All Deletes';
+  export class GetTrasheds {
+    static readonly type = '[TypeWorker] Get All Trasheds';
   }
 
   export class GetById {
@@ -15,28 +15,24 @@ export namespace TypeWorkerActions {
     constructor(public id: number) {}
   }
 
-  export class countDeletes {
-    static readonly type = '[TypeWorker] Count Deletes';
-  }
-
   export class Filters<T> {
     static readonly type = '[TypeWorker] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
     static readonly type = '[TypeWorker] Create';
-    constructor(public payload: TypeWorker) {}
+    constructor(public payload: TypeWorkerRequest) {}
   }
 
   export class Update {
     static readonly type = '[TypeWorker] Update';
-    constructor(public id: number, public payload: Partial<TypeWorker>) {}
+    constructor(public id: number, public payload: Partial<TypeWorkerRequest>) {}
   }
 
   export class Delete {
     static readonly type = '[TypeWorker] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class Restore {
@@ -46,7 +42,7 @@ export namespace TypeWorkerActions {
 
   export class DeleteAll {
     static readonly type = '[TypeWorker] Delete All';
-    constructor(public payload: TypeWorker[], public del: boolean, public active: boolean) {}
+    constructor(public payload: TypeWorker[], public del: boolean, public active: boolean, public page: string) {}
   }
 
   export class RestoreAll {
@@ -56,12 +52,12 @@ export namespace TypeWorkerActions {
 
   export class ToggleItemSelection {
     static readonly type = '[TypeWorker] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[TypeWorker] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {

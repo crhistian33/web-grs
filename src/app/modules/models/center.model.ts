@@ -7,4 +7,10 @@ export interface Center extends BaseModel {
   mount: number;
 }
 
+export interface CenterRequest {
+  code: string;
+  name: string;
+  mount: number;
+}
+
 export interface CenterStateModel extends BaseStateModel<Center> {}

@@ -40,17 +40,13 @@ export class RemovesComponent {
     search: true,
   }
 
-  typeWorkers$: Observable<TypeWorker[] | null> = this.store.select(TypeworkerState.getItems);
-  areAllSelected$: Observable<boolean> = this.store.select(TypeworkerState.areAllSelected);
-  hasSelectedItems$: Observable<boolean> = this.store.select(TypeworkerState.hasSelectedItems);
-  selectedItems$: Observable<TypeWorker[]> = this.store.select(TypeworkerState.getSelectedItems);
+  typeWorkers$: Observable<TypeWorker[] | null> = this.store.select(TypeworkerState.getTrasheds);
+  areAllSelected$: Observable<boolean> = this.store.select(TypeworkerState.areTrashedAllSelected);
+  hasSelectedItems$: Observable<boolean> = this.store.select(TypeworkerState.hasTrashedSelectedItems);
+  selectedItems$: Observable<TypeWorker[]> = this.store.select(TypeworkerState.getTrashedSelectedItems);
 
   ngOnInit() {
-    this.getAll();
-  }
-
-  getAll() {
-    this.store.dispatch(new TypeWorkerActions.GetDeletes)
+    this.store.dispatch(new TypeWorkerActions.GetTrasheds)
   }
 
   onDelete(id: number) {
@@ -60,7 +56,7 @@ export class RemovesComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new TypeWorkerActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new TypeWorkerActions.Delete(id, del, TYPES.RECYCLE)).subscribe({
       next: (response: any)=> {
         this.sweetalertService.confirmSuccess(
           response.typeworker.result.title,
@@ -68,8 +64,9 @@ export class RemovesComponent {
         )
       },
       error: (error) => {
+        const status = error.status === 422 ? 'warning' : 'error';
         const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-        this.notificationService.show(errors, "error");
+        this.notificationService.show(errors || 'Ocurrió un error', status);
       },
     })
   }
@@ -84,8 +81,9 @@ export class RemovesComponent {
           )
         },
         error: (error) => {
+          const status = error.status === 422 ? 'warning' : 'error';
           const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-          this.notificationService.show(errors, "error");
+          this.notificationService.show(errors || 'Ocurrió un error', status);
         },
       })
     })
@@ -106,8 +104,9 @@ export class RemovesComponent {
             )
           },
           error: (error) => {
+            const status = error.status === 422 ? 'warning' : 'error';
             const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-            this.notificationService.show(errors, "error");
+            this.notificationService.show(errors || 'Ocurrió un error', status);
           },
         })
       })
@@ -119,7 +118,7 @@ export class RemovesComponent {
       this.selectedItems$
       .pipe(take(1))
       .subscribe(data => {
-        this.store.dispatch(new TypeWorkerActions.DeleteAll(data, true, false))
+        this.store.dispatch(new TypeWorkerActions.DeleteAll(data, true, false, TYPES.RECYCLE))
         .pipe(take(1))
         .subscribe({
           next: (response: any)=> {
@@ -129,8 +128,9 @@ export class RemovesComponent {
             )
           },
           error: (error) => {
+            const status = error.status === 422 ? 'warning' : 'error';
             const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-            this.notificationService.show(errors, "error");
+            this.notificationService.show(errors || 'Ocurrió un error', status);
           },
         })
       })
@@ -138,20 +138,20 @@ export class RemovesComponent {
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new TypeWorkerActions.ToggleItemSelection(id));
+    this.store.dispatch(new TypeWorkerActions.ToggleItemSelection(id, TYPES.RECYCLE));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new TypeWorkerActions.ToggleAllItems(checked));
+    this.store.dispatch(new TypeWorkerActions.ToggleAllItems(checked, TYPES.RECYCLE));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new TypeWorkerActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new TypeWorkerActions.Filters(filter, TYPES.RECYCLE, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new TypeWorkerActions.clearAll);
+    this.store.dispatch(new TypeWorkerActions.ClearItemSelection);
   }
 }

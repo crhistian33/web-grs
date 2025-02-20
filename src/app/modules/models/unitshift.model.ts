@@ -11,4 +11,10 @@ export interface UnitShift extends BaseModel {
   assignments: Assignment[];
 }
 
+export interface UnitShiftRequest {
+  name: string;
+  unit_id: number;
+  shift_id: number;
+}
+
 export interface UnitshiftStateModel extends BaseStateModel<UnitShift> {}

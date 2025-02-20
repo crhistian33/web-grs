@@ -3,11 +3,12 @@
   [ngClass]="{
         'bg-green-700': currentNotification?.type === 'success',
         'bg-red-700': currentNotification?.type === 'error',
-        'bg-blue-500': currentNotification?.type === 'info'
+        'bg-blue-500': currentNotification?.type === 'info',
+        'bg-orange-600': currentNotification?.type === 'warning'
       }">
   <div class="flex items-start justify-between">
     <div>
-      <p class="text-white text-sm" *ngFor="let message of currentNotification?.message">{{ message }}</p>
+      <p class="text-white text-sm whitespace-pre-line" *ngFor="let message of currentNotification?.message">{{ message }}</p>
     </div>
     <button (click)="visible = false" class="ml-4 text-white hover:text-gray-200 focus:outline-none">
       ✕

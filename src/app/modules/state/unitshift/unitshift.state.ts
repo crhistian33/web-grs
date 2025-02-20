@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UnitShift, UnitshiftStateModel } from '@models/unitshift.model';
+import { UnitShift, UnitShiftRequest, UnitshiftStateModel } from '@models/unitshift.model';
 import { State, Action, Selector, StateContext } from '@ngxs/store';
 import { UnitShiftActions } from './unitshift.actions';
 import { BaseState } from '@shared/state/base.state';
@@ -11,13 +11,14 @@ import { UnitshiftService } from '@services/unitshift.service';
     entities: [],
     filteredItems: [],
     trashedItems: [],
+    filterTrashedItems: [],
     selectedEntity: null,
     searchTerm: '',
     result: null,
   }
 })
 @Injectable()
-export class UnitshiftState extends BaseState<UnitShift> {
+export class UnitshiftState extends BaseState<UnitShift, UnitShiftRequest> {
   constructor(private unitshiftService: UnitshiftService) {
     super(unitshiftService);
   }

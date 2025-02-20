@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IModule } from '@shared/models/form.model';
+import { FieldForm, IModule } from '@shared/models/form.model';
 import { SubEntity } from '@shared/models/subentity.model';
 import { FORM_MODULE } from '@shared/utils/form-fields';
 import { BehaviorSubject, count, distinctUntilChanged, filter, map, Observable, of, Subject, Subscription, take, takeUntil, tap } from 'rxjs';
@@ -131,7 +131,7 @@ export class FormBuilderComponent {
     if (!entity || !this.myForm) return;
 
     Object.keys(this.myForm.controls)
-    .filter(controlName => entity.hasOwnProperty(controlName))
+    //.filter(controlName => entity.hasOwnProperty(controlName))
     .forEach(controlName => {
       if (controlName === this.nameControlTable) {
         const controlId = this.subentities.find(e => e.type === 'table')?.id
@@ -147,21 +147,30 @@ export class FormBuilderComponent {
             this.selectedShifts$
               .pipe(takeUntil(this.destroy$))
               .subscribe(selectedShifts => {
+                console.log('selectedShifts', selectedShifts);
                 this.myForm.get(controlName)?.patchValue(selectedShifts);
               });
             break;
           default:
             break;
         }
-
       } else {
-        if(controlName === 'state') {
-          this.myForm.get(controlName)?.setValue(!!entity[controlName]);
+        switch (controlName) {
+          case 'state':
+            this.myForm.get(controlName)?.setValue(!!entity[controlName]);
+            break;
+          case 'type_worker_id':
+            this.myForm.get(controlName)?.setValue(entity['typeworker'].id);
+            break;
+          case 'company_id':
+            this.myForm.get(controlName)?.setValue(entity['company'].id);
+            break;
+          default:
+            this.myForm.get(controlName)?.patchValue(entity[controlName], {
+              emitEvent: false
+            });
+            break;
         }
-        else
-          this.myForm.get(controlName)?.patchValue(entity[controlName], {
-            emitEvent: false
-          });
       }
     });
   }
@@ -177,6 +186,25 @@ export class FormBuilderComponent {
     }
   }
 
+  changeSelected(event: any, item: FieldForm) {
+    const {name, prefix} = item;
+
+    if(prefix) {
+      if(name === 'company_id' || name === 'customer_id') {
+        const selectedElement = event.target as HTMLSelectElement;
+        const selectedValue = selectedElement.value;
+
+        this.getSubEntityItems$(name).subscribe(items => {
+          const selectedItem = items.find((item) => item.id === parseInt(selectedValue));
+          if (selectedItem) {
+            const code = selectedItem.code + '-';
+            this.myForm.get('code')?.patchValue(code);
+          }
+        })
+      }
+    }
+  }
+
   private resetForm() {
     if (!this.myForm) return;
 
@@ -186,7 +214,7 @@ export class FormBuilderComponent {
       .forEach(field => {
         this.myForm.get(field.name)?.setValue(field.value);
         if(field.name === 'shifts')
-          this.store.dispatch(new ShiftActions.ToggleAllItems(false));
+          this.store.dispatch(new ShiftActions.ToggleAllItems(false, TYPES.LIST));
       });
   }
 
@@ -197,6 +225,7 @@ export class FormBuilderComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['entity']?.currentValue && this.myForm) {
+
       this.updateFormValues(changes['entity'].currentValue);
     }
     if (changes['reset']?.currentValue && this.myForm) {
@@ -223,6 +252,7 @@ export class FormBuilderComponent {
 
   onToggleAll(checked: boolean) {
     const controlId = this.subentities.find(e => e.type === 'table')?.id
+    console.log(controlId, IDENTIFIES.SHIFTS);
     switch (controlId) {
       case IDENTIFIES.WORKERS:
         this.selectedWorkers(checked);
@@ -249,7 +279,8 @@ export class FormBuilderComponent {
   }
 
   private selectedShift(id: number) {
-    this.store.dispatch(new ShiftActions.ToggleItemSelection(id));
+    this.store.dispatch(new ShiftActions.ToggleItemSelection(id, TYPES.LIST))
+      .subscribe(data => console.log('Select', data));
     this.selectedShifts$
       .pipe(takeUntil(this.destroy$))
       .subscribe(selectedShifts => {
@@ -275,7 +306,7 @@ export class FormBuilderComponent {
   }
 
   private selectedShifts(checked: boolean) {
-    this.store.dispatch(new ShiftActions.ToggleAllItems(checked));
+    this.store.dispatch(new ShiftActions.ToggleAllItems(checked, TYPES.LIST));
     this.selectedShifts$
       .pipe(takeUntil(this.destroy$))
       .subscribe(selectedShifts => {

@@ -6,4 +6,9 @@ export interface Company extends BaseModel {
   name: string;
 }
 
+export interface CompanyRequest {
+  code: string;
+  name: string;
+}
+
 export interface CompanyStateModel extends BaseStateModel<Company> {}

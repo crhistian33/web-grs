@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { StateContext } from '@ngxs/store';
+import { inject, Injectable } from '@angular/core';
+import { StateContext, Store } from '@ngxs/store';
 import { BaseStateModel } from '@shared/models/base-state.model';
 import { BaseModel } from '@shared/models/base.model';
 import { BaseCrudService } from '@shared/services/base-crud.service';
@@ -7,6 +7,7 @@ import { finalize, tap } from 'rxjs';
 import { SetLoading } from './loading/loading.actions';
 import { FilterStateModel } from '@shared/models/filter.model';
 import { TYPES } from '@shared/utils/constants';
+import { CompanyState } from '@state/company/company.state';
 
 const initialValues = {
   entities: [],
@@ -20,9 +21,9 @@ const initialValues = {
 }
 
 @Injectable()
-export class BaseState<T extends BaseModel> {
+export class BaseState<T extends BaseModel, TRequest> {
   constructor(
-    protected service: BaseCrudService<T>,
+    protected service: BaseCrudService<T, TRequest>,
   ) {}
 
   protected getItems(ctx: StateContext<BaseStateModel<T>>, type: string) {
@@ -31,7 +32,8 @@ export class BaseState<T extends BaseModel> {
       return;
 
     ctx.dispatch(new SetLoading(type, true));
-    return this.service.getAll().pipe(
+
+    return this.service.getItems().pipe(
       tap({
         next: (response: any) => {
           ctx.patchState({
@@ -51,13 +53,17 @@ export class BaseState<T extends BaseModel> {
     );
   }
 
-  protected getItemsByCompany(ctx: StateContext<BaseStateModel<T>>, id: number, type: string) {
+  protected getItemsAll(ctx: StateContext<BaseStateModel<T>>, type: string, id?: number) {
     const state = ctx.getState();
     if(state.loaded)
       return;
 
     ctx.dispatch(new SetLoading(type, true));
-    return this.service.getbyCompany(id).pipe(
+    const service = id
+      ? this.service.getAll(id)
+      : this.service.getAll();
+
+    return service.pipe(
       tap({
         next: (response: any) => {
           ctx.patchState({
@@ -66,8 +72,9 @@ export class BaseState<T extends BaseModel> {
             loaded: true,
           })
         },
-        error: () => {
+        error: (error) => {
           ctx.dispatch(new SetLoading(type, false));
+          const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
         },
         finalize: () => {
           ctx.dispatch(new SetLoading(type, false));
@@ -76,29 +83,13 @@ export class BaseState<T extends BaseModel> {
     );
   }
 
-  protected getItemsDelete(ctx: StateContext<BaseStateModel<T>>, type: string) {
+  protected getItemsTrasheds(ctx: StateContext<BaseStateModel<T>>, type: string, id?: number) {
     ctx.dispatch(new SetLoading(type, true));
-    return this.service.getDeletes().pipe(
-      tap({
-        next: (response: any) => {
-          ctx.patchState({
-            trashedItems: response.data,
-            filterTrashedItems: response.data,
-          })
-        },
-        error: () => {
-          ctx.dispatch(new SetLoading(type, false));
-        },
-        finalize: () => {
-          ctx.dispatch(new SetLoading(type, false));
-        }
-      })
-    );
-  }
+    const service = id
+      ? this.service.getTrashed(id)
+      : this.service.getTrashed();
 
-  protected getItemsDeleteByCompany(ctx: StateContext<BaseStateModel<T>>, type: string, id: number) {
-    ctx.dispatch(new SetLoading(type, true));
-    return this.service.getDeletesByCompany(id).pipe(
+    return service.pipe(
       tap({
         next: (response: any) => {
           ctx.patchState({
@@ -121,6 +112,7 @@ export class BaseState<T extends BaseModel> {
     return this.service.getById(id).pipe(
       tap({
         next: (response: any) => {
+          console.log('Response', response.data);
           ctx.patchState({
             selectedEntity: response.data,
           })
@@ -135,19 +127,6 @@ export class BaseState<T extends BaseModel> {
     );
   }
 
-  protected countItemsTrashed(ctx: StateContext<BaseStateModel<T>>) {
-    return this.service.getDeletes().pipe(
-      tap({
-        next: (response: any) => {
-          ctx.patchState({
-            trashedItems: response.data,
-            filterTrashedItems: response.data,
-          })
-        },
-      })
-    );
-  }
-
   protected filtersItems(ctx: StateContext<BaseStateModel<T>>, type:string, payload: Partial<FilterStateModel>, columns?: (keyof T)[], page?: string) {
     ctx.dispatch(new SetLoading(type, true));
     const state = ctx.getState();
@@ -158,9 +137,9 @@ export class BaseState<T extends BaseModel> {
     const filtered = data.filter((item: any) => {
       const matchDrop =
         (!typeworkerId || item.typeworker.id === typeworkerId) &&
-        (!companyId || (item.assignment
+        (!companyId || (item.customer ? item.customer.company.id === companyId : (item.assignment
           ? item.assignment.unitshift.unit.customer.company.id === companyId
-          : (item.unitshift ? item.unitshift.unit.customer.company.id === companyId : item.company.id === companyId))) &&
+          : (item.unitshift ? item.unitshift.unit.customer.company.id === companyId : item.company.id === companyId)))) &&
         (!customerId || (item.assignment
           ? item.assignment.unitshift.unit.customer.id === customerId
           : (item.unitshift ? item.unitshift.unit.customer.id === customerId : item.customer.id === customerId))) &&
@@ -168,10 +147,10 @@ export class BaseState<T extends BaseModel> {
           ? item.assignment.unitshift.unit.id === unitId
           : (item.unitshift ? item.unitshift.unit.id === unitId : item.unit.id === unitId)
         )) &&
-        (!shiftId || (item.assignment
+        (!shiftId || (item.shifts ? item.shifts.some((shift: any) => shift.id === shiftId) : (item.assignment
           ? item.assignment.unitshift.shift.id === shiftId
           : (item.unitshift ? item.unitshift.shift.id === shiftId : item.shift.id === shiftId)
-         )) &&
+         ))) &&
         (!centerId || item.center.id === centerId) &&
         (!fromDate || new Date(item.start_date) >= new Date(fromDate)) &&
         (!toDate || new Date(item.start_date) <= new Date(toDate))
@@ -194,7 +173,7 @@ export class BaseState<T extends BaseModel> {
     ctx.dispatch(new SetLoading(type, false));
   }
 
-  protected createItem(ctx: StateContext<BaseStateModel<T>>, payload: T, type: string) {
+  protected createItem(ctx: StateContext<BaseStateModel<T>>, payload: TRequest, type: string) {
     ctx.dispatch(new SetLoading(type, true));
     return this.service.create(payload).pipe(
       tap({
@@ -215,16 +194,15 @@ export class BaseState<T extends BaseModel> {
     )
   }
 
-  protected updateItem(ctx: StateContext<BaseStateModel<T>>, payload: Partial<T>, id: number, type: string) {
+  protected updateItem(ctx: StateContext<BaseStateModel<T>>, payload: Partial<TRequest>, id: number, type: string) {
     ctx.dispatch(new SetLoading(type, true));
     const state = ctx.getState();
-
     return this.service.update(id, payload)
     .pipe(
       tap({
         next: (response: any) => {
           const updatedEntities = state.entities.map(entity =>
-            entity.id === id ? { ...entity, ...response.data } : entity
+            entity.id === Number(id) ? { ...entity, ...response.data } : entity
           );
           ctx.patchState({
             entities: updatedEntities,
@@ -266,13 +244,17 @@ export class BaseState<T extends BaseModel> {
     )
   }
 
-  protected deleteAllItem(ctx: StateContext<BaseStateModel<T>>, payload: T[], del: boolean, active: boolean, type: string, page?: string) {
+  protected deleteAllItem(ctx: StateContext<BaseStateModel<T>>, payload: T[], del: boolean, active: boolean, type: string, page?: string, id?: number) {
     ctx.dispatch(new SetLoading(type, true));
     const state = ctx.getState();
+    const service = id
+      ? this.service.deleteAll(payload, del, active, id)
+      : this.service.deleteAll(payload, del, active);
 
-    return this.service.deleteAll(payload, del, active).pipe(
+    return service.pipe(
       tap({
         next: (response: any) => {
+          console.log('Data', response.data);
           const data = page === TYPES.LIST ? state.entities : state.trashedItems;
           const entities = response.data
             ? response.data.map((entity: any) => ({
@@ -304,6 +286,7 @@ export class BaseState<T extends BaseModel> {
           const entities = state.trashedItems.filter(item => item.id !== id);
           ctx.patchState({
             entities: [...ctx.getState().entities, response.data],
+            filteredItems: [...ctx.getState().entities, response.data],
             trashedItems: entities,
             filterTrashedItems: entities,
             result: { title: response.title, message: response.message },
@@ -350,11 +333,15 @@ export class BaseState<T extends BaseModel> {
     const state = ctx.getState();
     const data = page === TYPES.LIST ? state.entities : state.trashedItems;
 
+    const value = state.entities.filter(item => item.id === id);
+    console.log('Valor con check', value);
+
     const entities = data.map(entity =>
       entity.id === id
         ? { ...entity, selected: !entity.selected }
         : entity
     );
+    console.log('Entities select', entities);
     page === TYPES.LIST
       ? ctx.patchState({ entities, filteredItems: entities })
       : ctx.patchState({ trashedItems: entities, filterTrashedItems: entities })
@@ -374,14 +361,14 @@ export class BaseState<T extends BaseModel> {
   }
 
   // //Agregar PAGE
-  // protected clearSelectionItem(ctx: StateContext<BaseStateModel<T>>) {
-  //   const state = ctx.getState();
-  //   const entities = state.entities.map(entity => ({
-  //     ...entity,
-  //     selected: false
-  //   }));
-  //   ctx.patchState({ entities, filteredItems: entities });
-  // }
+  protected clearSelectionItem(ctx: StateContext<BaseStateModel<T>>) {
+    const state = ctx.getState();
+    const entities = state.entities.map(entity => ({
+      ...entity,
+      selected: false
+    }));
+    ctx.patchState({ entities, filteredItems: entities });
+  }
 
   protected clearEntity(ctx: StateContext<BaseStateModel<T>>) {
     ctx.patchState({ selectedEntity: null });

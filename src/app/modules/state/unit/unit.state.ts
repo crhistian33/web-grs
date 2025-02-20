@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { State, Selector, Action, StateContext } from '@ngxs/store';
 import { BaseState } from '@shared/state/base.state';
-import { Unit, UnitStateModel } from '@models/unit.model';
+import { Unit, UnitRequest, UnitStateModel } from '@models/unit.model';
 import { UnitService } from '@services/unit.service';
 import { UnitActions } from './unit.actions';
 import { SetLoading } from '@shared/state/loading/loading.actions';
@@ -13,6 +13,7 @@ import { tap } from 'rxjs';
     entities: [],
     filteredItems: [],
     trashedItems: [],
+    filterTrashedItems: [],
     selectedEntity: null,
     searchTerm: '',
     loaded: false,
@@ -20,7 +21,7 @@ import { tap } from 'rxjs';
   },
 })
 @Injectable()
-export class UnitState extends BaseState<Unit> {
+export class UnitState extends BaseState<Unit, UnitRequest> {
   constructor(private unitService: UnitService) {
     super(unitService);
   }
@@ -32,12 +33,13 @@ export class UnitState extends BaseState<Unit> {
 
   @Selector()
   static getEntity(state: UnitStateModel): Unit | null {
+    console.log(state.selectedEntity);
     return state.selectedEntity;
   }
 
   @Selector()
   static getTrasheds(state: UnitStateModel): Unit[] {
-    return state.trashedItems;
+    return state.filterTrashedItems;
   }
 
   @Selector()
@@ -55,19 +57,29 @@ export class UnitState extends BaseState<Unit> {
     return state.entities.some(entity => entity.selected);
   }
 
+  @Selector()
+  static getTrashedSelectedItems(state: UnitStateModel) {
+    return state.trashedItems.filter(entity => entity.selected);
+  }
+
+  @Selector()
+  static areTrashedAllSelected(state: UnitStateModel) {
+    return state.trashedItems.length > 0 && state.trashedItems.every(entity => entity.selected);
+  }
+
+  @Selector()
+  static hasTrashedSelectedItems(state: UnitStateModel) {
+    return state.trashedItems.some(entity => entity.selected);
+  }
+
   @Action(UnitActions.GetAll)
-  getAll(ctx: StateContext<UnitStateModel>) {
-    return this.getItems(ctx, UnitActions.GetAll.type)
+  getAll(ctx: StateContext<UnitStateModel>, { id }: UnitActions.GetAll) {
+    return this.getItemsAll(ctx, UnitActions.GetAll.type, id)
   }
 
-  @Action(UnitActions.GetByCompany)
-  getAllCompany(ctx: StateContext<UnitStateModel>, { id }: UnitActions.GetByCompany) {
-    return this.getItemsByCompany(ctx, id, UnitActions.GetByCompany.type)
-  }
-
-  @Action(UnitActions.GetDeletes)
-  getDeletes(ctx: StateContext<UnitStateModel>) {
-    return this.getItemsDelete(ctx, UnitActions.GetDeletes.type)
+  @Action(UnitActions.GetTrasheds)
+  getTrasheds(ctx: StateContext<UnitStateModel>, { id }: UnitActions.GetTrasheds) {
+    return this.getItemsTrasheds(ctx, UnitActions.GetTrasheds.type, id)
   }
 
   @Action(UnitActions.GetById)
@@ -75,14 +87,9 @@ export class UnitState extends BaseState<Unit> {
     return this.getOne(ctx, id, UnitActions.GetById.type)
   }
 
-  @Action(UnitActions.countDeletes)
-  countTrasheds(ctx: StateContext<UnitStateModel>) {
-    return this.countItemsTrashed(ctx);
-  }
-
   @Action(UnitActions.Filters)
-  Filters(ctx: StateContext<UnitStateModel>, { payload, columns }: UnitActions.Filters<Unit>) {
-    return super.filtersItems(ctx, UnitActions.Filters.type, payload, columns);
+  Filters(ctx: StateContext<UnitStateModel>, { payload, page, columns }: UnitActions.Filters<Unit>) {
+    return super.filtersItems(ctx, UnitActions.Filters.type, payload, columns, page);
   }
 
   @Action(UnitActions.Create)
@@ -96,8 +103,8 @@ export class UnitState extends BaseState<Unit> {
   }
 
   @Action(UnitActions.Delete)
-  delete(ctx: StateContext<UnitStateModel>, { id, del }: UnitActions.Delete) {
-    return this.deleteItem(ctx, id, del, UnitActions.Delete.type)
+  delete(ctx: StateContext<UnitStateModel>, { id, del, page }: UnitActions.Delete) {
+    return this.deleteItem(ctx, id, del, UnitActions.Delete.type, page)
   }
 
   @Action(UnitActions.Restore)
@@ -106,8 +113,8 @@ export class UnitState extends BaseState<Unit> {
   }
 
   @Action(UnitActions.DeleteAll)
-  deleteAll(ctx: StateContext<UnitStateModel>, { payload, del, active }: UnitActions.DeleteAll) {
-    return this.deleteAllItem(ctx, payload, del, active, UnitActions.DeleteAll.type)
+  deleteAll(ctx: StateContext<UnitStateModel>, { payload, del, active, page, id }: UnitActions.DeleteAll) {
+    return this.deleteAllItem(ctx, payload, del, active, UnitActions.DeleteAll.type, page, id)
   }
 
   @Action(UnitActions.RestoreAll)
@@ -116,13 +123,13 @@ export class UnitState extends BaseState<Unit> {
   }
 
   @Action(UnitActions.ToggleItemSelection)
-  toggleSelection(ctx: StateContext<UnitStateModel>, { id }: UnitActions.ToggleItemSelection) {
-    return this.toggleSelectionItem(ctx, id)
+  toggleSelection(ctx: StateContext<UnitStateModel>, { id, page }: UnitActions.ToggleItemSelection) {
+    return this.toggleSelectionItem(ctx, id, page)
   }
 
   @Action(UnitActions.ToggleAllItems)
-  toggleAll(ctx: StateContext<UnitStateModel>, { selected }: UnitActions.ToggleAllItems) {
-    return this.toggleAllItem(ctx, selected)
+  toggleAll(ctx: StateContext<UnitStateModel>, { selected, page }: UnitActions.ToggleAllItems) {
+    return this.toggleAllItem(ctx, selected, page)
   }
 
   @Action(UnitActions.GetAllToShift)
@@ -144,10 +151,10 @@ export class UnitState extends BaseState<Unit> {
     return this.clearEntity(ctx);
   }
 
-  // @Action(UnitActions.ClearItemSelection)
-  // clearSelected(ctx: StateContext<UnitStateModel>) {
-  //   return this.clearSelectionItem(ctx);
-  // }
+  @Action(UnitActions.ClearItemSelection)
+  clearSelection(ctx: StateContext<UnitStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
 
   @Action(UnitActions.clearAll)
   clearAll(ctx: StateContext<UnitStateModel>) {

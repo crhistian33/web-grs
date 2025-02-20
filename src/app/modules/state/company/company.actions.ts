@@ -1,14 +1,13 @@
-import { Company } from "@models/company.model";
+import { Company, CompanyRequest } from "@models/company.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace CompanyActions {
   export class GetAll {
     static readonly type = '[Company] Get All';
-    constructor(public payload: Company[]) {};
   }
 
-  export class GetDeletes {
-    static readonly type = '[Company] Get All Deletes';
+  export class GetTrasheds {
+    static readonly type = '[Company] Get All Trasheds';
   }
 
   export class GetById {
@@ -16,28 +15,24 @@ export namespace CompanyActions {
     constructor(public id: number) {}
   }
 
-  export class countDeletes {
-    static readonly type = '[Company] Count Deletes';
-  }
-
   export class Filters<T> {
     static readonly type = '[Company] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
     static readonly type = '[Company] Create';
-    constructor(public payload: Company) {}
+    constructor(public payload: CompanyRequest) {}
   }
 
   export class Update {
     static readonly type = '[Company] Update';
-    constructor(public id: number, public payload: Partial<Company>) {}
+    constructor(public id: number, public payload: Partial<CompanyRequest>) {}
   }
 
   export class Delete {
     static readonly type = '[Company] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class Restore {
@@ -47,7 +42,7 @@ export namespace CompanyActions {
 
   export class DeleteAll {
     static readonly type = '[Company] Delete All';
-    constructor(public payload: Company[], public del: boolean, public active: boolean) {}
+    constructor(public payload: Company[], public del: boolean, public active: boolean, public page: string) {}
   }
 
   export class RestoreAll {
@@ -57,12 +52,12 @@ export namespace CompanyActions {
 
   export class ToggleItemSelection {
     static readonly type = '[Company] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[Company] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {

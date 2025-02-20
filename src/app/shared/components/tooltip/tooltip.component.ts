@@ -9,6 +9,7 @@ import { Component, Input } from '@angular/core';
 })
 export class TooltipComponent {
   @Input() text: string = '';
+  @Input() type: string = '';
   @Input() position: 'top' | 'right' | 'bottom' | 'left' = 'top';
 
   isVisible: boolean = false;

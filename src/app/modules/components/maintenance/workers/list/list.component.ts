@@ -40,8 +40,8 @@ export class ListComponent {
   readonly columns: DataListColumn<Worker>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.WORKER);
   readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.WORKER);
 
+  companyId!: number;
   config!: filterConfig;
-  companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
   workers$: Observable<Worker[]> = this.store.select(WorkerState.getItems);
   trashedWorkers$: Observable<Worker[] | null> = this.store.select(WorkerState.getTrasheds);
   areAllSelected$: Observable<boolean> = this.store.select(WorkerState.areAllSelected);
@@ -49,29 +49,31 @@ export class ListComponent {
   selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
 
   ngOnInit() {
-    this.companies$.pipe(
-      filter((companies): companies is Company[] => !!companies),
-      take(1),
-      tap(companies => {
-        if (companies.length > 1) {
-          this.config = {
-            company: true,
-            typeworker: true,
-            search: true,
-          }
-        } else if (companies.length === 1) {
-          this.config  = {
-            typeworker: true,
-            search: true,
-          }
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if(companies) {
+      if(companies.length > 1) {
+        this.config = {
+          company: true,
+          typeworker: true,
+          search: true,
         }
-      })
-    ).subscribe();
+      } else if(companies.length === 1) {
+        this.companyId = companies[0].id;
+        this.config  = {
+          typeworker: true,
+          search: true,
+        }
+      }
+    }
     this.onCountTrasheds();
   }
 
   onCountTrasheds() {
-    this.store.dispatch(new WorkerActions.countDeletes);
+    const action = this.companyId
+      ? new WorkerActions.GetTrasheds(this.companyId)
+      : new WorkerActions.GetTrasheds;
+
+    this.store.dispatch(action);
   }
 
   onDelete(id: number) {
@@ -91,8 +93,9 @@ export class ListComponent {
         )
       },
       error: (error) => {
+        const status = error.status === 422 ? 'warning' : 'error';
         const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-        this.notificationService.show(errors || 'Error occurred', "error");
+        this.notificationService.show(errors || 'Ocurrió un error', status);
       },
       complete: () => {
         this.onCountTrasheds();
@@ -112,7 +115,11 @@ export class ListComponent {
     this.selectedItems$
     .pipe(take(1))
     .subscribe(data => {
-      this.store.dispatch(new WorkerActions.DeleteAll(data, del, true, TYPES.LIST))
+      const action = this.companyId
+        ? new WorkerActions.DeleteAll(data, del, true, TYPES.LIST, this.companyId)
+        : new WorkerActions.DeleteAll(data, del, true, TYPES.LIST);
+
+      this.store.dispatch(action)
       .pipe(take(1))
       .subscribe({
         next: (response: any)=> {
@@ -122,8 +129,9 @@ export class ListComponent {
           )
         },
         error: (error) => {
+          const status = error.status === 422 ? 'warning' : 'error';
           const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-          this.notificationService.show(errors, "error");
+          this.notificationService.show(errors || 'Ocurrió un error', status);
         },
         complete: () => {
           this.onCountTrasheds();
@@ -147,6 +155,6 @@ export class ListComponent {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    //this.store.dispatch(new WorkerActions.clearAll);
+    this.store.dispatch(new WorkerActions.ClearItemSelection);
   }
 }

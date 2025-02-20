@@ -15,6 +15,7 @@ import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { CustomerActions } from '@state/customer/customer.action';
 import { CustomerState } from '@state/customer/customer.state';
+import { UserState } from '@state/user/user.state';
 import { Observable, Subject, take } from 'rxjs';
 
 @Component({
@@ -35,18 +36,35 @@ export class RemovesComponent {
   readonly columns: DataListColumn<Customer>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.CUSTOMER);
   readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.CUSTOMER);
 
-  config: filterConfig = {
-    company: true,
-    search: true,
-  }
 
-  customers$: Observable<Customer[] | null> = this.store.select(CustomerState.getItems);
-  areAllSelected$: Observable<boolean> = this.store.select(CustomerState.areAllSelected);
-  hasSelectedItems$: Observable<boolean> = this.store.select(CustomerState.hasSelectedItems);
-  selectedItems$: Observable<Customer[]> = this.store.select(CustomerState.getSelectedItems);
+  companyId!: number;
+  config!: filterConfig;
+  customers$: Observable<Customer[] | null> = this.store.select(CustomerState.getTrasheds);
+  areAllSelected$: Observable<boolean> = this.store.select(CustomerState.areTrashedAllSelected);
+  hasSelectedItems$: Observable<boolean> = this.store.select(CustomerState.hasTrashedSelectedItems);
+  selectedItems$: Observable<Customer[]> = this.store.select(CustomerState.getTrashedSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new CustomerActions.GetDeletes)
+    this.getTrasheds();
+  }
+
+  getTrasheds() {
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if(companies) {
+      if(companies.length > 1) {
+        this.store.dispatch(new CustomerActions.GetTrasheds);
+        this.config = {
+          company: true,
+          search: true,
+        }
+      } else if(companies.length === 1) {
+        this.companyId = companies[0].id;
+        this.store.dispatch(new CustomerActions.GetTrasheds(this.companyId));
+        this.config = {
+          search: true,
+        }
+      }
+    }
   }
 
   onDelete(id: number) {
@@ -56,7 +74,7 @@ export class RemovesComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new CustomerActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new CustomerActions.Delete(id, del, TYPES.RECYCLE)).subscribe({
       next: (response: any)=> {
         this.sweetalertService.confirmSuccess(
           response.customer.result.title,
@@ -64,8 +82,9 @@ export class RemovesComponent {
         )
       },
       error: (error) => {
+        const status = error.status === 422 ? 'warning' : 'error';
         const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-        this.notificationService.show(errors, "error");
+        this.notificationService.show(errors || 'Ocurrió un error', status);
       },
     })
   }
@@ -80,8 +99,9 @@ export class RemovesComponent {
           )
         },
         error: (error) => {
+          const status = error.status === 422 ? 'warning' : 'error';
           const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-          this.notificationService.show(errors, "error");
+          this.notificationService.show(errors || 'Ocurrió un error', status);
         },
       })
     })
@@ -102,8 +122,9 @@ export class RemovesComponent {
             )
           },
           error: (error) => {
+            const status = error.status === 422 ? 'warning' : 'error';
             const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-            this.notificationService.show(errors, "error");
+            this.notificationService.show(errors || 'Ocurrió un error', status);
           },
         })
       })
@@ -115,7 +136,11 @@ export class RemovesComponent {
       this.selectedItems$
       .pipe(take(1))
       .subscribe(data => {
-        this.store.dispatch(new CustomerActions.DeleteAll(data, true, false))
+        const action = this.companyId
+          ? new CustomerActions.DeleteAll(data, true, false, TYPES.RECYCLE, this.companyId)
+          : new CustomerActions.DeleteAll(data, true, false, TYPES.RECYCLE);
+
+        this.store.dispatch(action)
         .pipe(take(1))
         .subscribe({
           next: (response: any)=> {
@@ -125,8 +150,9 @@ export class RemovesComponent {
             )
           },
           error: (error) => {
+            const status = error.status === 422 ? 'warning' : 'error';
             const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
-            this.notificationService.show(errors, "error");
+            this.notificationService.show(errors || 'Ocurrió un error', status);
           },
         })
       })
@@ -134,20 +160,20 @@ export class RemovesComponent {
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new CustomerActions.ToggleItemSelection(id));
+    this.store.dispatch(new CustomerActions.ToggleItemSelection(id, TYPES.RECYCLE));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new CustomerActions.ToggleAllItems(checked));
+    this.store.dispatch(new CustomerActions.ToggleAllItems(checked, TYPES.RECYCLE));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new CustomerActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new CustomerActions.Filters(filter, TYPES.RECYCLE, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new CustomerActions.clearAll);
+    this.store.dispatch(new CustomerActions.ClearItemSelection);
   }
 }

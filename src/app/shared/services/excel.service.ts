@@ -8,6 +8,8 @@ import * as XLSX from 'xlsx';
 })
 export class ExcelService {
 
+  
+
   processFile(file: File): Observable<WorkerUpload[]> {
     return this.readExcelFile(file).pipe(
       map(data => this.validateData(data)),

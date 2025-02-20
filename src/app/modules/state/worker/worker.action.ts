@@ -1,49 +1,29 @@
-import { Worker } from "@models/worker.model";
+import { Worker, WorkerRequest } from "@models/worker.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace WorkerActions {
   export class GetAll {
     static readonly type = '[Worker] Get All';
+    constructor(public id?: number) {};
   }
 
-  export class GetByCompany {
-    static readonly type = '[Worker] Get All Company';
-    constructor(public id: number) {};
+  export class GetTrasheds {
+    static readonly type = '[Worker] Get All Trasheds';
+    constructor(public id?: number) {};
   }
 
-  export class GetAllReassigns {
-    static readonly type = '[Worker] Get All Reassigns';
-  }
-
-  export class GetDeletes {
-    static readonly type = '[Worker] Get All Deletes';
-  }
-
-  export class GetDeletesByCompany {
-    static readonly type = '[Worker] Get All Deletes by Company';
-    constructor(public id: number) {};
-  }
-
-  export class GetUnassignment<T> {
+  export class GetUnassignment {
     static readonly type = '[Worker] Get All Unassignment';
+    constructor(public id?: number) {};
   }
 
-  export class GetTitulars<T> {
+  export class GetTitulars {
     static readonly type = '[Worker] Get All Titulars';
   }
 
   export class GetById {
     static readonly type = '[Worker] Get By Id';
     constructor(public id: number) {}
-  }
-
-  export class GetAssignsId {
-    static readonly type = '[Worker] Get Assigns Id';
-    constructor(public id: number) {}
-  }
-
-  export class countDeletes {
-    static readonly type = '[Worker] Count Deletes';
   }
 
   export class Filters<T> {
@@ -53,12 +33,12 @@ export namespace WorkerActions {
 
   export class Create {
     static readonly type = '[Worker] Create';
-    constructor(public payload: Worker) {}
+    constructor(public payload: WorkerRequest) {}
   }
 
   export class Update {
     static readonly type = '[Worker] Update';
-    constructor(public id: number, public payload: Partial<Worker>) {}
+    constructor(public id: number, public payload: Partial<WorkerRequest>) {}
   }
 
   export class Delete {
@@ -73,7 +53,7 @@ export namespace WorkerActions {
 
   export class DeleteAll {
     static readonly type = '[Worker] Delete All';
-    constructor(public payload: Worker[], public del: boolean, public active: boolean, public page: string) {}
+    constructor(public payload: Worker[], public del: boolean, public active: boolean, public page: string, public id?: number) {}
   }
 
   export class RestoreAll {

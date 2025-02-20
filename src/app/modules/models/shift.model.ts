@@ -6,4 +6,9 @@ export interface Shift extends BaseModel {
   shortName: string;
 }
 
+export interface ShiftRequest {
+  name: string;
+  shortName: string;
+}
+
 export interface ShiftStateModel extends BaseStateModel<Shift> {}

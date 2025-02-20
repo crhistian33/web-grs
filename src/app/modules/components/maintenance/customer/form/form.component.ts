@@ -43,7 +43,6 @@ export class FormComponent {
   ]
 
   ngOnInit() {
-    //this.store.dispatch(new CompanyActions.GetAll);
     if(this.id) {
       this.store.dispatch(new CustomerActions.GetById(this.id));
     }
@@ -62,7 +61,7 @@ export class FormComponent {
       },
       error: (error) => {
         this.notificationService.show(
-          error.error?.message || 'Error occurred',
+          error.error?.message || 'Ocurrió un error',
           'error',
           5000
         );

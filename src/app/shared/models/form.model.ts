@@ -3,6 +3,7 @@ export interface FieldForm {
   name: string;
   label?: string;
   value?: string | boolean;
+  prefix?: boolean;
   validators?: IValidationForm[];
 }
 

@@ -17,4 +17,12 @@ export interface Assignment extends BaseModel {
   workers: Worker[];
 }
 
+export interface AssignmentRequest {
+  start_date: string;
+  end_date: string;
+  state: boolean;
+  unit_shift_id: number;
+
+}
+
 export interface AssignmentStateModel extends BaseStateModel<Assignment> {}

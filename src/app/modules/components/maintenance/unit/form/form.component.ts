@@ -13,7 +13,7 @@ import { SubEntity } from '@shared/models/subentity.model';
 import { HeaderDatalistService } from '@shared/services/header-datalist.service';
 import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
-import { IDENTIFIES, PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
+import { IDENTIFIES, PARAMETERS, ROUTES, TITLES, TYPES } from '@shared/utils/constants';
 import { CenterActions } from '@state/center/center.action';
 import { CenterState } from '@state/center/center.state';
 import { CustomerActions } from '@state/customer/customer.action';
@@ -22,7 +22,7 @@ import { ShiftActions } from '@state/shift/shift.action';
 import { ShiftState } from '@state/shift/shift.state';
 import { UnitActions } from '@state/unit/unit.actions';
 import { UnitState } from '@state/unit/unit.state';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { filter, forkJoin, Observable, skip, Subject, switchMap, take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-form',
@@ -57,14 +57,30 @@ export class FormComponent {
   ];
 
   ngOnInit() {
-    this.store.dispatch([
-      new CenterActions.GetAll,
-      new CustomerActions.GetAll,
-      new ShiftActions.GetAll,
-    ]);
-    if(this.id) {
-      this.store.dispatch(new UnitActions.GetById(this.id));
-    }
+    if(this.id)
+      this.loadExistingAssignment();
+  }
+
+  private loadExistingAssignment(): void {
+    this.entity$
+    .pipe(
+      skip(1),
+      take(1),
+      takeUntil(this.destroy$)
+    )
+    .subscribe(entity => {
+      if (entity?.shifts?.length) {
+        const selectionActions = entity.shifts.map(shift =>
+          this.store.dispatch(new ShiftActions.ToggleItemSelection(shift.id, TYPES.LIST))
+        );
+
+        forkJoin(selectionActions)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe();
+      }
+    });
+
+    this.store.dispatch(new UnitActions.GetById(this.id));
   }
 
   onSubmit(event: { data: any; redirect: boolean }) {
@@ -111,5 +127,6 @@ export class FormComponent {
     this.destroy$.next();
     this.destroy$.complete();
     this.store.dispatch(new UnitActions.clearEntity);
+    this.store.dispatch(new ShiftActions.ClearItemSelection);
   }
 }

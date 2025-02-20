@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
-import { UnitShift } from '@models/unitshift.model';
+import { UnitShift, UnitShiftRequest } from '@models/unitshift.model';
 import { BaseCrudService } from '@shared/services/base-crud.service';
 import { Observable } from 'rxjs';
 import { checkToken } from 'src/app/interceptors/auth.interceptor';
@@ -9,7 +9,7 @@ import { checkToken } from 'src/app/interceptors/auth.interceptor';
 @Injectable({
   providedIn: 'root'
 })
-export class UnitshiftService extends BaseCrudService<UnitShift> {
+export class UnitshiftService extends BaseCrudService<UnitShift, UnitShiftRequest> {
   constructor(private http: HttpClient) {
     super(http, `${environment.API_URL}/unitshifts`);
   }

@@ -15,6 +15,7 @@ import { SweetalertService } from '@shared/services/sweetalert.service';
 import { MESSAGES, PARAMETERS, TITLES, TYPES } from '@shared/utils/constants';
 import { UnitActions } from '@state/unit/unit.actions';
 import { UnitState } from '@state/unit/unit.state';
+import { UserState } from '@state/user/user.state';
 import { catchError, Observable, Subject, take } from 'rxjs';
 
 @Component({
@@ -35,13 +36,8 @@ export class ListComponent {
   readonly columns: DataListColumn<Unit>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.UNIT);
   readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.UNIT);
 
-  config: filterConfig = {
-    company: true,
-    customer: true,
-    center: true,
-    shift: true,
-  }
-
+  companyId!: number;
+  config!: filterConfig;
   units$: Observable<Unit[] | null> = this.store.select(UnitState.getItems);
   trashedItems$: Observable<Unit[] | null> = this.store.select(UnitState.getTrasheds);
   areAllSelected$: Observable<boolean> = this.store.select(UnitState.areAllSelected);
@@ -49,12 +45,31 @@ export class ListComponent {
   selectedItems$: Observable<Unit[]> = this.store.select(UnitState.getSelectedItems);
 
   ngOnInit() {
-    //this.store.dispatch(new UnitActions.GetAll())
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if (companies && companies.length > 1) {
+      this.config = {
+        company: true,
+        customer: true,
+        center: true,
+        shift: true,
+      }
+    } else if (companies?.length === 1) {
+      this.companyId = companies[0].id;
+      this.config  = {
+        customer: true,
+        center: true,
+        shift: true,
+      }
+    }
     this.onCountTrasheds();
   }
 
   onCountTrasheds() {
-    this.store.dispatch(new UnitActions.countDeletes());
+    const action = this.companyId
+      ? new UnitActions.GetTrasheds(this.companyId)
+      : new UnitActions.GetTrasheds;
+
+    this.store.dispatch(action);
   }
 
   onDelete(id: number) {
@@ -71,7 +86,7 @@ export class ListComponent {
   }
 
   onDeleteOrRecycle(id: number, del: boolean) {
-    this.store.dispatch(new UnitActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new UnitActions.Delete(id, del, TYPES.LIST)).subscribe({
       next: (response: any) => {
         this.sweetalertService.confirmSuccess(
           response.unit.result.title,
@@ -79,10 +94,11 @@ export class ListComponent {
         );
       },
       error: (error) => {
+        const status = error.status === 422 ? 'warning' : 'error';
         const errors: string[] = Array.isArray(error.error.message)
           ? error.error.message
           : [error.error.message];
-        this.notificationService.show(errors, 'error');
+        this.notificationService.show(errors || 'Ocurrió un error', status);
       },
       complete: () => {
         this.onCountTrasheds();
@@ -104,45 +120,51 @@ export class ListComponent {
   }
 
   onDeleteOrRecycleAll(del: boolean) {
-    this.selectedItems$.pipe(take(1)).subscribe((data) => {
-      this.store
-        .dispatch(new UnitActions.DeleteAll(data, del, true))
-        .pipe(take(1))
-        .subscribe({
-          next: (response: any) => {
-            this.sweetalertService.confirmSuccess(
-              response.unit.result.title,
-              response.unit.result.message
-            );
-          },
-          error: (error) => {
-            const errors: string[] = Array.isArray(error.error.message)
-              ? error.error.message
-              : [error.error.message];
-            this.notificationService.show(errors, 'error');
-          },
-          complete: () => {
-            this.onCountTrasheds();
-          },
-        });
+    this.selectedItems$
+    .pipe(take(1))
+    .subscribe((data) => {
+      const action = this.companyId
+        ? new UnitActions.DeleteAll(data, del, true, TYPES.LIST, this.companyId)
+        : new UnitActions.DeleteAll(data, del, true, TYPES.LIST);
+
+      this.store.dispatch(action)
+      .pipe(take(1))
+      .subscribe({
+        next: (response: any) => {
+          this.sweetalertService.confirmSuccess(
+            response.unit.result.title,
+            response.unit.result.message
+          );
+        },
+        error: (error) => {
+          const status = error.status === 422 ? 'warning' : 'error';
+          const errors: string[] = Array.isArray(error.error.message)
+            ? error.error.message
+            : [error.error.message];
+          this.notificationService.show(errors || 'Ocurrió un error', status);
+        },
+        complete: () => {
+          this.onCountTrasheds();
+        },
+      });
     });
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new UnitActions.ToggleItemSelection(id));
+    this.store.dispatch(new UnitActions.ToggleItemSelection(id, TYPES.LIST));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new UnitActions.ToggleAllItems(checked));
+    this.store.dispatch(new UnitActions.ToggleAllItems(checked, TYPES.LIST));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new UnitActions.Filters(filter, this.colFiltered));
+    this.store.dispatch(new UnitActions.Filters(filter, TYPES.LIST, this.colFiltered));
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    //this.store.dispatch(new UnitActions.clearAll);
+    this.store.dispatch(new UnitActions.ClearItemSelection);
   }
 }

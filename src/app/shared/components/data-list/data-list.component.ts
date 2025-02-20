@@ -7,10 +7,11 @@ import { NgIconsModule } from '@ng-icons/core';
 import { BaseModel } from '../../models/base.model';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { CellValuePipe } from '@shared/pipes/cell-value.pipe';
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 @Component({
   selector: 'app-data-list',
-  imports: [CommonModule, RouterLink, NgIconsModule, CellValuePipe],
+  imports: [CommonModule, RouterLink, NgIconsModule, CellValuePipe, TooltipComponent],
   providers: [DatePipe],
   templateUrl: './data-list.component.html',
   styleUrl: './data-list.component.scss',

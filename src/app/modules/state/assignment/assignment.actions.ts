@@ -1,4 +1,4 @@
-import { Assignment } from "@models/assignment.model";
+import { Assignment, AssignmentRequest } from "@models/assignment.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace AssignmentActions {
@@ -26,12 +26,12 @@ export namespace AssignmentActions {
 
   export class Create {
     static readonly type = '[Assignment] Create';
-    constructor(public payload: Assignment) {}
+    constructor(public payload: AssignmentRequest) {}
   }
 
   export class Update {
     static readonly type = '[Assignment] Update';
-    constructor(public id: number, public payload: Partial<Assignment>) {}
+    constructor(public id: number, public payload: Partial<AssignmentRequest>) {}
   }
 
   export class Delete {

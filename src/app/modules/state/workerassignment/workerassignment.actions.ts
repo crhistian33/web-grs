@@ -1,4 +1,4 @@
-import { WorkerAssignment } from "@models/workerassignment.model";
+import { WorkerAssignment, WorkerAssignmentRequest } from "@models/workerassignment.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace WorkerAssignmentActions {
@@ -18,7 +18,7 @@ export namespace WorkerAssignmentActions {
 
   export class Update {
     static readonly type = '[WorkerAssignment] Update';
-    constructor(public id: number, public payload: Partial<WorkerAssignment>) {}
+    constructor(public id: number, public payload: Partial<WorkerAssignmentRequest>) {}
   }
 
   export class Delete {

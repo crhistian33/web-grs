@@ -43,11 +43,11 @@ export const appConfig: ApplicationConfig = {
       NgxsReduxDevtoolsPluginModule.forRoot({
         disabled: environment.production
       }),
-      // NgxsLoggerPluginModule.forRoot({
-      //   disabled: environment.production
-      // }),
+      NgxsLoggerPluginModule.forRoot({
+        disabled: environment.production
+      }),
       NgxsStoragePluginModule.forRoot({
-        keys: ['auth.access_token', 'auth.refresh_token', 'auth.isAuthenticated', 'user']
+        keys: ['auth.access_token', 'auth.refresh_token', 'auth.isAuthenticated', 'user', 'auth.userId']
       })
     ]),
     provideStore([

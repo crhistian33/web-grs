@@ -6,6 +6,19 @@ export const FORM_MODULE: { [key: string]: IModule } = {
     name: PARAMETERS.WORKER,
     fields: [
       {
+        name: 'type_worker_id',
+        label: 'Tipo de trabajador',
+        type: 'select',
+        value: '',
+        validators: [
+          {
+            name: 'required',
+            validator: 'required',
+            message: 'El tipo de trabajador es requerido',
+          }
+        ]
+      },
+      {
         name: 'name',
         label: 'Nombres y apellidos',
         type: 'text',
@@ -45,22 +58,10 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         ]
       },
       {
-        name: 'type_worker_id',
-        label: 'Tipo de trabajador',
-        type: 'select',
-        value: '',
-        validators: [
-          {
-            name: 'required',
-            validator: 'required',
-            message: 'El tipo de trabajador es requerido',
-          }
-        ]
-      },
-      {
         name: 'company_id',
         label: 'Empresa',
         type: 'select',
+        prefix: false,
         value: '',
         validators: [
           {
@@ -70,11 +71,6 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           }
         ]
       },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   typeworker: {
@@ -98,11 +94,6 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           }
         ]
       },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   center: {
@@ -147,11 +138,6 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           },
         ]
       },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   company: {
@@ -183,16 +169,25 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           },
         ]
       },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   customer: {
     name: PARAMETERS.CUSTOMER,
     fields: [
+      {
+        name: 'company_id',
+        label: 'Empresa',
+        type: 'select',
+        prefix: true,
+        value: '',
+        validators: [
+          {
+            name: 'required',
+            validator: 'required',
+            message: 'La empresa es requerida',
+          },
+        ]
+      },
       {
         name: 'code',
         label: 'Código',
@@ -245,24 +240,6 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           },
         ]
       },
-      {
-        name: 'company_id',
-        label: 'Empresa',
-        type: 'select',
-        value: '',
-        validators: [
-          {
-            name: 'required',
-            validator: 'required',
-            message: 'La empresa es requerida',
-          },
-        ]
-      },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   shift: {
@@ -294,16 +271,25 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           },
         ]
       },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   unit: {
     name: PARAMETERS.UNIT,
     fields: [
+      {
+        name: 'customer_id',
+        label: 'Cliente',
+        type: 'select',
+        prefix: true,
+        value: '',
+        validators: [
+          {
+            name: 'required',
+            validator: 'required',
+            message: 'El cliente es requerido',
+          },
+        ]
+      },
       {
         name: 'code',
         label: 'Código',
@@ -343,19 +329,7 @@ export const FORM_MODULE: { [key: string]: IModule } = {
           },
         ]
       },
-      {
-        name: 'customer_id',
-        label: 'Cliente',
-        type: 'select',
-        value: '',
-        validators: [
-          {
-            name: 'required',
-            validator: 'required',
-            message: 'El cliente es requerido',
-          },
-        ]
-      },
+
       {
         name: 'min_assign',
         label: 'N° trabajadores a asignar',
@@ -375,11 +349,6 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         type: 'table',
         value: '',
       },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
-      }
     ]
   },
   assignment: {
@@ -408,11 +377,6 @@ export const FORM_MODULE: { [key: string]: IModule } = {
         label: 'Activo',
         type: 'checkbox',
         value: true,
-      },
-      {
-        name: 'user_id',
-        type: 'hidden',
-        value: '1'
       },
     ]
   }

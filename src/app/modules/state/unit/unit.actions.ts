@@ -1,18 +1,15 @@
-import { Unit } from '@models/unit.model';
+import { Unit, UnitRequest } from '@models/unit.model';
 import { FilterStateModel } from '@shared/models/filter.model';
 
 export namespace UnitActions {
   export class GetAll {
     static readonly type = '[Unit] Get All';
+    constructor(public id?: number) {};
   }
 
-  export class GetByCompany {
-    static readonly type = '[Unit] Get All Company';
-    constructor(public id: number) {};
-  }
-
-  export class GetDeletes {
-    static readonly type = '[Unit] Get All Deletes';
+  export class GetTrasheds {
+    static readonly type = '[Unit] Get All Trasheds';
+    constructor(public id?: number) {};
   }
 
   export class GetAllToShift {
@@ -24,28 +21,24 @@ export namespace UnitActions {
     constructor(public id: number) {}
   }
 
-  export class countDeletes {
-    static readonly type = '[Unit] Count Deletes';
-  }
-
   export class Filters<T> {
     static readonly type = '[Unit] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
     static readonly type = '[Unit] Create';
-    constructor(public payload: Unit) {}
+    constructor(public payload: UnitRequest) {}
   }
 
   export class Update {
     static readonly type = '[Unit] Update';
-    constructor(public id: number, public payload: Partial<Unit>) {}
+    constructor(public id: number, public payload: Partial<UnitRequest>) {}
   }
 
   export class Delete {
     static readonly type = '[Unit] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class Restore {
@@ -55,7 +48,7 @@ export namespace UnitActions {
 
   export class DeleteAll {
     static readonly type = '[Unit] Delete All';
-    constructor(public payload: Unit[], public del: boolean,public active: boolean) {}
+    constructor(public payload: Unit[], public del: boolean,public active: boolean, public page: string, public id?: number) {}
   }
 
   export class RestoreAll {
@@ -65,12 +58,12 @@ export namespace UnitActions {
 
   export class ToggleItemSelection {
     static readonly type = '[Unit] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[Unit] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {

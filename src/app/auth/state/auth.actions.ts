@@ -11,4 +11,8 @@ export namespace AuthAction {
   export class Logout {
     static readonly type = '[Auth] Logout';
   }
+
+  export class getUserID {
+    static readonly type = '[Auth] Get User ID';
+  }
 }

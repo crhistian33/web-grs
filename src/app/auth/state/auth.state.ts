@@ -14,6 +14,7 @@ import { UnitActions } from '@state/unit/unit.actions';
 import { ShiftActions } from '@state/shift/shift.action';
 import { TypeWorkerActions } from '@state/typeworker/typeworker.action';
 import { WorkerActions } from '@state/worker/worker.action';
+import { User } from '@models/user.model';
 
 export interface AuthStateModel {
   access_token: string | null;
@@ -22,14 +23,16 @@ export interface AuthStateModel {
   isAuthenticated: boolean;
 }
 
+const initialValue = {
+  access_token: null,
+  refresh_token: null,
+  error: null,
+  isAuthenticated: false,
+}
+
 @State<AuthStateModel>({
   name: 'auth',
-  defaults: {
-    access_token: null,
-    refresh_token: null,
-    error: null,
-    isAuthenticated: false,
-  }
+  defaults: initialValue
 })
 
 @Injectable()
@@ -72,7 +75,7 @@ export class AuthState {
                 access_token: response.data.access_token,
                 refresh_token: response.data.refresh_token,
                 isAuthenticated: true,
-                error: null
+                error: null,
               });
               ctx.dispatch(new UserAction.GetProfile(response.data.user)).pipe(
                 switchMap(() => this.initialLoaderService.load())
@@ -124,12 +127,7 @@ export class AuthState {
         localStorage.removeItem('auth.isAuthenticated');
         localStorage.removeItem('auth.refresh_token');
         localStorage.removeItem('user');
-        ctx.setState({
-          access_token: null,
-          refresh_token: null,
-          isAuthenticated: false,
-          error: null
-        });
+        ctx.setState(initialValue);
         ctx.dispatch([
           new CenterActions.clearAll,
           new CompanyActions.clearAll,
@@ -140,8 +138,8 @@ export class AuthState {
           new WorkerActions.clearAll,
           new UserAction.ClearAll,
         ]);
-        this.router.navigate(['/auth/login']);
         ctx.dispatch(new SetLoading(AuthAction.Logout.type, false));
+        this.router.navigate(['/auth/login']);
       })
     );
   }

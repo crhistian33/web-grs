@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { State, Selector, Action, StateContext } from '@ngxs/store';
-import { WorkerAssignment, WorkerassignmentStateModel } from '@models/workerassignment.model';
+import { WorkerAssignment, WorkerAssignmentRequest, WorkerassignmentStateModel } from '@models/workerassignment.model';
 import { BaseState } from '@shared/state/base.state';
 import { WorkerAssignmentActions } from './workerassignment.actions';
 import { WorkerassignmentService } from '@services/workerassignment.service';
@@ -11,6 +11,7 @@ import { WorkerassignmentService } from '@services/workerassignment.service';
     entities: [],
     filteredItems: [],
     trashedItems: [],
+    filterTrashedItems: [],
     selectedEntity: null,
     searchTerm: '',
     result: null,
@@ -18,7 +19,7 @@ import { WorkerassignmentService } from '@services/workerassignment.service';
 })
 
 @Injectable()
-export class WorkerassignmentState extends BaseState<WorkerAssignment> {
+export class WorkerassignmentState extends BaseState<WorkerAssignment, WorkerAssignmentRequest> {
   constructor(private workerassignmentService: WorkerassignmentService) {
     super(workerassignmentService);
   }

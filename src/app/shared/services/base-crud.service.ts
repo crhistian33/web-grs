@@ -1,29 +1,40 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Inject, Injectable } from '@angular/core';
 import { BaseModel } from '../models/base.model';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, throwError } from 'rxjs';
 import { checkToken } from 'src/app/interceptors/auth.interceptor';
+import { Store } from '@ngxs/store';
+import { UserState } from '@state/user/user.state';
 
 @Injectable({
   providedIn: 'root',
 })
-export class BaseCrudService<T extends BaseModel> {
-  constructor(private httpClient: HttpClient, @Inject(String) protected apiUrl: string) {}
+export class BaseCrudService<T extends BaseModel, Trequest> {
+  private readonly store = inject(Store);
 
-  getAll(): Observable<T[]> {
+  constructor(
+    private httpClient: HttpClient,
+    @Inject(String) protected apiUrl: string
+  ) {}
+
+  getItems(): Observable<T[]> {
     return this.httpClient.get<T[]>(this.apiUrl, { context: checkToken() }).pipe(catchError(this.handleError));
   }
 
-  getbyCompany(id: number): Observable<T[]> {
-    return this.httpClient.get<T[]>(`${this.apiUrl}/getbycompany/${id}`, { context: checkToken() });
+  getAll(id?: number): Observable<T[]> {
+    const url = id
+      ? `${this.apiUrl}/all/${id}`
+      : `${this.apiUrl}/all`;
+
+    return this.httpClient.get<T[]>(url, { context: checkToken() }).pipe(catchError(this.handleError));
   }
 
-  getDeletes(): Observable<T[]> {
-    return this.httpClient.get<T[]>(`${this.apiUrl}/deletes`, { context: checkToken() }).pipe(catchError(this.handleError));
-  }
+  getTrashed(id?: number) {
+    const url = id
+    ? `${this.apiUrl}/deletes/${id}`
+    : `${this.apiUrl}/deletes`;
 
-  getDeletesByCompany(id: number): Observable<T[]> {
-    return this.httpClient.get<T[]>(`${this.apiUrl}/deletesbycompany/${id}`, { context: checkToken() }).pipe(catchError(this.handleError));
+    return this.httpClient.get<T[]>(url, { context: checkToken() });
   }
 
   getById(id: number): Observable<T> {
@@ -31,13 +42,23 @@ export class BaseCrudService<T extends BaseModel> {
       .pipe(catchError(this.handleError));
   }
 
-  create(resource: T): Observable<T> {
-    return this.httpClient.post<T>(this.apiUrl, resource, { context: checkToken() })
+  create(resource: Trequest): Observable<T> {
+    const userID = this.store.selectSnapshot(UserState.getCurrentUserID);
+    const newResources = {
+      ...resource,
+      created_by: userID
+    };
+    return this.httpClient.post<T>(this.apiUrl, newResources, { context: checkToken() })
       .pipe(catchError(this.handleError));
   }
 
-  update(id: number, resource: Partial<T>): Observable<T> {
-    return this.httpClient.patch<T>(`${this.apiUrl}/${id}`, resource, { context: checkToken() })
+  update(id: number, resource: Partial<Trequest>): Observable<T> {
+    const userID = this.store.selectSnapshot(UserState.getCurrentUserID);
+    const newResources = {
+      ...resource,
+      updated_by: userID
+    };
+    return this.httpClient.patch<T>(`${this.apiUrl}/${id}`, newResources, { context: checkToken() })
       .pipe(catchError(this.handleError));
   }
 
@@ -51,8 +72,13 @@ export class BaseCrudService<T extends BaseModel> {
       .pipe(catchError(this.handleError));
   }
 
-  deleteAll(resource: T[], del: boolean, active: boolean): Observable<T[]> {
-    return this.httpClient.post<T[]>(`${this.apiUrl}/destroyes`, { resources: resource, del, active }, { context: checkToken() })
+  deleteAll(resource: T[], del: boolean, active: boolean, companyId?: number): Observable<T[]> {
+    const url = companyId
+      ? `${this.apiUrl}/destroyes/${companyId}`
+      : `${this.apiUrl}/destroyes`;
+
+    console.log('URL', url);
+    return this.httpClient.post<T[]>(url, { resources: resource, del, active }, { context: checkToken() })
       .pipe(catchError(this.handleError));
   }
 

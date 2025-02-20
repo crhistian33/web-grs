@@ -6,8 +6,8 @@ export namespace ShiftActions {
     static readonly type = '[Shift] Get All';
   }
 
-  export class GetDeletes {
-    static readonly type = '[Shift] Get All Deletes';
+  export class GetTrasheds {
+    static readonly type = '[Shift] Get All Trasheds';
   }
 
   export class GetById {
@@ -15,13 +15,9 @@ export namespace ShiftActions {
     constructor(public id: number) {}
   }
 
-  export class countDeletes {
-    static readonly type = '[Shift] Count Deletes';
-  }
-
   export class Filters<T> {
     static readonly type = '[Shift] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -36,7 +32,7 @@ export namespace ShiftActions {
 
   export class Delete {
     static readonly type = '[Shift] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class Restore {
@@ -46,7 +42,7 @@ export namespace ShiftActions {
 
   export class DeleteAll {
     static readonly type = '[Shift] Delete All';
-    constructor(public payload: Shift[], public del: boolean, public active: boolean) {}
+    constructor(public payload: Shift[], public del: boolean, public active: boolean, public page: string) {}
   }
 
   export class RestoreAll {
@@ -56,12 +52,12 @@ export namespace ShiftActions {
 
   export class ToggleItemSelection {
     static readonly type = '[Shift] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[Shift] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {

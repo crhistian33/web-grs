@@ -43,6 +43,7 @@
               [id]="item.name"
               [formControlName]="item.name"
               class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
+              (change)="changeSelected($event, item)"
             >
               <option value="">Seleccionar {{ item.label }}</option>
               <ng-container *ngIf="getSubEntityItems$(item.name) | async as subItems">

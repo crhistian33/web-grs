@@ -3,6 +3,7 @@
   [page]="page"
   [numTrashed]="(trashedItems$ | async)?.length ?? 0">
 </app-title-page>
+<app-filter [config]="config" (filters)="filtersData($event)"></app-filter>
 <div class="bg-white p-4 my-4 rounded shadow relative z-auto">
   <app-actions
     [page]="page"

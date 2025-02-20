@@ -13,4 +13,13 @@ export interface Unit extends BaseModel {
   shifts: Shift[];
 }
 
+export interface UnitRequest {
+  code: string;
+  name: string;
+  center_id: number;
+  customer_id: number;
+  min_assign: number;
+  shifts: Shift[];
+}
+
 export interface UnitStateModel extends BaseStateModel<Unit> {}

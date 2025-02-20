@@ -8,4 +8,9 @@ export interface WorkerAssignment extends BaseModel {
   assignment: Assignment;
 }
 
+export interface WorkerAssignmentRequest {
+  worker_id: number;
+  assignment_id: number;
+}
+
 export interface WorkerassignmentStateModel extends BaseStateModel<WorkerAssignment> {}

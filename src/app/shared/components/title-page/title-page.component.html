@@ -14,7 +14,9 @@
         <ng-icon name="heroTrashSolid" class="text-gray_dark_600 scale-75"></ng-icon>
         <span class="ms-1 text-sm font-semibold">Papelera</span>
       </div>
-      <div class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full -top-2 -end-2">{{ numTrashed }}</div>
+      @if(numTrashed > 0) {
+        <div class="absolute inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full -top-2 -end-2">{{ numTrashed }}</div>
+      }
     </a>
   }
 </div>

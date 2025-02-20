@@ -14,10 +14,11 @@ import { Router } from '@angular/router';
 import { IDENTIFIES, PARAMETERS, ROUTES, TITLES } from '@shared/utils/constants';
 import { FormBuilderComponent } from '@shared/components/formbuilder/formbuilder.component';
 import { SubEntity } from '@shared/models/subentity.model';
-import { Worker } from '@models/worker.model';
+import { Worker, WorkerRequest } from '@models/worker.model';
 import { WorkerState } from '@state/worker/worker.state';
 import { Company } from '@models/company.model';
 import { UserState } from '@state/user/user.state';
+import { CompanyState } from '@state/company/company.state';
 
 @Component({
   selector: 'app-form',
@@ -40,9 +41,7 @@ export class FormComponent {
   resetForm: boolean = false;
   typesWorker$: Observable<TypeWorker[]> = this.store.select(TypeworkerState.getItems);
   entity$: Observable<Worker | null> = this.store.select(WorkerState.getEntity);
-  companies$: Observable<Company[] | undefined> = this.store.select(UserState.getItem).pipe(
-    map(item => item?.companies)
-  );
+  companies$: Observable<Company[]> = this.store.select(CompanyState.getItems);
 
   readonly subentities: SubEntity[] = [
     { id: IDENTIFIES.TYPEWORKER, data: this.typesWorker$, type: 'select' },
@@ -50,13 +49,12 @@ export class FormComponent {
   ]
 
   ngOnInit() {
-    this.store.dispatch(new TypeWorkerActions.GetAll);
     if(this.id) {
       this.store.dispatch(new WorkerActions.GetById(this.id));
     }
   }
 
-  onSubmit(event: { data: any; redirect: boolean }) {
+  onSubmit(event: { data: WorkerRequest; redirect: boolean }) {
     const action = this.id
       ? new WorkerActions.Update(this.id, event.data)
       : new WorkerActions.Create(event.data);
@@ -69,7 +67,7 @@ export class FormComponent {
       },
       error: (error) => {
         this.notificationService.show(
-          error.error?.message || 'Error occurred',
+          error.error?.message || 'Ocurrió un error',
           'error',
           5000
         );

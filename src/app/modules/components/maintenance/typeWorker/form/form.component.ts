@@ -51,7 +51,7 @@ export class FormComponent {
       },
       error: (error) => {
         this.notificationService.show(
-          error.error?.message || 'Error occurred',
+          error.error?.message || 'Ocurrió un error',
           'error',
           5000
         );

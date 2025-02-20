@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Assist, AssistStateModel } from '@models/assist.model';
+import { Assist, AssistRequest, AssistStateModel } from '@models/assist.model';
 import { State, Action, Selector, StateContext } from '@ngxs/store';
 import { AssistService } from '@services/assist.service';
 import { BaseState } from '@shared/state/base.state';
@@ -11,6 +11,7 @@ import { AssistActions } from './assist.actions';
     entities: [],
     filteredItems: [],
     trashedItems: [],
+    filterTrashedItems: [],
     selectedEntity: null,
     searchTerm: '',
     result: null,
@@ -18,7 +19,7 @@ import { AssistActions } from './assist.actions';
 })
 
 @Injectable()
-export class AssistState extends BaseState<Assist> {
+export class AssistState extends BaseState<Assist, AssistRequest> {
   constructor(private assistService: AssistService) {
     super(assistService);
   }

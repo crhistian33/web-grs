@@ -69,7 +69,7 @@ export class FormComponent {
         this.store.dispatch(new UnitShiftActions.GetAll);
       } else if(companies.length === 1) {
         this.companyId = companies[0].id;
-        this.store.dispatch(new UnitShiftActions.GetAll);
+        this.store.dispatch(new UnitShiftActions.GetAll(this.companyId));
       }
     }
     if(this.id)

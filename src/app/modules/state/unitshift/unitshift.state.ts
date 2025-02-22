@@ -39,7 +39,7 @@ export class UnitshiftState extends BaseState<UnitShift, UnitShiftRequest> {
   }
 
   @Action(UnitShiftActions.GetAll)
-  getAll(ctx: StateContext<UnitshiftStateModel>) {
-    return this.getItems(ctx, UnitShiftActions.GetAll.type)
+  getAll(ctx: StateContext<UnitshiftStateModel>, { id }: UnitShiftActions.GetAll) {
+    return this.getItemsAll(ctx, UnitShiftActions.GetAll.type, id)
   }
 }

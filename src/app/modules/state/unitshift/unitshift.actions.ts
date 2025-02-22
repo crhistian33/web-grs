@@ -1,6 +1,7 @@
 export namespace UnitShiftActions {
   export class GetAll {
     static readonly type = '[UnitShift] Get All';
+    constructor(public id?: number) {};
   }
 
   export class clearAll {

@@ -11,8 +11,6 @@
     [columns]="columns"
     [page]="page"
     [areAllSelected]="(areAllSelected$ | async) ?? false"
-    [nestedColumns]="nestedColumns"
-    [getNestedDataFn]="getWorkers"
     (deleteItem)="onDelete($event)"
     (toggleItem)="onToggleItem($event)"
     (toggleAll)="onToggleAll($event)"/>

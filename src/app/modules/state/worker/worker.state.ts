@@ -110,11 +110,9 @@ export class WorkerState extends BaseState<Worker, WorkerRequest> {
   }
 
   @Action(WorkerActions.GetUnassignment)
-  getUnassigns(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.GetUnassignment) {
+  getUnassigns(ctx: StateContext<WorkerStateModel>, { payload }: WorkerActions.GetUnassignment) {
     ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, true));
-    const service = id
-      ? this.workerService.getUnassigns(id)
-      : this.workerService.getUnassigns();
+    const service = this.workerService.getUnassigns(payload)
 
     return service.pipe(
       tap({

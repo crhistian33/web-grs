@@ -4,6 +4,7 @@ import { FilterStateModel } from "@shared/models/filter.model";
 export namespace AssignmentActions {
   export class GetAll {
     static readonly type = '[Assignment] Get All';
+    constructor(public id?: number) {};
   }
 
   export class GetAllReassigns {
@@ -21,7 +22,7 @@ export namespace AssignmentActions {
 
   export class Filters<T> {
     static readonly type = '[Assignment] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {
@@ -36,22 +37,22 @@ export namespace AssignmentActions {
 
   export class Delete {
     static readonly type = '[Assignment] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class DeleteAll {
     static readonly type = '[Assignment] Delete All';
-    constructor(public payload: Assignment[], public del: boolean, public active: boolean) {}
+    constructor(public payload: Assignment[], public del: boolean, public active: boolean, public page: string) {}
   }
 
   export class ToggleItemSelection {
     static readonly type = '[Assignment] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[Assignment] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {

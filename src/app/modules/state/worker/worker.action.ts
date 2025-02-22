@@ -1,4 +1,4 @@
-import { Worker, WorkerRequest } from "@models/worker.model";
+import { Worker, WorkerForm, WorkerRequest } from "@models/worker.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace WorkerActions {
@@ -14,7 +14,7 @@ export namespace WorkerActions {
 
   export class GetUnassignment {
     static readonly type = '[Worker] Get All Unassignment';
-    constructor(public id?: number) {};
+    constructor(public payload?: WorkerForm) {};
   }
 
   export class GetTitulars {

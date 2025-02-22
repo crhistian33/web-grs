@@ -73,7 +73,7 @@ export class FormComponent {
     if(this.isChange)
       this.sweetalertService.confirmAction('Datos por guardar', 'Hay datos por guardar. Si no lo guarda se perderán. ¿Desea continuar?', 'Aceptar', () => {
         this.store.dispatch(new CalendarAction.ClearCalendar);
-        this.store.dispatch(new WorkerActions.GetUnassignment(event.id));
+        this.store.dispatch(new WorkerActions.GetUnassignment({ assignment_id: event.id }));
         this.myFormBreak.reset();
         this.isChange = false;
         return;
@@ -82,7 +82,7 @@ export class FormComponent {
           this.items.get('month')?.setValue(this.initialItem, { emitEvent: false });
       })
     else
-      this.store.dispatch(new WorkerActions.GetUnassignment(event.id));
+      this.store.dispatch(new WorkerActions.GetUnassignment({ assignment_id: event.id }));
 
     this.initialItem = event.id;
   }

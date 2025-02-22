@@ -61,8 +61,8 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
   }
 
   @Action(AssignmentActions.GetAll)
-  getAll(ctx: StateContext<AssignmentStateModel>) {
-    return this.getItems(ctx, AssignmentActions.GetAll.type);
+  getAll(ctx: StateContext<AssignmentStateModel>, { id }: AssignmentActions.GetAll) {
+    return this.getItemsAll(ctx, AssignmentActions.GetAll.type, id);
   }
 
   @Action(AssignmentActions.GetAllReassigns)
@@ -96,8 +96,8 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
   }
 
   @Action(AssignmentActions.Filters)
-  Filters(ctx: StateContext<AssignmentStateModel>, { payload, columns }: AssignmentActions.Filters<Assignment>) {
-    return super.filtersItems(ctx, AssignmentActions.Filters.type, payload, columns);
+  Filters(ctx: StateContext<AssignmentStateModel>, { payload, page, columns }: AssignmentActions.Filters<Assignment>) {
+    return super.filtersItems(ctx, AssignmentActions.Filters.type, payload, columns, page);
   }
 
   @Action(AssignmentActions.Create)
@@ -111,23 +111,23 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
   }
 
   @Action(AssignmentActions.Delete)
-  delete(ctx: StateContext<AssignmentStateModel>, { id, del }: AssignmentActions.Delete) {
-    return this.deleteItem(ctx, id, del, AssignmentActions.Delete.type);
+  delete(ctx: StateContext<AssignmentStateModel>, { id, del, page }: AssignmentActions.Delete) {
+    return this.deleteItem(ctx, id, del, AssignmentActions.Delete.type, page);
   }
 
   @Action(AssignmentActions.DeleteAll)
-  deleteAll(ctx: StateContext<AssignmentStateModel>, { payload, del, active }: AssignmentActions.DeleteAll) {
-    return this.deleteAllItem(ctx, payload, del, active, AssignmentActions.DeleteAll.type);
+  deleteAll(ctx: StateContext<AssignmentStateModel>, { payload, del, active, page }: AssignmentActions.DeleteAll) {
+    return this.deleteAllItem(ctx, payload, del, active, AssignmentActions.DeleteAll.type, page);
   }
 
   @Action(AssignmentActions.ToggleItemSelection)
-  toggleSelection(ctx: StateContext<AssignmentStateModel>, { id }: AssignmentActions.ToggleItemSelection) {
-    return this.toggleSelectionItem(ctx, id);
+  toggleSelection(ctx: StateContext<AssignmentStateModel>, { id, page }: AssignmentActions.ToggleItemSelection) {
+    return this.toggleSelectionItem(ctx, id, page);
   }
 
   @Action(AssignmentActions.ToggleAllItems)
-  toggleAll(ctx: StateContext<AssignmentStateModel>, { selected }: AssignmentActions.ToggleAllItems) {
-    return this.toggleAllItem(ctx, selected);
+  toggleAll(ctx: StateContext<AssignmentStateModel>, { selected, page }: AssignmentActions.ToggleAllItems) {
+    return this.toggleAllItem(ctx, selected, page);
   }
 
   @Action(AssignmentActions.clearEntity)
@@ -135,10 +135,10 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
     return this.clearEntity(ctx);
   }
 
-  // @Action(AssignmentActions.ClearItemSelection)
-  // clearSelected(ctx: StateContext<AssignmentStateModel>) {
-  //   return this.clearSelectionItem(ctx);
-  // }
+  @Action(AssignmentActions.ClearItemSelection)
+  clearSelected(ctx: StateContext<AssignmentStateModel>) {
+    return this.clearSelectionItem(ctx);
+  }
 
   @Action(AssignmentActions.clearAll)
   clearAll(ctx: StateContext<AssignmentStateModel>) {

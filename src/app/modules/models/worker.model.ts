@@ -22,6 +22,11 @@ export interface WorkerRequest {
   user_id: number;
 }
 
+export interface WorkerForm {
+  assignment_id?: number;
+  company_id?: number;
+}
+
 export interface WorkerUpload {
   name: string;
   dni: string;

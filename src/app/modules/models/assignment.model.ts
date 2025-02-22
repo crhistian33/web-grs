@@ -9,9 +9,6 @@ export interface Assignment extends BaseModel {
   start_date: string;
   end_date: string;
   state: boolean;
-  // unit: Unit;
-  // shift: Shift;
-  //unit_shift_id?: number;
   unitshift: UnitShift;
   workers_count: number;
   workers: Worker[];

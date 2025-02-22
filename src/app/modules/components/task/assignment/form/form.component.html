@@ -7,5 +7,6 @@
   [route]="route_list"
   [reset]="resetForm"
   (formSubmitted)="onSubmitted($event)"
-  (clearReset)="onClearReset($event)">
+  (clearReset)="onClearReset($event)"
+  (companyId)="loadWorkers($event)">
 </app-formbuilder>

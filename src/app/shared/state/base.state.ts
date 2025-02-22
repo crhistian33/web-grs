@@ -333,6 +333,8 @@ export class BaseState<T extends BaseModel, TRequest> {
     const state = ctx.getState();
     const data = page === TYPES.LIST ? state.entities : state.trashedItems;
 
+    console.log('ID', id);
+    console.log('DATA', data);
     const value = state.entities.filter(item => item.id === id);
     console.log('Valor con check', value);
 

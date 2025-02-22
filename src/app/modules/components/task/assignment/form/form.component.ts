@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngxs/store';
-import { Observable, Subject, filter, switchMap, take, takeUntil } from 'rxjs';
+import { Observable, Subject, combineLatest, distinctUntilChanged, filter, forkJoin, map, skip, switchMap, take, takeUntil, tap } from 'rxjs';
 
 import { Assignment } from '@models/assignment.model';
 import { Worker } from '@models/worker.model';
@@ -24,6 +24,9 @@ import { UnitShift } from '@models/unitshift.model';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { SubEntity } from '@shared/models/subentity.model';
 import { HeaderDatalistService } from '@shared/services/header-datalist.service';
+import { UserState } from '@state/user/user.state';
+import { WorkerFormState } from '@state/worker-form/worker-form.state';
+import { WorkerFormAction } from '@state/worker-form/worker-form.actions';
 
 @Component({
   selector: 'app-form',
@@ -47,10 +50,11 @@ export class FormComponent {
   resetForm = false;
   readonly columnsWorker: DataListColumn<Worker>[] = this.headerDataListService.getHeaderFormDataList(PARAMETERS.WORKER);
 
+  companyId!: number;
   unitshifts$: Observable<UnitShift[]> = this.store.select(UnitshiftState.getItems);
-  workers$: Observable<Worker[]> = this.store.select(WorkerState.getItems);
-  selectedItems$: Observable<Worker[]> = this.store.select(WorkerState.getSelectedItems);
-  entity$: Observable<Assignment | null> = this.store.select(AssignmentState.getEntity).pipe(filter(Boolean));
+  workers$: Observable<Worker[]> = this.store.select(WorkerFormState.getItems);
+  selectedItems$: Observable<Worker[]> = this.store.select(WorkerFormState.getSelectedItems);
+  entity$: Observable<Assignment | null> = this.store.select(AssignmentState.getEntity);
   $ifAssign: Observable<boolean> = this.store.select(VerifiedState.getVerified);
 
   readonly subentities: SubEntity[] = [
@@ -59,37 +63,66 @@ export class FormComponent {
   ];
 
   ngOnInit() {
-    this.store.dispatch(new UnitShiftActions.GetAll);
-    if(!this.id) {
-      this.store.dispatch(new WorkerActions.GetUnassignment)
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if(companies) {
+      if(companies.length > 1) {
+        this.store.dispatch(new UnitShiftActions.GetAll);
+      } else if(companies.length === 1) {
+        this.companyId = companies[0].id;
+        this.store.dispatch(new UnitShiftActions.GetAll);
+      }
     }
-    else {
-      this.loadExistingAssignment();
-    }
+    if(this.id)
+      this.store.dispatch(new AssignmentActions.GetById(this.id));
   }
 
   private loadExistingAssignment(): void {
-    this.store.dispatch(new WorkerActions.GetUnassignment(this.id))
+    combineLatest([
+      this.entity$.pipe(
+        filter((entity): entity is Assignment => !!entity && Array.isArray(entity.workers) && entity.workers.length > 0)
+      ),
+      this.workers$.pipe(
+        filter((workers): workers is Worker[] => !!workers?.length)
+      )
+    ])
     .pipe(
-      switchMap(() => this.workers$.pipe(
-        filter(workers => workers.length > 0),
-        take(1)
-      )),
-      switchMap(() => this.store.dispatch(new AssignmentActions.GetById(this.id))),
-      switchMap(() => this.entity$.pipe(
-        filter(entity => !!entity),
-        take(1)
-      )),
+      take(1),
+      switchMap(([entity, workers]) => {
+        const selectionActions = entity.workers
+          .filter(worker => workers.some(w => w.id === worker.id))
+          .map(worker =>
+            this.store.dispatch(new WorkerFormAction.ToggleItemSelection(worker.id, TYPES.LIST))
+          );
+
+        return selectionActions.length ? combineLatest(selectionActions) : [];
+      }),
       takeUntil(this.destroy$)
     )
-    .subscribe(entity => {
-      if (entity?.workers?.length) {
-        entity.workers.forEach(worker => {
-          this.store.dispatch(new WorkerActions.ToggleItemSelection(worker.id, TYPES.LIST))
-          .pipe(takeUntil(this.destroy$));
-        });
-      }
+    .subscribe({
+      next: () => console.log('Workers selection completed'),
+      error: (error) => console.error('Error selecting workers:', error)
     });
+  }
+
+  loadWorkers(company_id: number) {
+    this.companyId = company_id;
+    const action = this.id
+      ? new WorkerFormAction.GetUnassigns({ assignment_id: this.id, company_id })
+      : new WorkerFormAction.GetUnassigns({ company_id });
+
+    this.store.dispatch(action).pipe(
+      switchMap(() => this.workers$.pipe(
+        filter(workers => !!workers?.length),
+        take(1)
+      )),
+      tap(() => {
+        if (this.id) {
+          this.loadExistingAssignment();
+        }
+      }),
+      takeUntil(this.destroy$)
+    )
+    .subscribe();
   }
 
   onSubmitted(event: any) {
@@ -137,7 +170,7 @@ export class FormComponent {
       },
       complete: () => {
         if(!this.id) {
-          this.store.dispatch(new WorkerActions.GetUnassignment)
+          //this.store.dispatch(new WorkerActions.GetUnassignment)
         }
         if(param_id)
           this.updateState(event, param_id);
@@ -161,6 +194,10 @@ export class FormComponent {
           this.router.navigate([this.route_list]);
         } else {
           this.resetForm = true;
+          const action = this.id
+            ? new WorkerFormAction.GetUnassigns({ assignment_id: this.id, company_id: this.companyId })
+            : new WorkerFormAction.GetUnassigns({ company_id: this.companyId });
+          this.store.dispatch(action);
         }
       }
     );
@@ -173,7 +210,8 @@ export class FormComponent {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new AssignmentActions.clearEntity)
-    this.store.dispatch(new WorkerActions.clearAll)
+    this.store.dispatch(new AssignmentActions.clearEntity);
+    this.store.dispatch(new WorkerFormAction.ClearItemSelection);
+    this.store.dispatch(new WorkerFormAction.clearAll);
   }
 }

@@ -18,6 +18,7 @@ import { Worker } from '@models/worker.model';
 import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { SweetalertService } from '@shared/services/sweetalert.service';
 import { NotificationService } from '@shared/services/notification.service';
+import { UserState } from '@state/user/user.state';
 
 @Component({
   selector: 'app-list',
@@ -34,39 +35,49 @@ export class ListComponent {
 
   readonly title: string = TITLES.ASSIGNMENTS;
   readonly page: string = TYPES.NONE;
-  readonly config: filterConfig = {
-    company: true,
-    customer: true,
-    unit: true,
-    shift: true,
-  }
   readonly columns: DataListColumn<Assignment>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.ASSIGNMENT);
   readonly nestedColumns: DataListColumn<Worker>[] = this.headerDataListService.getInternal(PARAMETERS.WORKER);
 
-  assignments: Assignment[] = [];
-  filterAssignments: Assignment[] = [];
-
+  companyId!: number;
+  config!: filterConfig;
   assignments$: Observable<Assignment[]> = this.store.select(AssignmentState.getItems);
   areAllSelected$: Observable<boolean> = this.store.select(AssignmentState.areAllSelected);
   hasSelectedItems$: Observable<boolean> = this.store.select(AssignmentState.hasSelectedItems);
   selectedItems$: Observable<Assignment[]> = this.store.select(AssignmentState.getSelectedItems);
 
-  getWorkers = (assignment: Assignment) => assignment.workers;
-
   ngOnInit() {
-    this.store.dispatch(new AssignmentActions.GetAll);
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if(companies) {
+      if(companies.length > 1) {
+        this.store.dispatch(new AssignmentActions.GetAll);
+        this.config = {
+          company: true,
+          customer: true,
+          unit: true,
+          shift: true,
+        }
+      } else if(companies.length === 1) {
+        this.companyId = companies[0].id;
+        this.store.dispatch(new AssignmentActions.GetAll(this.companyId));
+        this.config  = {
+          customer: true,
+          unit: true,
+          shift: true,
+        }
+      }
+    }
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new AssignmentActions.ToggleItemSelection(id));
+    this.store.dispatch(new AssignmentActions.ToggleItemSelection(id, TYPES.LIST));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new AssignmentActions.ToggleAllItems(checked));
+    this.store.dispatch(new AssignmentActions.ToggleAllItems(checked, TYPES.LIST));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new AssignmentActions.Filters(filter));
+    this.store.dispatch(new AssignmentActions.Filters(filter, TYPES.LIST));
   }
 
   onDelete(id: number) {
@@ -80,7 +91,7 @@ export class ListComponent {
   }
 
   handleConfirmDelete(id: number, del: boolean) {
-    this.store.dispatch(new AssignmentActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new AssignmentActions.Delete(id, del, TYPES.LIST)).subscribe({
       next: (response: any) => {
         this.sweetalertService.confirmSuccess(
           response.assignment.result.title,
@@ -106,7 +117,7 @@ export class ListComponent {
     this.selectedItems$
     .pipe(take(1))
     .subscribe(data => {
-      this.store.dispatch(new AssignmentActions.DeleteAll(data, del, true))
+      this.store.dispatch(new AssignmentActions.DeleteAll(data, del, true, TYPES.LIST))
       .pipe(take(1))
       .subscribe({
         next: (response: any)=> {
@@ -124,6 +135,8 @@ export class ListComponent {
   }
 
   ngOnDestroy() {
-    this.store.dispatch(new AssignmentActions.clearAll);
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new AssignmentActions.ClearItemSelection);
   }
 }

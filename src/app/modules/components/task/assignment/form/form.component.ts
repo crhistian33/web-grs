@@ -2,20 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngxs/store';
-import { Observable, Subject, combineLatest, distinctUntilChanged, filter, forkJoin, map, skip, switchMap, take, takeUntil, tap } from 'rxjs';
+import { Observable, Subject, combineLatest, filter, switchMap, take, takeUntil, tap } from 'rxjs';
 
+import { IDENTIFIES, PARAMETERS, ROUTES, TITLES, TYPES } from '@shared/utils/constants';
 import { Assignment } from '@models/assignment.model';
 import { Worker } from '@models/worker.model';
 import { FormBuilderComponent } from '@shared/components/formbuilder/formbuilder.component';
 import { NotificationService } from '@shared/services/notification.service';
 import { SweetalertService } from '@shared/services/sweetalert.service';
-import { IDENTIFIES, PARAMETERS, ROUTES, TITLES, TYPES } from '@shared/utils/constants';
 import { AssignmentActions } from '@state/assignment/assignment.actions';
 import { AssignmentState } from '@state/assignment/assignment.state';
-import { UnitActions } from '@state/unit/unit.actions';
-import { UnitState } from '@state/unit/unit.state';
-import { WorkerActions } from '@state/worker/worker.action';
-import { WorkerState } from '@state/worker/worker.state';
 import { VerifiedAction } from '@shared/state/verified/verified.actions';
 import { VerifiedState } from '@shared/state/verified/verified.state';
 import { UnitShiftActions } from '@state/unitshift/unitshift.actions';
@@ -31,7 +27,7 @@ import { WorkerFormAction } from '@state/worker-form/worker-form.actions';
 @Component({
   selector: 'app-form',
   imports: [CommonModule, FormBuilderComponent],
-templateUrl: './form.component.html',
+  templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
 export class FormComponent {
@@ -55,12 +51,16 @@ export class FormComponent {
   workers$: Observable<Worker[]> = this.store.select(WorkerFormState.getItems);
   selectedItems$: Observable<Worker[]> = this.store.select(WorkerFormState.getSelectedItems);
   entity$: Observable<Assignment | null> = this.store.select(AssignmentState.getEntity);
-  $ifAssign: Observable<boolean> = this.store.select(VerifiedState.getVerified);
+  ifAssign$: Observable<boolean> = this.store.select(VerifiedState.getVerified);
 
-  readonly subentities: SubEntity[] = [
-    { id: IDENTIFIES.UNIT_SHIFT, data: this.unitshifts$, type: 'select' },
-    { id: IDENTIFIES.WORKERS, data: this.workers$, type: 'table', columns: this.columnsWorker }
-  ];
+  readonly subentities: SubEntity[] = [];
+
+  constructor() {
+    this.subentities = [
+      { id: IDENTIFIES.UNIT_SHIFT, data: this.unitshifts$, type: 'select' },
+      { id: IDENTIFIES.WORKERS, data: this.workers$, type: 'table', columns: this.columnsWorker }
+    ];
+  }
 
   ngOnInit() {
     const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
@@ -99,8 +99,9 @@ export class FormComponent {
       takeUntil(this.destroy$)
     )
     .subscribe({
-      next: () => console.log('Workers selection completed'),
-      error: (error) => console.error('Error selecting workers:', error)
+      error: () => {
+        this.notificationService.show(['Error al cargar los trabajadores'], 'error', 5000);
+      }
     });
   }
 
@@ -132,7 +133,7 @@ export class FormComponent {
 
     this.store.dispatch(verifiedAction)
     .subscribe(() => {
-      this.$ifAssign
+      this.ifAssign$
       .pipe(
         take(1),
         takeUntil(this.destroy$),
@@ -141,7 +142,8 @@ export class FormComponent {
         if(response.verified) {
           const textBottom = this.id ? 'Actualizar' : 'Guardar';
           this.sweetAlertService.confirmAction(response.title, response.message, textBottom, () => {
-            this.onCreateOrUpdate(event, response.id);
+            this.onCreateOrUpdate(event);
+            this.updateState(response.id);
           });
         } else {
           this.onCreateOrUpdate(event);
@@ -150,7 +152,7 @@ export class FormComponent {
     });
   }
 
-  private onCreateOrUpdate(event: any, param_id?: number) {
+  private onCreateOrUpdate(event: any) {
     const action = this.id
       ? new AssignmentActions.Update(this.id, event.data)
       : new AssignmentActions.Create(event.data);
@@ -168,20 +170,11 @@ export class FormComponent {
           5000
         );
       },
-      complete: () => {
-        if(!this.id) {
-          //this.store.dispatch(new WorkerActions.GetUnassignment)
-        }
-        if(param_id)
-          this.updateState(event, param_id);
-      }
     });
   }
 
-  private updateState(event: any, id: number) {
-    const newData = {...event.data}
-    newData.state = false;
-    this.store.dispatch(new AssignmentActions.Update(id, newData))
+  private updateState(id: number) {
+    this.store.dispatch(new AssignmentActions.Desactivate(id))
   }
 
   private handleSuccess(response: any, redirect: boolean): void {
@@ -210,8 +203,8 @@ export class FormComponent {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this.store.dispatch(new AssignmentActions.clearEntity);
-    this.store.dispatch(new WorkerFormAction.ClearItemSelection);
+    this.store.dispatch(new AssignmentActions.clearAll);
     this.store.dispatch(new WorkerFormAction.clearAll);
+    this.store.dispatch(new WorkerFormAction.ClearItemSelection);
   }
 }

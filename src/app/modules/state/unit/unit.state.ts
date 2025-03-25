@@ -33,7 +33,6 @@ export class UnitState extends BaseState<Unit, UnitRequest> {
 
   @Selector()
   static getEntity(state: UnitStateModel): Unit | null {
-    console.log(state.selectedEntity);
     return state.selectedEntity;
   }
 

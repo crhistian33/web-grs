@@ -8,6 +8,7 @@ import { BaseModel } from '../../models/base.model';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
 import { CellValuePipe } from '@shared/pipes/cell-value.pipe';
 import { TooltipComponent } from '../tooltip/tooltip.component';
+import { MONTHS } from '@shared/utils/constants';
 
 @Component({
   selector: 'app-data-list',
@@ -36,22 +37,25 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
     ])
   ]
 })
-export class DataListComponent<T extends BaseModel, N = any> implements OnInit, OnChanges {
+export class DataListComponent<T extends BaseModel> implements OnInit, OnChanges {
   @Output() deleteItem = new EventEmitter<number>();
+  @Output() deleteItemMonth = new EventEmitter<{ id: number, month: number}>();
   @Output() restoreItem = new EventEmitter<number>();
   @Output() toggleItem = new EventEmitter<number>();
   @Output() toggleAll = new EventEmitter<boolean>();
   @Output() assign = new EventEmitter<any>();
+  @Output() valueDay = new EventEmitter<{ id: number, date: string }>();
   @Input() data: T[] | null = [];
   @Input() columns: DataListColumn<T>[] | null = [];
   @Input() areAllSelected: boolean = false;
-  @Input() nestedColumns?: DataListColumn<N>[];
-  @Input() getNestedDataFn?: (item: T) => N[];
   @Input() page!: string;
   @Input() hiddenActions: boolean = false;
+  @Input() titleTable!: string;
+
   expandedRows: { [key: number]: boolean } = {};
   isShown = false;
   panelStates = new Map<number, boolean>();
+  days: number = 1;
 
   // Paginación
   currentPage = 1;
@@ -90,26 +94,14 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
     }
   }
 
-  hasNestedData(item: T): boolean {
-    if(this.getNestedDataFn) {
-      this.isShown = true;
-      return this.getNestedDataFn(item)?.length > 0;
-    }
-    this.isShown = false;
-    return false;
-  }
-
-  getNestedData(item: T): N[] {
-    const items = this.getNestedDataFn ? this.getNestedDataFn(item) : [];
-    return items;
-  }
-
   ngOnChanges(changes: SimpleChanges) {
     if(changes['data'])
       this.initializeData();
   }
 
   onToggleItem(id: number) {
+    if(this.page === 'asistencia')
+      return;
     this.toggleItem.emit(id);
   }
 
@@ -122,12 +114,15 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
     this.deleteItem.emit(id);
   }
 
+  onDeleteItemMonth(id: number, month: number) {
+    this.deleteItemMonth.emit({ id, month });
+  }
+
   onRestore(id: number) {
     this.restoreItem.emit(id);
   }
 
   onReassign(item: any) {
-    //const assign_id = item.assignments.map((element: any) => element.id);
     this.assign.emit(item);
   }
 
@@ -147,5 +142,68 @@ export class DataListComponent<T extends BaseModel, N = any> implements OnInit, 
 
   togglePanel(id: number) {
     this.panelStates.set(id, !this.panelStates.get(id));
+  }
+
+  protected getDynamicData(item: T): any {
+    if(item) {
+      const dynamicData = (item as any)['days'];
+      this.days = Array.isArray(dynamicData) ? dynamicData.length : 1;
+      return Array.isArray(dynamicData) ? dynamicData : [];
+    }
+    return [];
+  }
+
+  protected getMonthData(item: T): any {
+    if(item) {
+      const monthCountMap = new Map<number, number>();
+
+      const dynamicData = (item as any)['days'];
+      dynamicData.forEach((day: any) => {
+        const count = monthCountMap.get(day.month) || 0;
+        monthCountMap.set(day.month, count + 1);
+      });
+      const result = Array.from(monthCountMap.entries()).map(([monthNumber, count]) => ({
+        name: MONTHS.find((_, index) => index === monthNumber -1),
+        count
+      }));
+
+      return result;
+    }
+    return [];
+  }
+
+  getMonthValue(item: T) {
+    const month = (item as any)['month'];
+
+    if (month !== null && month !== undefined)
+      return month.toString();
+
+    return null;
+  }
+
+  getWorkerValue(item: T) {
+    const worker = (item as any)['worker'];
+
+    if (worker !== null && worker !== undefined)
+      return worker.id;
+
+    return null;
+  }
+
+  protected getColumnClasses(index: number, key?: any): any {
+    return {
+      'w-2': key && key === 'id',
+      [this.getStickyColumn(index)]: this.page === 'asistencia' && index < 2
+    };
+  }
+
+  protected getStickyColumn(index: number): string {
+    if (index === 0) return 'sticky left-0 z-10';
+    if (index === 1) return 'sticky left-8 z-10';
+    return '';
+  }
+
+  protected changeValueDay(id: number, date: string) {
+    this.valueDay.emit({ id, date });
   }
 }

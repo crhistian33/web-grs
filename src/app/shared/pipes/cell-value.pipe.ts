@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { inject, Pipe, PipeTransform } from '@angular/core';
 import { RelationType } from '@shared/models/dataListColumn.model';
+import { MONTHS } from '@shared/utils/constants';
 
 @Pipe({
   name: 'cellValue',
@@ -32,6 +33,8 @@ export class CellValuePipe implements PipeTransform {
         return this.getShifts(value);
       case 'state':
         return value ? 'Activo' : 'Inactivo';
+      case 'month':
+        return this.getMonth(value);
       default:
         return String(value);
     }
@@ -67,12 +70,17 @@ export class CellValuePipe implements PipeTransform {
   }
 
   private getUnits(value: any) {
-    const unit = value.unitshift.unit.name;
+    const unit = value.unitshift ? value.unitshift.unit.name : value.unit.name;
     return unit;
   }
 
   private getShifts(value: any) {
     const shift = value.unitshift.shift.name;
     return shift;
+  }
+
+  private getMonth(value: any): string {
+    const monthName = MONTHS.find((_, index) => index === value);
+    return monthName ?? '';
   }
 }

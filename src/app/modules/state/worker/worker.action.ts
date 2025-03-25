@@ -12,13 +12,18 @@ export namespace WorkerActions {
     constructor(public id?: number) {};
   }
 
-  export class GetUnassignment {
-    static readonly type = '[Worker] Get All Unassignment';
-    constructor(public payload?: WorkerForm) {};
-  }
-
   export class GetTitulars {
     static readonly type = '[Worker] Get All Titulars';
+  }
+
+  export class GetByUnitshift {
+    static readonly type = '[Worker] Get Workers by UnitShift';
+    constructor(public id: number) {};
+  }
+
+  export class GetUnitShiftID {
+    static readonly type = '[Worker] Get Unit shift ID';
+    constructor(public id: number) {};
   }
 
   export class GetById {

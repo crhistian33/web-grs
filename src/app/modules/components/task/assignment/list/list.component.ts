@@ -138,5 +138,6 @@ export class ListComponent {
     this.destroy$.next();
     this.destroy$.complete();
     this.store.dispatch(new AssignmentActions.ClearItemSelection);
+    this.store.dispatch(new AssignmentActions.clearAll);
   }
 }

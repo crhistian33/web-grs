@@ -1,0 +1,27 @@
+<div class="w-auto p-3 border-b rounded-t-lg border-gray-200 bg-gray-50">
+  <form [formGroup]="myForm" (submit)="onSubmit()">
+    <div class="flex items-center justify-between">
+      <div class="flex flex-col md:flex-row items-center gap-3">
+        <span>Asistencias desde</span>
+        <div class="w-full sm:w-1/2 md:w-1/4">
+          <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa"
+          formControlName="date_from">
+        </div>
+        <span>hasta</span>
+        <div class="w-full sm:w-1/2 md:w-1/4">
+          <input type="date" class="border border-gray-300 p-2 rounded w-full" placeholder="dd/mm/aaaa"
+          formControlName="date_to">
+        </div>
+        <button type="submit"
+        class="rounded-md bg-main px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-main_dark transition-colors">Mostrar
+      </button>
+    </div>
+    <a class="bg-gray-200 hover:bg-gray-300 text-sm font-semibold transition-colors px-3 py-2 rounded" [routerLink]="[route]">
+      <div class="flex items-center">
+        <ng-icon name="heroCalendarDaysSolid" class="scale-75"></ng-icon>
+        <span class="ms-1">Asistencia de {{ labelRoute }}</span>
+      </div>
+    </a>
+  </div>
+  </form>
+</div>

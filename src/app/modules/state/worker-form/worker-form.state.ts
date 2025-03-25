@@ -44,12 +44,9 @@ export class WorkerFormState extends BaseState<Worker, WorkerRequest> {
   @Action(WorkerFormAction.GetUnassigns)
   getUnassigns(ctx: StateContext<WorkerStateModel>, { payload }: WorkerFormAction.GetUnassigns) {
     ctx.dispatch(new SetLoading(WorkerFormAction.GetUnassigns.type, true));
-    const service = this.workerService.getUnassigns(payload)
-
-    return service.pipe(
+    return this.workerService.getUnassigns(payload).pipe(
       tap({
         next: (response: any) => {
-          console.log('RESPONSE', response.data);
           ctx.patchState({
             entities: response.data,
             filteredItems: response.data,

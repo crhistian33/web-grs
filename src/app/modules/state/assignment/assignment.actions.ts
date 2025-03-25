@@ -7,8 +7,8 @@ export namespace AssignmentActions {
     constructor(public id?: number) {};
   }
 
-  export class GetAllReassigns {
-    static readonly type = '[Assignment] Get All Reassigns';
+  export class GetWorkerAssigns {
+    static readonly type = '[Assignment] Get Workers assigns';
   }
 
   export class GetUnitToShift {
@@ -33,6 +33,11 @@ export namespace AssignmentActions {
   export class Update {
     static readonly type = '[Assignment] Update';
     constructor(public id: number, public payload: Partial<AssignmentRequest>) {}
+  }
+
+  export class Desactivate {
+    static readonly type = '[Assignment] Desactivate';
+    constructor(public id: number) {}
   }
 
   export class Delete {

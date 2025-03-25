@@ -7,7 +7,7 @@ import { provideStore } from '@ngxs/store';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
-import { heroArrowLeftOnRectangleSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroClipboardDocumentCheckSolid, heroDocumentCheckSolid, heroEllipsisVerticalSolid, heroHomeSolid, heroKeySolid, heroListBulletSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroPencilSquareSolid, heroPlusSolid, heroTrashSolid, heroUserCircleSolid, heroUserSolid, heroUsersSolid, heroWrenchSolid, heroXMarkSolid } from '@ng-icons/heroicons/solid';
+import { heroArrowLeftOnRectangleSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroCalendarDaysSolid, heroCheckSolid, heroChevronDownSolid, heroClipboardDocumentCheckSolid, heroDocumentCheckSolid, heroEllipsisVerticalSolid, heroHomeSolid, heroKeySolid, heroListBulletSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroPencilSquareSolid, heroPlusSolid, heroTrashSolid, heroUserCircleSolid, heroUserSolid, heroUsersSolid, heroWrenchSolid, heroXMarkSolid } from '@ng-icons/heroicons/solid';
 
 import { routes } from './app.routes';
 import { environment } from '@environments/environment.development';
@@ -34,6 +34,8 @@ import { UserState } from '@state/user/user.state';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { CollapseState } from '@shared/state/collapse/collapse.state';
 import { WorkerFormState } from '@state/worker-form/worker-form.state';
+import { StateWorkState } from '@state/state-work/state-work.state';
+import { InassistState } from '@state/inassist/inassist.state';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -69,9 +71,11 @@ export const appConfig: ApplicationConfig = {
       WorkerassignmentState,
       UnitshiftState,
       AssistState,
+      InassistState,
       CalendarState,
       AuthState,
       UserState,
+      StateWorkState,
       CollapseState,
     ], {
       developmentMode: !environment.production,
@@ -88,6 +92,6 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     ReactiveFormsModule,
     provideNgIconsConfig({ size: '1.5em' }),
-    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid, heroClipboardDocumentCheckSolid, heroXMarkSolid, heroUserSolid, heroKeySolid, heroEllipsisVerticalSolid }),
+    provideIcons({ heroHomeSolid, heroUsersSolid, heroPlusSolid, heroDocumentCheckSolid, heroPencilSquareSolid, heroTrashSolid, heroWrenchSolid, heroArrowLeftOnRectangleSolid, heroListBulletSolid, heroArrowUturnLeftSolid, heroBellAlertSolid, heroChevronDownSolid, heroMagnifyingGlassSolid, heroMinusSolid, heroUserCircleSolid, heroClipboardDocumentCheckSolid, heroXMarkSolid, heroUserSolid, heroKeySolid, heroEllipsisVerticalSolid, heroCalendarDaysSolid, heroCheckSolid }),
   ]
 };

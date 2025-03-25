@@ -66,12 +66,13 @@ export class SweetalertService {
       title: `¿Eliminar ${model}?`,
       text: message,
       icon: "warning",
-      showCancelButton: false,
+      showCancelButton: true,
+      cancelButtonText: 'Cancelar',
       confirmButtonText: `Eliminar`,
       confirmButtonColor: '#BB2124',
       showCloseButton: true,
       allowOutsideClick: false,
-      reverseButtons: true,
+      //reverseButtons: true,
       customClass: {
         title: 'swal-title'
       },

@@ -15,6 +15,8 @@ import { ExcelService } from '@shared/services/excel.service';
     filteredItems: [],
     trashedItems: [],
     filterTrashedItems: [],
+    assigns: [],
+    unitshiftId: 0,
     selectedEntity: null,
     searchTerm: '',
     loaded: false,
@@ -31,6 +33,11 @@ export class WorkerState extends BaseState<Worker, WorkerRequest> {
   @Selector()
   static getItems(state: WorkerStateModel): Worker[] {
     return state.filteredItems;
+  }
+
+  @Selector()
+  static getAssigns(state: WorkerStateModel): Worker[] {
+    return state.assigns ?? [];
   }
 
   @Selector()
@@ -109,28 +116,71 @@ export class WorkerState extends BaseState<Worker, WorkerRequest> {
     )
   }
 
-  @Action(WorkerActions.GetUnassignment)
-  getUnassigns(ctx: StateContext<WorkerStateModel>, { payload }: WorkerActions.GetUnassignment) {
-    ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, true));
-    const service = this.workerService.getUnassigns(payload)
-
-    return service.pipe(
+  @Action(WorkerActions.GetByUnitshift)
+  getByUnitshift(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.GetByUnitshift) {
+    const type = WorkerActions.GetTitulars.type;
+    ctx.dispatch(new SetLoading(type, true));
+    return this.workerService.getByUnitshift(id).pipe(
       tap({
         next: (response: any) => {
           ctx.patchState({
-            entities: response.data,
-            filteredItems: response.data,
+            assigns: response.data,
           })
         },
         error: () => {
-          ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, false));
+          ctx.dispatch(new SetLoading(type, false));
         },
         finalize: () => {
-          ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, false));
+          ctx.dispatch(new SetLoading(type, false));
         }
       })
     )
   }
+
+  @Action(WorkerActions.GetUnitShiftID)
+  getUnitShift(ctx: StateContext<WorkerStateModel>, { id }: WorkerActions.GetUnitShiftID) {
+    const type = WorkerActions.GetUnitShiftID.type;
+    ctx.dispatch(new SetLoading(type, true));
+
+    return this.workerService.getUnitShiftID(id).pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({
+            unitshiftId: response,
+          })
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        }
+      })
+    );
+  }
+
+  // @Action(WorkerActions.GetUnassignment)
+  // getUnassigns(ctx: StateContext<WorkerStateModel>, { payload }: WorkerActions.GetUnassignment) {
+  //   ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, true));
+  //   const service = this.workerService.getUnassigns(payload)
+
+  //   return service.pipe(
+  //     tap({
+  //       next: (response: any) => {
+  //         ctx.patchState({
+  //           entities: response.data,
+  //           filteredItems: response.data,
+  //         })
+  //       },
+  //       error: () => {
+  //         ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, false));
+  //       },
+  //       finalize: () => {
+  //         ctx.dispatch(new SetLoading(WorkerActions.GetUnassignment.type, false));
+  //       }
+  //     })
+  //   )
+  // }
 
   @Action(WorkerActions.Filters)
   Filters(ctx: StateContext<WorkerStateModel>, { payload, page, columns }: WorkerActions.Filters<Worker>) {

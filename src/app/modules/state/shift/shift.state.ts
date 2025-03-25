@@ -41,7 +41,6 @@ export class ShiftState extends BaseState<Shift, ShiftRequest> {
 
   @Selector()
   static getSelectedItems(state: ShiftStateModel) {
-    console.log('Selected shifts', state.entities.filter((entity) => entity.selected));
     return state.entities.filter((entity) => entity.selected);
   }
 

@@ -16,4 +16,10 @@
     (assign)="onReassign($event)"
     (deleteItem)="onDelete($event)" />
 </div>
-<app-modalreassign [isOpen]="isOpen" [workerReassign]="workerReassign" (closeEvent)="handleClose()" (updateEvent)="handleUpdate()"></app-modalreassign>
+<!-- <app-modalreassign [isOpen]="isOpen" [workerReassign]="workerReassign" (closeEvent)="handleClose()" (updateEvent)="handleUpdate()"></app-modalreassign> -->
+
+<ng-container *ngIf="isOpen">
+  <app-modal [title]="titleModal" [isOpen]="isOpen">
+    <app-form [workerReassign]="workerReassign" (closeEvent)="handleClose()"></app-form>
+  </app-modal>
+</ng-container>

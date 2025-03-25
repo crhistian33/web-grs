@@ -20,7 +20,7 @@ const initialValues = {
 export class CalendarState {
 
   @Selector()
-  static selectedtemId(state: CalendarStateModel) {
+  static selectedItemId(state: CalendarStateModel) {
     return state.selectedItemId;
   }
 

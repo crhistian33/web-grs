@@ -3,6 +3,7 @@ import { State, Action, Selector, StateContext } from '@ngxs/store';
 import { VerifiedAction } from './verified.actions';
 import { UnitshiftService } from '@services/unitshift.service';
 import { tap } from 'rxjs';
+import { SetLoading } from '../loading/loading.actions';
 
 export interface VerifiedStateModel {
   verified: boolean;
@@ -26,12 +27,22 @@ export class VerifiedState {
   @Action(VerifiedAction.IfAssign)
   verifiedUnitShift(ctx: StateContext<VerifiedStateModel>, { id, assign_id }: VerifiedAction.IfAssign) {
     const state = ctx.getState();
+    const type = VerifiedAction.IfAssign.type;
+    ctx.dispatch(new SetLoading(type, true));
     return this.unitshiftService.verifiedIfAssign(id, assign_id).pipe(
-      tap((verified: boolean) => {
-        ctx.setState({
-          ...state,
-          verified
-        })
+      tap({
+        next: (verified: boolean) => {
+          ctx.setState({
+            ...state,
+            verified
+          })
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        },
+        complete: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        }
       })
     )
   }

@@ -27,10 +27,6 @@ export class BaseState<T extends BaseModel, TRequest> {
   ) {}
 
   protected getItems(ctx: StateContext<BaseStateModel<T>>, type: string) {
-    const state = ctx.getState();
-    if(state.loaded)
-      return;
-
     ctx.dispatch(new SetLoading(type, true));
 
     return this.service.getItems().pipe(
@@ -39,7 +35,6 @@ export class BaseState<T extends BaseModel, TRequest> {
           ctx.patchState({
             entities: response.data,
             filteredItems: response.data,
-            loaded: true,
           })
         },
         error: (error) => {
@@ -54,10 +49,6 @@ export class BaseState<T extends BaseModel, TRequest> {
   }
 
   protected getItemsAll(ctx: StateContext<BaseStateModel<T>>, type: string, id?: number) {
-    const state = ctx.getState();
-    if(state.loaded)
-      return;
-
     ctx.dispatch(new SetLoading(type, true));
     const service = id
       ? this.service.getAll(id)
@@ -69,7 +60,6 @@ export class BaseState<T extends BaseModel, TRequest> {
           ctx.patchState({
             entities: response.data,
             filteredItems: response.data,
-            loaded: true,
           })
         },
         error: (error) => {
@@ -112,7 +102,6 @@ export class BaseState<T extends BaseModel, TRequest> {
     return this.service.getById(id).pipe(
       tap({
         next: (response: any) => {
-          console.log('Response', response.data);
           ctx.patchState({
             selectedEntity: response.data,
           })
@@ -133,7 +122,6 @@ export class BaseState<T extends BaseModel, TRequest> {
     const { centerId, companyId, customerId, shiftId, typeworkerId, unitId, fromDate, toDate, searchTerm } = payload;
 
     const data = page === TYPES.LIST ? state.entities : state.trashedItems;
-
     const filtered = data.filter((item: any) => {
       const matchDrop =
         (!typeworkerId || item.typeworker.id === typeworkerId) &&
@@ -142,7 +130,7 @@ export class BaseState<T extends BaseModel, TRequest> {
           : (item.unitshift ? item.unitshift.unit.customer.company.id === companyId : item.company.id === companyId)))) &&
         (!customerId || (item.assignment
           ? item.assignment.unitshift.unit.customer.id === customerId
-          : (item.unitshift ? item.unitshift.unit.customer.id === customerId : item.customer.id === customerId))) &&
+          : (item.unitshift ? item.unitshift.unit.customer.id === customerId : (item.unit ? item.unit.customer.id === customerId : item.customer.id === customerId)))) &&
         (!unitId || (item.assignment
           ? item.assignment.unitshift.unit.id === unitId
           : (item.unitshift ? item.unitshift.unit.id === unitId : item.unit.id === unitId)
@@ -159,7 +147,9 @@ export class BaseState<T extends BaseModel, TRequest> {
         return matchDrop;
 
       const matchSearch = !columns || columns.some((column) => {
-        const value = item[column] ? item[column].toString().toLowerCase() : '';
+        const value = typeof item[column] === 'object' && item[column] !== null
+          ? item[column].name?.toString().toLowerCase() || ''
+          : item[column]?.toString().toLowerCase() || '';
         return value.includes(searchTerm.toLowerCase());
       });
 
@@ -181,6 +171,27 @@ export class BaseState<T extends BaseModel, TRequest> {
           ctx.patchState({
             entities: [...ctx.getState().entities, response.data],
             filteredItems: [...ctx.getState().filteredItems, response.data],
+            result: { title: response.title, message: response.message },
+          })
+        },
+        error: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        }
+      })
+    )
+  }
+
+  protected createManyItem(ctx: StateContext<BaseStateModel<T>>, payload: TRequest[], type: string) {
+    ctx.dispatch(new SetLoading(type, true));
+    return this.service.createMany(payload).pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({
+            entities: [...ctx.getState().entities, ...response.data],
+            filteredItems: [...ctx.getState().filteredItems, ...response.data],
             result: { title: response.title, message: response.message },
           })
         },
@@ -254,7 +265,6 @@ export class BaseState<T extends BaseModel, TRequest> {
     return service.pipe(
       tap({
         next: (response: any) => {
-          console.log('Data', response.data);
           const data = page === TYPES.LIST ? state.entities : state.trashedItems;
           const entities = response.data
             ? response.data.map((entity: any) => ({
@@ -332,18 +342,14 @@ export class BaseState<T extends BaseModel, TRequest> {
   protected toggleSelectionItem(ctx: StateContext<BaseStateModel<T>>, id: number, page?: string) {
     const state = ctx.getState();
     const data = page === TYPES.LIST ? state.entities : state.trashedItems;
-
-    console.log('ID', id);
-    console.log('DATA', data);
-    const value = state.entities.filter(item => item.id === id);
-    console.log('Valor con check', value);
+    //const value = state.entities.filter(item => item.id === id);
 
     const entities = data.map(entity =>
       entity.id === id
         ? { ...entity, selected: !entity.selected }
         : entity
     );
-    console.log('Entities select', entities);
+
     page === TYPES.LIST
       ? ctx.patchState({ entities, filteredItems: entities })
       : ctx.patchState({ trashedItems: entities, filterTrashedItems: entities })

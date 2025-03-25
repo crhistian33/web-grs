@@ -40,7 +40,7 @@ export class ModalreassignComponent implements OnInit {
     'assignment_id': ['', Validators.required],
   });
 
-  unitshiftsActive$: Observable<UnitShift[]> = this.store.select(UnitshiftState.getAssigns);
+  unitshiftsActive$: Observable<UnitShift[]> = this.store.select(UnitshiftState.getAssigneds);
 
   ngOnInit(): void {
     this.store.dispatch(new AssignmentActions.GetAll);

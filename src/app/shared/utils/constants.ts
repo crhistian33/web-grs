@@ -9,6 +9,8 @@ export const PARAMETERS = {
   ASSIGNMENT: 'assignment',
   REASSIGNMENT: 'reassignment',
   ASSIST: 'assist',
+  ASSIST_BREAKS: 'assist_breaks',
+  BREAK: 'break',
 }
 
 export const IDENTIFIES = {
@@ -52,8 +54,14 @@ export const TITLES = {
   WORKER: 'Trabajador',
   ASSIGNMENT: 'Asignación',
   REASSIGNMENT: 'Reasignación',
+  REASSIGN_WORKER: 'Reasignar trabajador',
   ASSIST: 'Asistencia',
   ASSISTS: 'Asistencias',
+  UPDATE_ASSIST: 'Modificar asistencia',
+  ASSIST_TITULARS: 'titulares',
+  ASSIST_BREAKS: 'descanseros',
+  BREAK: 'Descanso',
+  BREAKS: 'Descansos',
 }
 
 export const TYPES = {
@@ -61,6 +69,7 @@ export const TYPES = {
   RECYCLE: 'papelera',
   NONE: 'none',
   REASSIGN: 'reasigna',
+  ASSIST: 'asistencia'
 }
 
 export const MESSAGES = {
@@ -70,6 +79,8 @@ export const MESSAGES = {
   CONFIRM_DELETES: 'Los registros se eliminarán permanentemente.',
   CONFIRM_DELETE_REMOVE: 'El registro se eliminará permanentemente o puedes removerlo a la papelera.',
   CONFIRM_DELETES_REMOVES: 'Los registros se eliminarán permanentemente o puedes removerlos a la papelera.',
+  INVALID_RANGE_DATE: 'La fecha desde no puede ser mayor a la fecha hasta',
+  INVALID_SUBMIT_FILTER_DATE: 'Ingresa las fechas desde y hasta',
 }
 
 export const ROUTES = {
@@ -81,21 +92,11 @@ export const ROUTES = {
   UNIT_LIST: '/mantenimiento/unidades',
   WORKER_LIST: '/mantenimiento/trabajadores',
   ASSIGNMENT_LIST: '/tareo/asignaciones',
+  ASSIST_LIST: '/tareo/asistencias',
+  ASSIST_LIST_BREAKS: '/tareo/asistencias/descanseros',
+  BREAK_LIST: '/tareo/descansos',
 }
 
-export const MONTHS = [
-  { id: 0, name: 'Enero' },
-  { id: 1, name: 'Febrero' },
-  { id: 2, name: 'Marzo' },
-  { id: 3, name: 'Abril' },
-  { id: 4, name: 'Mayo' },
-  { id: 5, name: 'Junio' },
-  { id: 6, name: 'Julio' },
-  { id: 7, name: 'Agosto' },
-  { id: 8, name: 'Setiembre' },
-  { id: 9, name: 'Octubre' },
-  { id: 10, name: 'Noviembre' },
-  { id: 11, name: 'Diciembre' }
-]
+export const MONTHS = [ 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre' ];
 
 export const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];

@@ -2,7 +2,7 @@ export interface FieldForm {
   type: 'text' | 'email' | 'tel' | 'select' | 'table' | 'date' | 'hidden' | 'checkbox' | 'object-shift';
   name: string;
   label?: string;
-  value?: string | boolean;
+  value?: string | boolean | null;
   prefix?: boolean;
   validators?: IValidationForm[];
 }

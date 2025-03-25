@@ -6,6 +6,7 @@ import { Store } from '@ngxs/store';
 import { ActionsComponent } from '@shared/components/actions/actions.component';
 import { DataListComponent } from '@shared/components/data-list/data-list.component';
 import { FilterComponent } from '@shared/components/filter/filter.component';
+import { ModalComponent } from '@shared/components/modal/modal.component';
 import { ModalreassignComponent } from '@shared/components/modalreassign/modalreassign.component';
 import { TitlePageComponent } from '@shared/components/title-page/title-page.component';
 import { DataListColumn } from '@shared/models/dataListColumn.model';
@@ -20,10 +21,12 @@ import { WorkerActions } from '@state/worker/worker.action';
 import { WorkerAssignmentActions } from '@state/workerassignment/workerassignment.actions';
 import { WorkerassignmentState } from '@state/workerassignment/workerassignment.state';
 import { Observable, Subject, take } from 'rxjs';
+import { FormComponent } from '../form/form.component';
+import { UserState } from '@state/user/user.state';
 
 @Component({
   selector: 'app-list',
-  imports: [CommonModule, TitlePageComponent, FilterComponent, DataListComponent, ActionsComponent, ModalreassignComponent],
+  imports: [CommonModule, TitlePageComponent, FilterComponent, DataListComponent, ActionsComponent, ModalComponent, FormComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss'
 })
@@ -36,14 +39,12 @@ export class ListComponent {
 
   readonly title: string = TITLES.REASSIGNMENTS;
   readonly page: string = TYPES.REASSIGN;
-  readonly config: filterConfig = {
-    company: true,
-    customer: true,
-    unit: true,
-    shift: true,
-  }
   readonly columns: DataListColumn<WorkerAssignment>[] = this.headerDataListService.getHeaderDataList(PARAMETERS.REASSIGNMENT);
+  readonly colFiltered: string[] = this.headerDataListService.getFiltered(PARAMETERS.REASSIGNMENT);
 
+  companyId!: number;
+  config!: filterConfig;
+  titleModal: string = TITLES.REASSIGN_WORKER;
   isOpen: boolean = false;
   workerReassign!: WorkerAssignment;
   assignments: Assignment[] = [];
@@ -55,19 +56,46 @@ export class ListComponent {
   selectedItems$: Observable<WorkerAssignment[]> = this.store.select(WorkerassignmentState.getSelectedItems);
 
   ngOnInit() {
-    this.store.dispatch(new WorkerAssignmentActions.GetAll);
+    this.initializeComponent();
+  }
+
+  private initializeComponent(): void {
+    const companies = this.store.selectSnapshot(UserState.getCurrentUserCompanies);
+    if (!companies) {
+      return;
+    }
+
+    if (companies.length > 1) {
+      this.store.dispatch(new WorkerAssignmentActions.GetAll);
+      this.config = {
+        company: true,
+        customer: true,
+        unit: true,
+        shift: true,
+        search: true,
+      }
+    } else if (companies.length === 1) {
+      this.companyId = companies[0].id;
+      this.store.dispatch(new WorkerAssignmentActions.GetAll(this.companyId));
+      this.config = {
+        search: true,
+        customer: true,
+        unit: true,
+        shift: true,
+      };
+    }
   }
 
   onToggleItem(id: number) {
-    this.store.dispatch(new WorkerAssignmentActions.ToggleItemSelection(id));
+    this.store.dispatch(new WorkerAssignmentActions.ToggleItemSelection(id, TYPES.LIST));
   }
 
   onToggleAll(checked: boolean) {
-    this.store.dispatch(new WorkerAssignmentActions.ToggleAllItems(checked));
+    this.store.dispatch(new WorkerAssignmentActions.ToggleAllItems(checked, TYPES.LIST));
   }
 
   filtersData(filter: FilterStateModel) {
-    this.store.dispatch(new WorkerAssignmentActions.Filters(filter));
+    this.store.dispatch(new WorkerAssignmentActions.Filters(filter, TYPES.LIST, this.colFiltered));
   }
 
   onDelete(id: number) {
@@ -81,7 +109,7 @@ export class ListComponent {
   }
 
   handleConfirmDelete(id: number, del: boolean) {
-    this.store.dispatch(new WorkerAssignmentActions.Delete(id, del)).subscribe({
+    this.store.dispatch(new WorkerAssignmentActions.Delete(id, del, TYPES.LIST)).subscribe({
       next: (response: any) => {
         this.sweetalertService.confirmSuccess(
           response.workerassignment.result.title,
@@ -137,11 +165,13 @@ export class ListComponent {
     this.isOpen = false;
   }
 
-  handleUpdate() {
-    this.store.dispatch(new WorkerAssignmentActions.GetAll);
-  }
+  // handleUpdate() {
+  //   this.store.dispatch(new WorkerAssignmentActions.GetAll);
+  // }
 
   ngOnDestroy() {
-    this.store.dispatch(new AssignmentActions.clearAll);
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(new WorkerAssignmentActions.ClearItemSelection);
   }
 }

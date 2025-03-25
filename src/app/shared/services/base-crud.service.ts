@@ -52,6 +52,16 @@ export class BaseCrudService<T extends BaseModel, Trequest> {
       .pipe(catchError(this.handleError));
   }
 
+  createMany(resources: Trequest[]): Observable<T[]> {
+    const userID = this.store.selectSnapshot(UserState.getCurrentUserID);
+    const newResources = resources.map(resource => ({
+      ...resource,
+      created_by: userID
+    }));
+    return this.httpClient.post<T[]>(this.apiUrl, newResources, { context: checkToken() })
+      .pipe(catchError(this.handleError));
+  }
+
   update(id: number, resource: Partial<Trequest>): Observable<T> {
     const userID = this.store.selectSnapshot(UserState.getCurrentUserID);
     const newResources = {
@@ -77,7 +87,6 @@ export class BaseCrudService<T extends BaseModel, Trequest> {
       ? `${this.apiUrl}/destroyes/${companyId}`
       : `${this.apiUrl}/destroyes`;
 
-    console.log('URL', url);
     return this.httpClient.post<T[]>(url, { resources: resource, del, active }, { context: checkToken() })
       .pipe(catchError(this.handleError));
   }

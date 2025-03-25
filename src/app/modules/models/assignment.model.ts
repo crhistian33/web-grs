@@ -19,7 +19,15 @@ export interface AssignmentRequest {
   end_date: string;
   state: boolean;
   unit_shift_id: number;
+}
 
+export interface AssignmentWorker {
+  assignment_id: number;
+  workers: {
+    id: number;
+    worker_assignment_id: number;
+
+  }
 }
 
 export interface AssignmentStateModel extends BaseStateModel<Assignment> {}

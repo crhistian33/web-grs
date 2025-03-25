@@ -1,9 +1,20 @@
-import { Assist } from "@models/assist.model";
+import { Assist, AssistForm } from "@models/assist.model";
 import { FilterStateModel } from "@shared/models/filter.model";
 
 export namespace AssistActions {
   export class GetAll {
     static readonly type = '[Assist] Get All';
+    constructor(public payload: AssistForm) {}
+  }
+
+  export class GetAllBreaks {
+    static readonly type = '[Assist] Get All Breaks';
+    constructor(public payload: AssistForm) {}
+  }
+
+  export class GetAssistDay {
+    static readonly type = '[Assist] Get Assist Day';
+    constructor(public id: number, public date: string) {}
   }
 
   export class GetById {
@@ -13,7 +24,7 @@ export namespace AssistActions {
 
   export class Filters<T> {
     static readonly type = '[Assist] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Create {

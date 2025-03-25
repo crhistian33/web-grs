@@ -20,7 +20,6 @@ export class WorkerService extends BaseCrudService<Worker, WorkerRequest> {
   }
 
   getUnassigns(payload?: WorkerForm) {
-    console.log('Payload', payload);
     let params = new HttpParams();
 
     if (payload?.assignment_id) {
@@ -31,12 +30,18 @@ export class WorkerService extends BaseCrudService<Worker, WorkerRequest> {
       params = params.set('company_id', payload.company_id);
     }
 
-    console.log('Params', params);
-
     return this.http.get<Worker[]>(`${environment.API_URL}/workers/unassigns`, { params, context: checkToken() });
   }
 
   uploadWorkers(payload: any) {
     return this.http.post(`${environment.API_URL}/workers/bulk-upload`, payload, { context: checkToken() })
+  }
+
+  getByUnitshift(id: number): Observable<Worker[]> {
+    return this.http.get<Worker[]>(`${environment.API_URL}/workers/getbyunitshift/${id}`, { context: checkToken() });
+  }
+
+  getUnitShiftID(id: number) {
+    return this.http.get<number>(`${environment.API_URL}/workers/getunitshift/${id}`, { context: checkToken() });
   }
 }

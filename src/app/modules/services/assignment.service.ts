@@ -21,4 +21,8 @@ export class AssignmentService extends BaseCrudService<Assignment, AssignmentReq
   getReassignments(): Observable<Assignment[]> {
     return this.http.get<Assignment[]>(`${environment.API_URL}/assignments/reassignments`, { context: checkToken() });
   }
+
+  desactivate(id: number) {
+    return this.http.get(`${environment.API_URL}/assignments/desactivate/${id}`, { context: checkToken() });
+  }
 }

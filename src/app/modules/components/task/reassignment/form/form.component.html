@@ -1,0 +1,47 @@
+<div class="modal-content p-4">
+  <form [formGroup]="reassignForm">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray_dark_500 text-white">
+        <tr>
+          <th class="px-4 py-1 text-left text-sm font-medium">Trabajador a reasignar</th>
+          <th class="px-4 py-1 text-left text-sm font-medium">Unidad asignada</th>
+          <th class="px-4 py-1 text-left text-sm font-medium">Turno asignado</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr class="bg-gray-100">
+          <td class="px-4 py-1 whitespace-nowrap">
+            <span class="text-lg font-medium text-gray-900 uppercase">{{ workerReassign.worker.name }}</span>
+          </td>
+          <td class="px-4 py-1 whitespace-nowrap">
+            <span class="font-medium text-gray-900">{{ workerReassign.assignment?.unitshift?.unit?.name }}</span>
+          </td>
+          <td class="px-4 py-1 whitespace-nowrap">
+            <span class="font-medium text-gray-900">{{ workerReassign.assignment?.unitshift?.shift?.name }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mt-4">
+      <label for="unit-shift" class="block text-sm font-medium text-gray_dark_600 mb-2">Seleccionar unidad por turno a reasignar</label>
+      <select
+        name="unit-shift"
+        class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-[#D81E0B] focus:border-[#D81E0B] text-[#2E384D]"
+        formControlName="assignment_id">
+        <option value="">Seleccionar unidad por turno</option>
+        <option [value]="item.assignments[0].id" *ngFor="let item of unitshiftsActive$ | async">{{ item.name }}</option>
+      </select>
+      <div *ngIf="reassignForm.get('unit_shift_id')?.touched && reassignForm.get('unit_shift_id')?.invalid" class="text-[#D81E0B] text-sm mt-1">
+        Seleccione la unidad turno
+      </div>
+    </div>
+  </form>
+</div>
+<div class="flex justify-end border-t px-4 py-3">
+  <button class="bg-main text-white px-4 py-2 rounded hover:bg-main_dark transition-colors" (click)="onReassign(workerReassign)">
+    Aceptar
+  </button>
+  <button class="bg-gray_dark_500 text-white px-4 py-2 rounded hover:bg-gray_dark_600 transition-colors ms-2" (click)="closeModal()">
+    Cancelar
+  </button>
+</div>

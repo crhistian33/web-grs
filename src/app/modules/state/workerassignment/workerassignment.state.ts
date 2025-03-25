@@ -4,6 +4,8 @@ import { WorkerAssignment, WorkerAssignmentRequest, WorkerassignmentStateModel }
 import { BaseState } from '@shared/state/base.state';
 import { WorkerAssignmentActions } from './workerassignment.actions';
 import { WorkerassignmentService } from '@services/workerassignment.service';
+import { SetLoading } from '@shared/state/loading/loading.actions';
+import { tap } from 'rxjs';
 
 @State<WorkerassignmentStateModel>({
   name: 'workerassignment',
@@ -50,8 +52,32 @@ export class WorkerassignmentState extends BaseState<WorkerAssignment, WorkerAss
   }
 
   @Action(WorkerAssignmentActions.GetAll)
-  getAll(ctx: StateContext<WorkerassignmentStateModel>) {
-    return this.getItems(ctx, WorkerAssignmentActions.GetAll.type)
+  getAll(ctx: StateContext<WorkerassignmentStateModel>, { id }: WorkerAssignmentActions.GetAll) {
+    return this.getItemsAll(ctx, WorkerAssignmentActions.GetAll.type, id)
+  }
+
+  @Action(WorkerAssignmentActions.GetWorkerToUnit)
+  getWorkerToUnit(ctx: StateContext<WorkerassignmentStateModel>, { unit_shift_id, today }: WorkerAssignmentActions.GetWorkerToUnit) {
+    const state = ctx.getState();
+    const type = WorkerAssignmentActions.GetWorkerToUnit.type;
+    ctx.dispatch(new SetLoading(type, true));
+
+    return this.workerassignmentService.getWorkerToUnit(unit_shift_id, today).pipe(
+      tap({
+        next: (response: any) => {
+          ctx.patchState({
+            entities: response.data,
+            filteredItems: response.data,
+          })
+        },
+        error: (error) => {
+          ctx.dispatch(new SetLoading(type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        }
+      })
+    );
   }
 
   @Action(WorkerAssignmentActions.Update)
@@ -60,8 +86,8 @@ export class WorkerassignmentState extends BaseState<WorkerAssignment, WorkerAss
   }
 
   @Action(WorkerAssignmentActions.Delete)
-  delete(ctx: StateContext<WorkerassignmentStateModel>, { id, del }: WorkerAssignmentActions.Delete) {
-    return this.deleteItem(ctx, id, del, WorkerAssignmentActions.Delete.type)
+  delete(ctx: StateContext<WorkerassignmentStateModel>, { id, del, page }: WorkerAssignmentActions.Delete) {
+    return this.deleteItem(ctx, id, del, WorkerAssignmentActions.Delete.type, page)
   }
 
   @Action(WorkerAssignmentActions.DeleteAll)
@@ -70,17 +96,17 @@ export class WorkerassignmentState extends BaseState<WorkerAssignment, WorkerAss
   }
 
   @Action(WorkerAssignmentActions.ToggleItemSelection)
-  toggleSelection(ctx: StateContext<WorkerassignmentStateModel>, { id }: WorkerAssignmentActions.ToggleItemSelection) {
-    return this.toggleSelectionItem(ctx, id)
+  toggleSelection(ctx: StateContext<WorkerassignmentStateModel>, { id, page }: WorkerAssignmentActions.ToggleItemSelection) {
+    return this.toggleSelectionItem(ctx, id, page)
   }
 
   @Action(WorkerAssignmentActions.ToggleAllItems)
-  toggleAll(ctx: StateContext<WorkerassignmentStateModel>, { selected }: WorkerAssignmentActions.ToggleAllItems) {
-    return this.toggleAllItem(ctx, selected)
+  toggleAll(ctx: StateContext<WorkerassignmentStateModel>, { selected, page }: WorkerAssignmentActions.ToggleAllItems) {
+    return this.toggleAllItem(ctx, selected, page)
   }
 
   @Action(WorkerAssignmentActions.Filters)
-  Filters(ctx: StateContext<WorkerassignmentStateModel>, { payload, columns }: WorkerAssignmentActions.Filters<WorkerAssignment>) {
-    return super.filtersItems(ctx, WorkerAssignmentActions.Filters.type, payload, columns);
+  Filters(ctx: StateContext<WorkerassignmentStateModel>, { payload, page, columns }: WorkerAssignmentActions.Filters<WorkerAssignment>) {
+    return super.filtersItems(ctx, WorkerAssignmentActions.Filters.type, payload, columns, page);
   }
 }

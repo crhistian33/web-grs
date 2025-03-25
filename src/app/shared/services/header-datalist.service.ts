@@ -4,6 +4,7 @@ import { Assist } from '@models/assist.model';
 import { Center } from '@models/center.model';
 import { Company } from '@models/company.model';
 import { Customer } from '@models/customer.model';
+import { Inassist } from '@models/inassist.model';
 import { Shift } from '@models/shift.model';
 import { TypeWorker } from '@models/type-worker.model';
 import { Unit } from '@models/unit.model';
@@ -30,11 +31,11 @@ export class HeaderDatalistService {
     { key: 'dni', label: 'DNI', type: 'text'},
   ];
   private headWorkerAssign: DataListColumn<WorkerAssignment>[] = [
-    { key: 'id', label: 'N°', type: 'number', filtered: false, internal: false },
-    { key: 'worker', label: 'Nombres y apellidos', type: 'relation-name', filtered: true, internal: true },
-    { key: 'worker', label: 'DNI', type: 'relation-dni', filtered: true, internal: true },
-    { key: 'assignment', label: 'Unidad asignada', type: 'relations-unit', filtered: true, internal: false },
-    { key: 'assignment', label: 'Turno asignado', type: 'relations-shift', filtered: true, internal: false },
+    { key: 'id', label: 'N°', type: 'number', filtered: false },
+    { key: 'worker', label: 'Nombres y apellidos', type: 'relation-name', filtered: true },
+    { key: 'worker', label: 'DNI', type: 'relation-dni', filtered: true },
+    { key: 'assignment', label: 'Unidad asignada', type: 'relations-unit', filtered: false },
+    { key: 'assignment', label: 'Turno asignado', type: 'relations-shift', filtered: false },
   ];
   private headTypeWorker: DataListColumn<TypeWorker>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false, },
@@ -89,11 +90,27 @@ export class HeaderDatalistService {
 
   private headAssist: DataListColumn<Assist>[] = [
     { key: 'id', label: 'N°', type: 'number', filtered: false },
-    { key: 'start_date', label: 'Fecha', type: 'date', filtered: false },
+    { key: 'name', label: 'Nombres y apellidos', type: 'text', filtered: true },
+    { key: 'dni', label: 'DNI', type: 'text', filtered: true },
+    { key: 'unitshift', label: 'Unidad', type: 'relations-unit', filtered: false },
+    { key: 'days', label: 'Días', type: 'dynamic', filtered: false },
+  ];
+
+  private headAssistBreaks: DataListColumn<Assist>[] = [
+    { key: 'id', label: 'N°', type: 'number', filtered: false },
+    { key: 'name', label: 'Nombres y apellidos', type: 'text', filtered: true },
+    { key: 'dni', label: 'DNI', type: 'text', filtered: true },
+    { key: 'days', label: 'Días', type: 'dynamic', filtered: false },
+  ];
+
+  private headBreak: DataListColumn<Inassist>[] = [
+    { key: 'id', label: 'N°', type: 'number', filtered: false },
+    { key: 'worker', label: 'Nombres y apellidos', type: 'relation-name', filtered: true },
+    { key: 'worker', label: 'DNI', type: 'relation-dni', filtered: true },
     { key: 'unitshift', label: 'Unidad', type: 'relation-unit', filtered: false },
     { key: 'unitshift', label: 'Turno', type: 'relation-shift', filtered: false },
-    { key: 'total_attended', label: '# Asistencias', type: 'text', filtered: false },
-    { key: 'total_absent', label: '# Inasistencias', type: 'text', filtered: false },
+    { key: 'month', label: 'Mes', type: 'month', filtered: false },
+    { key: 'days', label: 'Días de descanso', type: 'text', filtered: false },
   ];
 
   getHeaderDataList(param: string): DataListColumn<any>[] {
@@ -127,6 +144,12 @@ export class HeaderDatalistService {
         break;
       case PARAMETERS.ASSIST:
         return this.headAssist;
+        break;
+      case PARAMETERS.ASSIST_BREAKS:
+        return this.headAssistBreaks;
+        break;
+      case PARAMETERS.BREAK:
+        return this.headBreak;
         break;
       default:
         return [];
@@ -170,6 +193,18 @@ export class HeaderDatalistService {
         break;
       case PARAMETERS.UNIT:
         return this.headUnit.filter(column => column.filtered).map(column => column.key);
+        break;
+      case PARAMETERS.ASSIST:
+        return this.headAssist.filter(column => column.filtered).map(column => column.key);
+        break;
+      case PARAMETERS.ASSIST_BREAKS:
+        return this.headAssistBreaks.filter(column => column.filtered).map(column => column.key);
+        break;
+      case PARAMETERS.REASSIGNMENT:
+        return this.headWorkerAssign.filter(column => column.filtered).map(column => column.key);
+        break;
+      case PARAMETERS.BREAK:
+        return this.headBreak.filter(column => column.filtered).map(column => column.key);
         break;
       default:
         return [];

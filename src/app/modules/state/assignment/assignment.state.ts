@@ -65,9 +65,9 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
     return this.getItemsAll(ctx, AssignmentActions.GetAll.type, id);
   }
 
-  @Action(AssignmentActions.GetAllReassigns)
+  @Action(AssignmentActions.GetWorkerAssigns)
   protected getAllReassigns(ctx: StateContext<AssignmentStateModel>) {
-    ctx.dispatch(new SetLoading(AssignmentActions.GetAllReassigns.type, true));
+    ctx.dispatch(new SetLoading(AssignmentActions.GetWorkerAssigns.type, true));
     return this.assignmentService.getReassignments().pipe(
       tap({
         next: (response: any) => {
@@ -77,21 +77,18 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
           })
         },
         error: (error) => {
-          ctx.dispatch(new SetLoading(AssignmentActions.GetAllReassigns.type, false));
+          ctx.dispatch(new SetLoading(AssignmentActions.GetWorkerAssigns.type, false));
           // const errors: string[] = Array.isArray(error.error.message) ? error.error.message : [error.error.message];
         },
         finalize: () => {
-          ctx.dispatch(new SetLoading(AssignmentActions.GetAllReassigns.type, false));
+          ctx.dispatch(new SetLoading(AssignmentActions.GetWorkerAssigns.type, false));
         }
       })
     );
   }
 
   @Action(AssignmentActions.GetById)
-  getByID(
-    ctx: StateContext<AssignmentStateModel>,
-    { id }: AssignmentActions.GetById
-  ) {
+  getByID(ctx: StateContext<AssignmentStateModel>, { id }: AssignmentActions.GetById) {
     return this.getOne(ctx, id, AssignmentActions.GetById.type);
   }
 
@@ -108,6 +105,22 @@ export class AssignmentState extends BaseState<Assignment, AssignmentRequest> {
   @Action(AssignmentActions.Update)
   update(ctx: StateContext<AssignmentStateModel>, { id, payload }: AssignmentActions.Update) {
     return this.updateItem(ctx, payload, id, AssignmentActions.Update.type);
+  }
+
+  @Action(AssignmentActions.Desactivate)
+  desactivate(ctx: StateContext<AssignmentStateModel>, { id }: AssignmentActions.Desactivate) {
+    const type = AssignmentActions.Desactivate.type;
+    ctx.dispatch(new SetLoading(type, true));
+    return this.assignmentService.desactivate(id).pipe(
+      tap({
+        error: (error) => {
+          ctx.dispatch(new SetLoading(type, false));
+        },
+        finalize: () => {
+          ctx.dispatch(new SetLoading(type, false));
+        }
+      })
+    );
   }
 
   @Action(AssignmentActions.Delete)

@@ -18,10 +18,11 @@ import { ShiftState } from '@state/shift/shift.state';
 import { ShiftActions } from '@state/shift/shift.action';
 import { WorkerFormState } from '@state/worker-form/worker-form.state';
 import { WorkerFormAction } from '@state/worker-form/worker-form.actions';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-formbuilder',
-  imports: [CommonModule, ReactiveFormsModule, DataListComponent],
+  imports: [CommonModule, ReactiveFormsModule, DataListComponent, NgSelectModule],
   templateUrl: './formbuilder.component.html',
   styleUrl: './formbuilder.component.scss',
 })
@@ -102,9 +103,9 @@ export class FormBuilderComponent {
     const formGroup = this.createFormGroup();
     this.myForm = this.fb.group(formGroup, { updateOn: 'change' });
 
-    if (this.entity) {
-      this.updateFormValues(this.entity);
-    }
+    // if (this.entity) {
+    //   this.updateFormValues(this.entity);
+    // }
   }
 
   private createFormGroup(): { [key: string]: any } {
@@ -113,7 +114,9 @@ export class FormBuilderComponent {
         this.nameControlTable = field.name;
       }
       const validators = this.buildValidators(field);
-      const initialValue = this.entity?.[field.name] ?? field.value;
+      let initialValue = field.value; //this.entity?.[field.name] ??
+      if(initialValue === '')
+        initialValue = null;
       return { ...group, [field.name]: [initialValue, validators] };
     }, {});
   }
@@ -134,7 +137,7 @@ export class FormBuilderComponent {
     if (!entity || !this.myForm) return;
 
     Object.keys(this.myForm.controls)
-    //.filter(controlName => entity.hasOwnProperty(controlName))
+    .filter(controlName => entity.hasOwnProperty(controlName))
     .forEach(controlName => {
       if (controlName === this.nameControlTable) {
         const controlId = this.subentities.find(e => e.type === 'table')?.id
@@ -157,7 +160,6 @@ export class FormBuilderComponent {
             break;
         }
       } else {
-        console.log(controlName, entity[controlName]);
         switch (controlName) {
           case 'state':
             this.myForm.get(controlName)?.setValue(!!entity[controlName]);
@@ -169,7 +171,9 @@ export class FormBuilderComponent {
             this.myForm.get(controlName)?.setValue(entity['company'].id);
             break;
           case 'unit_shift_id':
-            this.myForm.get(controlName)?.patchValue(entity[controlName]);
+            this.myForm.get(controlName)?.patchValue(entity[controlName], {
+              emitEvent: false
+            });
             this.getCompanyID(controlName, entity[controlName]);
             break;
           default:
@@ -194,34 +198,41 @@ export class FormBuilderComponent {
   }
 
   changeSelected(event: any, item: FieldForm) {
-    const {name, prefix} = item;
-    const selectedElement = event.target as HTMLSelectElement;
-    const selectedValue = selectedElement.value;
+    if(event) {
+      const {name, prefix} = item;
+      // const selectedElement = event.target as HTMLSelectElement;
+      // const selectedValue = selectedElement.value;
 
-    if(prefix) {
-      if(name === 'company_id' || name === 'customer_id') {
-        this.getSubEntityItems$(name).subscribe(items => {
-          const selectedItem = items.find((item) => item.id === parseInt(selectedValue));
-          if (selectedItem) {
-            const code = selectedItem.code + '-';
-            this.myForm.get('code')?.patchValue(code);
-          }
-        })
+      if(prefix) {
+        if(name === 'company_id' || name === 'customer_id') {
+          this.getSubEntityItems$(name).subscribe(items => {
+            const selectedItem = items.find((item) => item.id === parseInt(event.id));
+            if (selectedItem) {
+              const code = selectedItem.code + '-';
+              this.myForm.get('code')?.patchValue(code);
+            }
+          })
+        }
       }
-    }
-    if(name === 'unit_shift_id') {
-      this.getCompanyID(name, selectedValue);
+      if(name === 'unit_shift_id') {
+        this.getCompanyID(name, event.id);
+      }
     }
   }
 
   private getCompanyID(name: string, id: string) {
-    this.getSubEntityItems$(name).subscribe(items => {
+    this.getSubEntityItems$(name)
+    .pipe(
+      //take(1),
+      takeUntil(this.destroy$)
+    )
+    .subscribe(items => {
       const selectedItem = items.find((item) => item.id === parseInt(id));
       if(selectedItem) {
         const companyId = selectedItem.unit.customer.company.id;
         this.companyId.emit(companyId);
       }
-    })
+    });
   }
 
   private resetForm() {
@@ -244,7 +255,6 @@ export class FormBuilderComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['entity']?.currentValue && this.myForm) {
-
       this.updateFormValues(changes['entity'].currentValue);
     }
     if (changes['reset']?.currentValue && this.myForm) {
@@ -271,7 +281,6 @@ export class FormBuilderComponent {
 
   onToggleAll(checked: boolean) {
     const controlId = this.subentities.find(e => e.type === 'table')?.id
-    console.log(controlId, IDENTIFIES.SHIFTS);
     switch (controlId) {
       case IDENTIFIES.WORKERS:
         this.selectedWorkers(checked);
@@ -298,17 +307,16 @@ export class FormBuilderComponent {
   }
 
   private selectedShift(id: number) {
-    this.store.dispatch(new ShiftActions.ToggleItemSelection(id, TYPES.LIST))
-      .subscribe(data => console.log('Select', data));
+    this.store.dispatch(new ShiftActions.ToggleItemSelection(id, TYPES.LIST));
     this.selectedShifts$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(selectedShifts => {
-        this.formModule!.fields.forEach(field => {
-          if(field.type === 'table') {
-            this.myForm.get(field.name)?.patchValue(selectedShifts);
-          }
-        })
-      });
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(selectedShifts => {
+      this.formModule!.fields.forEach(field => {
+        if(field.type === 'table') {
+          this.myForm.get(field.name)?.patchValue(selectedShifts);
+        }
+      })
+    });
   }
 
   private selectedWorkers(checked: boolean) {
@@ -348,6 +356,7 @@ export class FormBuilderComponent {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.resetForm();
     //this.store.dispatch(new WorkerFormAction.ClearItemSelection);
   }
 }

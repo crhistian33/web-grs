@@ -1,75 +1,140 @@
 <div class="bg-white shadow-md rounded-b-lg">
-  <div>
+  <div class="overflow-x-auto min-w-full">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray_dark_500 text-white">
+        <!-- @if(titleTable) {
+          <tr class="px-3 py-2 text-center text-xs font-medium tracking-wider cursor-pointer">
+            <th [colSpan]="days > 1 ? days : null">{{ titleTable }}</th>
+          </tr>
+          } -->
         <tr>
-          <th
-            class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors w-1">
-            <div class="flex items-center gap-2">
-              <input type="checkbox"
-                class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 focus:ring-2 cursor-pointer"
-                [checked]="areAllSelected" (change)="onToggleAll($event)">
-            </div>
-          </th>
-          @for (column of columns; track $index) {
-          <th
-            class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-gray_dark_600 transition-colors"
-            [ngClass]="{'w-1': column.key==='id'}">
-            <div class="flex items-center gap-2">
-              {{ column.key === 'id' ? '#' : column.label }}
-            </div>
-          </th>
+          @if(page !== 'asistencia') {
+            <th
+              class="w-1 border border-gray-400 px-3 py-2 text-left text-xs font-medium uppercase">
+              <div class="flex items-center gap-2">
+                <input type="checkbox"
+                  class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 focus:ring-2 cursor-pointer"
+                  [checked]="areAllSelected" (change)="onToggleAll($event)">
+              </div>
+            </th>
           }
-          <th class="relative px-6 py-3" *ngIf="!hiddenActions">
+          @for (column of columns; track $index; let i = $index) {
+            @if(column.type === 'dynamic') {
+              <ng-container *ngFor="let month of getMonthData(paginatedData[0])">
+                <th
+                  class="w-1 border border-gray-400 px-3 py-2 text-center text-xs font-medium uppercase" [colSpan]="month.count">
+                  <span>{{ month.name }}</span>
+                </th>
+              </ng-container>
+            }
+            @else {
+              <th rowspan="2"
+                class="border border-gray-400 px-3 py-2 text-left text-xs font-medium uppercase bg-gray_dark_500"
+                [ngClass]="getColumnClasses(i, column.key)">
+                <div class="flex items-center gap-2">
+                  {{ column.key === 'id' ? '#' : column.label }}
+                </div>
+              </th>
+            }
+          }
+          <th rowspan="2" class="relative border border-gray-400 px-3 py-2" *ngIf="!hiddenActions">
             <span class="text-xs font-medium uppercase">Acciones</span>
           </th>
         </tr>
+        <tr>
+          @for (column of columns; track $index; let i = $index) {
+            @if(column.type === 'dynamic') {
+              <th
+                class="w-1 border border-gray-400 px-3 py-2 text-center text-xs font-medium uppercase"
+                *ngFor="let itemDay of getDynamicData(paginatedData[0])">
+                <span>{{ itemDay.day }}</span>
+              </th>
+            }
+          }
+        </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
-        @for (item of paginatedData; track item.id; let i = $index) {
-        <tr class="hover:bg-gray-200 cursor-pointer" (click)="onToggleItem(item.id)">
-          <td class="p-3 whitespace-nowrap">
+        @for (item of paginatedData; track $index; let i = $index) {
+        <tr
+          [ngClass]="{'hover:bg-gray-200 cursor-pointer': page !== 'asistencia'}"
+          (click)="onToggleItem(item.id)">
+          <td class="px-3 py-2 whitespace-nowrap" *ngIf="page !== 'asistencia'">
             <input
               class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 focus:ring-2 cursor-pointer"
               type="checkbox" [checked]="item.selected">
           </td>
-          @for (column of columns; track $index) {
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900">
-              @if(column.key === 'id') {
-              {{ startIndex * totalItems + (i + 1) }}
+          @for (column of columns; track $index; let index = $index) {
+            @if(column.type === 'dynamic') {
+              @for(subitem of getDynamicData(item); track $index) {
+                <td
+                  class="px-3 py-2 whitespace-nowrap text-center transition-colors cursor-pointer text-sm font-semibold"
+                  [ngClass]="{
+                    'bg-green-100 text-green-900 hover:bg-green-300': subitem.state.shortName === 'D' || subitem.state.shortName === 'N',
+                    'bg-rose-200 text-rose-950 hover:bg-rose-300': subitem.state.shortName === 'X',
+                    'bg-blue-200 text-blue-950 hover:bg-blue-300': subitem.state.shortName === 'DM',
+                    'bg-lime-200 text-lime-950 hover:bg-lime-300': subitem.state.shortName === 'V',
+                  }"
+                  (click)="changeValueDay(item.id, subitem.key)">
+                  {{ subitem.state.shortName }}
+                </td>
               }
-              @else {
-              {{ item[column.key] | cellValue:column.type:column.key.toString() }}
-              }
-            </div>
-          </td>
+            }
+            @else {
+              <td
+                class="px-3 py-2 whitespace-nowrap bg-white"
+                [class]="getStickyColumn(index)" [class.bg-white]="page === 'asistencia'">
+                <div class="text-sm text-gray-900">
+                  @if(column.key === 'id') {
+                    {{ startIndex * totalItems + (i + 1) }}
+                  }
+                  @else {
+                    {{ item[column.key] | cellValue:column.type }}
+                  }
+                </div>
+              </td>
+            }
           }
-          <td class="w-40 px-6 py-4 whitespace-nowrap text-right text-sm font-medium" *ngIf="!hiddenActions">
+          <td class="w-40 px-3 py-2 whitespace-nowrap text-right text-sm font-medium" *ngIf="!hiddenActions">
             <div class="flex items-center justify-center">
-              <app-tooltip text="Reasignar" position="bottom" type="table">
+              <app-tooltip text="Reasignar" position="left" type="table">
                 <button class="ms-2" (click)="onReassign(item); $event.stopPropagation()" *ngIf="page === 'reasigna'">
                   <ng-icon name="heroClipboardDocumentCheckSolid"
                     class="text-gray_dark_600 hover:text-orange-600 transition-colors"></ng-icon>
                 </button>
               </app-tooltip>
-              <app-tooltip text="Editar" position="bottom" type="table">
-                <a [routerLink]="['editar', item.id]" *ngIf="page === 'lista' || page === 'none'">
-                  <ng-icon name="heroPencilSquareSolid"
-                    class="text-gray_dark_600 hover:text-orange-500 transition-colors"></ng-icon>
-                </a>
+              <app-tooltip text="Editar" position="left" type="table">
+                @if(getMonthValue(item)) {
+                  <a [routerLink]="['editar', getWorkerValue(item), getMonthValue(item)]" *ngIf="page === 'lista' || page === 'none'">
+                    <ng-icon name="heroPencilSquareSolid"
+                      class="text-gray_dark_600 hover:text-orange-500 transition-colors"></ng-icon>
+                  </a>
+                }
+                @else {
+                  <a [routerLink]="['editar', item.id]" *ngIf="page === 'lista' || page === 'none'">
+                    <ng-icon name="heroPencilSquareSolid"
+                      class="text-gray_dark_600 hover:text-orange-500 transition-colors"></ng-icon>
+                  </a>
+                }
               </app-tooltip>
-              <app-tooltip text="Restaurar" position="bottom" type="table">
+              <app-tooltip text="Restaurar" position="left" type="table">
                 <button class="ms-2" (click)="onRestore(item.id); $event.stopPropagation()" *ngIf="page === 'papelera'">
                   <ng-icon name="heroArrowLeftOnRectangleSolid"
                     class="text-gray_dark_600 hover:text-blue-500 transition-colors"></ng-icon>
                 </button>
               </app-tooltip>
-              <app-tooltip text="Eliminar" position="bottom" type="table">
-                <button class="ms-2" (click)="onDelete(item.id); $event.stopPropagation()">
-                  <ng-icon name="heroTrashSolid"
-                    class="text-gray_dark_600 hover:text-red-600 transition-colors"></ng-icon>
-                </button>
+              <app-tooltip text="Eliminar" position="left" type="table">
+                @if(getMonthValue(item)) {
+                  <button class="ms-2" (click)="onDeleteItemMonth(getWorkerValue(item), getMonthValue(item)); $event.stopPropagation()">
+                    <ng-icon name="heroTrashSolid"
+                      class="text-gray_dark_600 hover:text-red-600 transition-colors"></ng-icon>
+                  </button>
+                }
+                @else {
+                  <button class="ms-2" (click)="onDelete(item.id); $event.stopPropagation()">
+                    <ng-icon name="heroTrashSolid"
+                      class="text-gray_dark_600 hover:text-red-600 transition-colors"></ng-icon>
+                  </button>
+                }
               </app-tooltip>
             </div>
           </td>

@@ -4,6 +4,12 @@ import { FilterStateModel } from "@shared/models/filter.model";
 export namespace WorkerAssignmentActions {
   export class GetAll {
     static readonly type = '[WorkerAssignment] Get All';
+    constructor(public id?: number) {};
+  }
+
+  export class GetWorkerToUnit {
+    static readonly type = '[WorkerAssignment] Get Worker to Unit';
+    constructor(public unit_shift_id: number, public today: string) {};
   }
 
   export class GetById {
@@ -13,7 +19,7 @@ export namespace WorkerAssignmentActions {
 
   export class Filters<T> {
     static readonly type = '[WorkerAssignment] Filters Entities';
-    constructor(public payload: Partial<FilterStateModel>, public columns?: (keyof T)[]) {}
+    constructor(public payload: Partial<FilterStateModel>, public page: string, public columns?: (keyof T)[]) {}
   }
 
   export class Update {
@@ -23,7 +29,7 @@ export namespace WorkerAssignmentActions {
 
   export class Delete {
     static readonly type = '[WorkerAssignment] Delete';
-    constructor(public id: number, public del: boolean) {}
+    constructor(public id: number, public del: boolean, public page: string) {}
   }
 
   export class DeleteAll {
@@ -33,12 +39,12 @@ export namespace WorkerAssignmentActions {
 
   export class ToggleItemSelection {
     static readonly type = '[WorkerAssignment] Toggle Selection';
-    constructor(public id: number) {}
+    constructor(public id: number, public page: string) {}
   }
 
   export class ToggleAllItems {
     static readonly type = '[WorkerAssignment] Toggle All';
-    constructor(public selected: boolean) {}
+    constructor(public selected: boolean, public page: string) {}
   }
 
   export class ClearItemSelection {

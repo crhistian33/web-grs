@@ -5,6 +5,9 @@ export interface BaseStateModel<T extends BaseModel> {
   filteredItems: T[];
   trashedItems: T[];
   filterTrashedItems: T[];
+  assigns?: T[];
+  unitshiftId?: number;
+  days?: any[];
   selectedEntity: T | null;
   searchTerm: string;
   loaded?: boolean;

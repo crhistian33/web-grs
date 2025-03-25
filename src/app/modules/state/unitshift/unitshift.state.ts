@@ -4,6 +4,8 @@ import { State, Action, Selector, StateContext } from '@ngxs/store';
 import { UnitShiftActions } from './unitshift.actions';
 import { BaseState } from '@shared/state/base.state';
 import { UnitshiftService } from '@services/unitshift.service';
+import { SetLoading } from '@shared/state/loading/loading.actions';
+import { tap } from 'rxjs';
 
 @State<UnitshiftStateModel>({
   name: 'unitshift',
@@ -34,7 +36,7 @@ export class UnitshiftState extends BaseState<UnitShift, UnitShiftRequest> {
   }
 
   @Selector()
-  static getAssigns(state: UnitshiftStateModel) {
+  static getAssigneds(state: UnitshiftStateModel) {
     return state.filteredItems.filter(item => item.assignments.some(assign => assign.state));
   }
 

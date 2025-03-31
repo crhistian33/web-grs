@@ -62,6 +62,7 @@ export const TITLES = {
   ASSIST_BREAKS: 'descanseros',
   BREAK: 'Descanso',
   BREAKS: 'Descansos',
+  PERMISSIONS: 'Permisos',
 }
 
 export const TYPES = {
